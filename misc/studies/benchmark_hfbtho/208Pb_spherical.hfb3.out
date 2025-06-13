@@ -1,0 +1,180 @@
+Versio: HFB3 (1.0.0rc10-87-gfe546f0a)
+Compil: SKILL3 (Ultra-Violence)
+WARNING Compatibility mode: 'hfbtho'
+WARNING Using non-standard Multipole Moment Operators ! (general.compatibility mode set)
+SolWS.: SolverWS
+SolWS.: │ solut.: (sys.:208Pb,cst.:(q10t:0.000e+00,q20t:0.000e+00,q30t:0.000e+00,q40t:0.000e+00,q50t:0.000e+00,q60t:0.000e+00),cvg.:false,ene.:1.000e+99)
+SolWS.: │ basis : (nOscil:16,b_r:2.223,b_z:2.223,d_0:0.000,g_q:1.0,states:969,max_nz:17)
+SolWS.: │ momen.: empty
+SolWS.: │ dim.  : 5
+SolWS.: │ max.it: 200
+SolWS.: │ vmin  : [-1.0000e+00, -1.0000e+00, -1.0000e+00, -1.0000e+00, -1.0000e+00]
+SolWS.: │ vmax  : [1.0000e+00, 1.0000e+00, 1.0000e+00, 1.0000e+00, 1.0000e+00]
+SolWS.: └ vstep : [5.0000e-02, 5.0000e-02, 5.0000e-02, 5.0000e-02, 5.0000e-02]
+WARNING Using non-standard Multipole Moment Operators ! (general.compatibility mode set)
+SolWS.: target value reached 6.539835e-08 < 1.000000e-06
+WS_001: (a20: 0.00e+00, a30: 0.00e+00, a40: 0.00e+00, a50: 0.00e+00, a60: 0.00e+00) err: 6.54e-08 *
+SolWS.: End of optimization
+WS_res: (a20: 0.00e+00, a30: 0.00e+00, a40: 0.00e+00, a50: 0.00e+00, a60: 0.00e+00) err: 6.54e-08 *
+SolWS.: ┌────────────────────────────────────────────────────┐
+SolWS.: │ Deformations     Neutron      Proton     Neut+Prot │
+SolWS.: │ Mass    [n]    125.996578   81.998106   207.994684 │
+SolWS.: │ <Q00> [fm0]    125.996578   81.998106   207.994684 │
+SolWS.: │ <Q10> [fm1]      0.000000   -0.000000    -0.000000 │
+SolWS.: │ <Q20> [fm2]      0.000001    0.000000     0.000001 │
+SolWS.: │ <Q30> [fm3]     -0.000000    0.000000    -0.000000 │
+SolWS.: │ <Q40> [fm4]      0.000004    0.000005     0.000008 │
+SolWS.: │ <Q50> [fm5]     -0.000000    0.000000     0.000000 │
+SolWS.: │ <Q60> [fm6]     -0.000164    0.000102    -0.000062 │
+SolWS.: │ beta2    []      0.000000    0.000000     0.000000 │
+SolWS.: └────────────────────────────────────────────────────┘
+Saving: DataTree saved in 208Pb_spherical.ws.msg.gz
+Action: Execution length (calcWS): 0.493s
+ActHFB: Even-even target nucleus
+ActHFB: === Fixed basis HFB calculation ===
+WARNING Using non-standard Multipole Moment Operators ! (general.compatibility mode set)
+WARNING Using non-standard Multipole Moment Operators ! (general.compatibility mode set)
+SolBas: An initial state is given => starting with SolverHFBBroyden.
+SolBas: Solver scheme: (500 BROY, 20 GRAD)
+SolBas: SolverHFBBroyden
+SolBas: │ bogoSt: (sys.:208Pb,cst.:(q10t:0.000e+00,q20t:0.000e+00,q30t:0.000e+00,q40t:0.000e+00,q50t:0.000e+00,q60t:0.000e+00),cvg.:false,ene.:1.000e+99)
+SolBas: │ basis : (nOscil:16,b_r:2.223,b_z:2.223,d_0:0.000,g_q:1.0,states:969,max_nz:17)
+SolBas: │ interaction: D1S (Kinet.,Centr.,Centr.,CoulSl,Densi.,SpiOrb,Rearr.)
+SolBas: │ momen.: (Q00:2.079947e+02,Q10:-4.216890e-15,Q20:1.205230e-06,Q30:-3.212258e-14,beta:1.514283e-10)
+SolBas: │ mixing: (m.size:8,lfact.:1.000000e-01,mfact.:6.000000e-01)
+SolBas: │ maxIt.: 500
+SolBas: │ target: 1.000000e-08
+SolBas: │ maxItL: 20
+SolBas: │ ltarg.: 1.000000e-09
+SolBas: │ bloc.n: none
+SolBas: └ bloc.p: none
+SolBro: #it: 000 cvg: 4.00e+00 ene:  1.43e+03 ln:  -3.756(#19) lp:  -2.519(#10)
+SolBro: #it: 001 cvg: 7.43e-01 ene: -1617.262 ln:  -6.450(#20) lp:  -7.593(#20)
+SolBro: #it: 002 cvg: 6.14e-01 ene: -1621.362 ln:  -6.424(#20) lp:  -7.485(#20)
+SolBro: #it: 003 cvg: 5.09e-01 ene: -1624.640 ln:  -6.305(# 5) lp:  -7.154(#12)
+SolBro: #it: 004 cvg: 4.26e-01 ene: -1627.377 ln:  -6.255(#15) lp:  -7.108(#20)
+SolBro: #it: 005 cvg: 3.58e-01 ene: -1629.665 ln:  -6.212(# 7) lp:  -7.039(# 7)
+SolBro: #it: 006 cvg: 3.04e-01 ene: -1631.620 ln:  -6.175(# 7) lp:  -6.993(# 9)
+SolBro: #it: 007 cvg: 2.59e-01 ene: -1633.313 ln:  -6.142(# 6) lp:  -6.952(# 7)
+SolBro: #it: 008 cvg: 2.22e-01 ene: -1634.801 ln:  -6.112(# 6) lp:  -6.916(# 7)
+SolBro: #it: 009 cvg: 5.31e-01 ene: -1626.524 ln:  -6.267(# 5) lp:  -7.090(# 6)
+SolBro: #it: 010 cvg: 6.02e-02 ene: -1651.483 ln:  -5.781(#14) lp:  -6.479(#14)
+SolBro: #it: 011 cvg: 2.40e-02 ene: -1652.769 ln:  -5.767(#20) lp:  -6.457(#20)
+SolBro: #it: 012 cvg: 6.82e-03 ene: -1651.285 ln:  -5.627(# 3) lp:  -6.273(# 3)
+SolBro: #it: 013 cvg: 5.82e-03 ene: -1650.415 ln:  -5.619(#15) lp:  -6.260(#20)
+SolBro: #it: 014 cvg: 6.57e-03 ene: -1649.933 ln:  -5.614(# 3) lp:  -6.248(# 4)
+SolBro: #it: 015 cvg: 3.15e-03 ene: -1650.904 ln:  -5.574(# 2) lp:  -6.246(# 3)
+SolBro: #it: 016 cvg: 1.01e-03 ene: -1650.851 ln:  -5.640(# 3) lp:  -6.251(# 2)
+SolBro: #it: 017 cvg: 3.67e-04 ene: -1650.743 ln:  -5.634(# 4) lp:  -6.260(# 2)
+SolBro: #it: 018 cvg: 2.88e-04 ene: -1650.726 ln:  -5.631(# 2) lp:  -6.272(# 2)
+SolBro: #it: 019 cvg: 2.95e-04 ene: -1650.748 ln:  -5.626(# 2) lp:  -6.314(# 2)
+SolBro: #it: 020 cvg: 1.18e-04 ene: -1650.757 ln:  -5.626(# 0) lp:  -6.414(# 2)
+SolBro: #it: 021 cvg: 3.61e-05 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 022 cvg: 1.74e-05 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 023 cvg: 6.60e-06 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 024 cvg: 2.11e-06 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 025 cvg: 5.67e-07 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 026 cvg: 3.65e-07 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 027 cvg: 2.29e-07 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 028 cvg: 7.50e-08 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 029 cvg: 3.38e-08 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: #it: 030 cvg: 8.87e-09 ene: -1650.750 ln:  -5.626(# 0) lp:  -6.414(# 0)
+SolBro: Target value reached, exiting HFB loop
+ActHFB: ┌────────────────────────────────────────────┐
+ActHFB: │ Converged solution found ! \o/ Properties: │
+ActHFB: └────────────────────────────────────────────┘
+WARNING Using non-standard Multipole Moment Operators ! (general.compatibility mode set)
+ActEne: ┌──────────────────────────────────────────────────────────────────────────┐
+ActEne: │ Energies                               Neutron      Proton     Neut+Prot │
+ActEne: │                                         [MeV]       [MeV]        [MeV]   │
+ActEne: │ kinetic Direct                         2569.266    1344.880     3914.146 │
+ActEne: │ central Direct                        -5716.114   -5920.244   -11636.357 │
+ActEne: │ central Exchange                       2621.783    2443.838     5065.621 │
+ActEne: │ central Pairing                           0.000       0.000        0.000 │
+ActEne: │ central Direct                         -583.529      65.748     -517.780 │
+ActEne: │ central Exchange                      -3010.126   -2672.216    -5682.343 │
+ActEne: │ central Pairing                          -0.000      -0.000       -0.000 │
+ActEne: │ coulomb (Slater) Direct                   0.000     830.635      830.635 │
+ActEne: │ coulomb (Slater) Exchange                 0.000     -31.377      -31.377 │
+ActEne: │ density Direct                         3255.695    3255.695     6511.389 │
+ActEne: │ spin-orbit Direct                       -64.180     -40.504     -104.684 │
+ActEne: │ rearrangement (non-contrib.) Direct     646.505     438.726     1085.230 │
+ActEne: │ TOTAL (HFB Energy)                     -927.205    -723.545    -1650.750 │
+ActEne: └──────────────────────────────────────────────────────────────────────────┘
+WARNING Using non-standard Multipole Moment Operators ! (general.compatibility mode set)
+ActObs: ┌────────────────────────────────────────────────────┐
+ActObs: │ Deformations     Neutron      Proton     Neut+Prot │
+ActObs: │ Mass    [n]    126.000000   82.000000   208.000000 │
+ActObs: │ <Q00> [fm0]    126.000000   82.000000   208.000000 │
+ActObs: │ <Q10> [fm1]      0.000000   -0.000000    -0.000000 │
+ActObs: │ <Q20> [fm2]      0.000451   -0.000451     0.000000 │
+ActObs: │ <Q30> [fm3]      0.000000   -0.000000     0.000000 │
+ActObs: │ <Q40> [fm4]     -0.001827    0.001827    -0.000000 │
+ActObs: │ <Q50> [fm5]     -0.000000    0.000000    -0.000000 │
+ActObs: │ <Q60> [fm6]     -0.254053    0.254053     0.000000 │
+ActObs: │ beta2    []      0.000000   -0.000000     0.000000 │
+ActObs: └────────────────────────────────────────────────────┘
+ActObs: ┌────────────────────────────────────────────────────────────────────────┐
+ActObs: │ Fragments   N. pos.   N. dens.   <Qneck>   L. Mass   R. Mass   T. Mass │
+ActObs: │               [fm]    [n.fm-3]     [n]       [n]       [n]       [n]   │
+ActObs: │ neutron                  0.082    23.789    63.677    62.321   125.998 │
+ActObs: │ proton                   0.080    15.719    41.449    40.550    81.999 │
+ActObs: │ total         0.000      0.162    39.508   105.126   102.871   207.997 │
+ActObs: └────────────────────────────────────────────────────────────────────────┘
+ActObs: ┌───────────────────────────────────┐
+ActObs: │ Radii      RMS     <r>    ch. RMS │
+ActObs: │            [fm]    [fm]     [fm]  │
+ActObs: │ neutron   5.571   5.339           │
+ActObs: │ proton    5.440   5.227     5.497 │
+ActObs: │ total     5.520   5.295           │
+ActObs: └───────────────────────────────────┘
+WARNING Using non-standard Multipole Moment Operators ! (general.compatibility mode set)
+ActObs: ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+ActObs: │ Metric           q20             q30             q40             q50             q60      │
+ActObs: │                 [fm2]           [fm3]           [fm4]           [fm5]           [fm6]     │
+ActObs: │ q20 [fm2]    3.985060e-06    5.195782e-22   -5.182664e-14   -3.529556e-24   -1.364782e-16 │
+ActObs: │ q30 [fm3]    5.195782e-22    6.849734e-07    2.002177e-23   -2.030115e-14   -1.414630e-25 │
+ActObs: │ q40 [fm4]   -5.182664e-14    2.002177e-23    1.006140e-08    3.035519e-25   -4.085088e-16 │
+ActObs: │ q50 [fm5]   -3.529556e-24   -2.030115e-14    3.035519e-25    1.697770e-10    7.741166e-27 │
+ActObs: │ q60 [fm6]   -1.364782e-16   -1.414630e-25   -4.085088e-16    7.741166e-27    2.036970e-12 │
+ActObs: └───────────────────────────────────────────────────────────────────────────────────────────┘
+ActObs: ┌───────────────────────────────────────────────────────────────────────────────────────────┐
+ActObs: │ Mass GCM         q20             q30             q40             q50             q60      │
+ActObs: │                 [fm2]           [fm3]           [fm4]           [fm5]           [fm6]     │
+ActObs: │ q20 [fm2]    5.157983e-07    8.982567e-23   -2.188141e-14   -1.726903e-26   -9.701957e-17 │
+ActObs: │ q30 [fm3]    8.982567e-23    1.170031e-07    4.199900e-24   -4.105035e-15    3.582323e-27 │
+ActObs: │ q40 [fm4]   -2.188141e-14    4.199900e-24    1.185898e-09    2.740347e-26   -6.267995e-17 │
+ActObs: │ q50 [fm5]   -1.726903e-26   -4.105035e-15    2.740347e-26    2.485862e-11    1.219132e-27 │
+ActObs: │ q60 [fm6]   -9.701957e-17    3.582323e-27   -6.267995e-17    1.219132e-27    2.200741e-13 │
+ActObs: └───────────────────────────────────────────────────────────────────────────────────────────┘
+ActObs: ┌───────────────────────────────────────────────────────────────────────────────────────────────┐
+ActObs: │ ZPE GCM [MeV]        q20             q30             q40             q50             q60      │
+ActObs: │                     [fm2]           [fm3]           [fm4]           [fm5]           [fm6]     │
+ActObs: │ q20 [fm2]        3.863002e+00   -6.097479e-18    1.297211e-07   -3.307123e-18    7.381975e-10 │
+ActObs: │ q30 [fm3]       -7.453488e-16    2.927160e+00   -6.671220e-17    3.305480e-08   -7.462272e-19 │
+ActObs: │ q40 [fm4]        4.942644e-05   -1.925057e-15    4.242103e+00    4.907408e-17    7.236985e-08 │
+ActObs: │ q50 [fm5]       -6.830925e-14    7.504526e-05    1.429161e-15    3.414852e+00   -7.126155e-17 │
+ActObs: │ q60 [fm6]        1.392943e-03   -3.690472e-13    2.800895e-04   -1.329412e-15    4.627917e+00 │
+ActObs: └───────────────────────────────────────────────────────────────────────────────────────────────┘
+ActObs: ┌────────────────────────────────────────────────────────────────────────────────────────────┐
+ActObs: │ Mass ATDHF        q20             q30             q40             q50             q60      │
+ActObs: │                  [fm2]           [fm3]           [fm4]           [fm5]           [fm6]     │
+ActObs: │ q20 [fm2]     6.428267e-07    1.228594e-22   -1.767927e-14   -3.408964e-25   -2.430218e-16 │
+ActObs: │ q30 [fm3]     1.228594e-22    1.467031e-07    4.967519e-24   -7.038031e-15    9.817353e-27 │
+ActObs: │ q40 [fm4]    -1.767927e-14    4.967519e-24    1.489548e-09    1.246917e-26   -8.130066e-17 │
+ActObs: │ q50 [fm5]    -3.408964e-25   -7.038031e-15    1.246917e-26    3.640726e-11    2.018313e-27 │
+ActObs: │ q60 [fm6]    -2.430218e-16    9.817353e-27   -8.130066e-17    2.018313e-27    2.889207e-13 │
+ActObs: └────────────────────────────────────────────────────────────────────────────────────────────┘
+ActObs: ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
+ActObs: │ ZPE ATDHF [MeV]        q20             q30             q40             q50             q60      │
+ActObs: │                       [fm2]           [fm3]           [fm4]           [fm5]           [fm6]     │
+ActObs: │ q20 [fm2]          3.099638e+00   -4.205347e-17    5.257339e-08   -1.508860e-18    1.226531e-09 │
+ActObs: │ q30 [fm3]         -8.250048e-16    2.334556e+00   -4.612091e-17    4.266818e-08   -7.180492e-19 │
+ActObs: │ q40 [fm4]          1.939261e-05   -1.064819e-15    3.377336e+00    8.237528e-17    5.527960e-08 │
+ActObs: │ q50 [fm5]         -1.945033e-14    1.724959e-04    3.012107e-15    2.331637e+00   -8.911003e-17 │
+ActObs: │ q60 [fm6]          2.371039e-03   -3.241413e-13    2.434067e-04   -2.891394e-15    3.525137e+00 │
+ActObs: └─────────────────────────────────────────────────────────────────────────────────────────────────┘
+Saving: DataTree saved in 208Pb_spherical.msg.gz
+Action: Execution length (calcHFB): 49.113s
+Action: Execution length (calcWSHFB): 49.613s
+Action: Execution length (total): 49.613s

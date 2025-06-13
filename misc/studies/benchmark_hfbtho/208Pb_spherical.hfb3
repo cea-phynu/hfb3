@@ -1,0 +1,42 @@
+#!HFB3!#
+
+# Example of an HFB calculation for a spherical 208Pb nucleus.
+
+action ws_hfb
+
+[action]
+basisOptimization False
+jobName           208Pb_spherical
+
+[solver]
+broyden/maxIter   500
+broyden/cvgTarget 1e-8
+gradient/maxIter  20
+basis/maxIter     50
+
+[basis]
+nOscil            16
+d_0               0.0
+b_r               2.223
+b_z               2.223
+g_q               1.0
+
+[constraints]
+q10t              0.0
+q20t              0.0
+q30t              0.0
+q40t              0.0
+q50t              0.0
+q60t              0.0
+
+[system]
+nProt             82
+nNeut             126
+
+[general]
+compatibility     hfbtho
+
+[interaction]
+name              D1S
+cdm2              False
+

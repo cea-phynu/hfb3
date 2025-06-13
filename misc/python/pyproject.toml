@@ -1,0 +1,24 @@
+[build-system]
+requires = ["setuptools>=59.6.0", "wheel", "numpy", "swig"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hfb3"
+version = "1.0.0"
+authors = [
+  { name="Dubray N.", email="noel.dubray@cea.fr" },
+]
+description = "Axial 2-center Hartree-Fock-Bogoliubov solver"
+readme = "README.md"
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: C++",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/cea-hpc/hfb3"
+"Bug Tracker" = "https://github.com/cea-hpc/hfb3/issues"

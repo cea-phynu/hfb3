@@ -1,0 +1,28 @@
+#!HFB3!#
+
+# Example of an HFB calculation for a slightly oblate 90Zr nucleus using a 2ct basis (basis/d_0 = 6.0).
+
+action ws_hfb
+
+[interaction]
+name               D1S
+
+[system]
+nProt              40
+nNeut              50
+
+[action]
+basisOptimization  True
+jobName            90Zr_deformed_2x9
+
+[basis]
+nOscil             9
+d_0                5.0
+b_r                1.95
+b_z                1.7
+g_q                1.0
+
+[constraints]
+q10t               0.0
+beta2t             -0.05
+

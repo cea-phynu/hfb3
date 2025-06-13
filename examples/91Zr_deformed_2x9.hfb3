@@ -1,0 +1,33 @@
+#!HFB3!#
+
+# Example of an HFB calculation for a slightly oblate 91Zr nucleus using a 2ct basis (basis/d_0 = 6.0).
+# It is advised to calculate 90Zr first, and use the result as a starting point for the blocking tries.
+# One can do so by launching the following commands in order:
+#
+# $ bin/hfb3 examples/90Zr_deformed_2x9.hfb3
+# $ bin/hfb3 90Zr_deformed_2x9.msg.gz examples/91Zr_deformed_2x9.hfb3
+
+action hfb
+
+[interaction]
+name               D1S
+
+[system]
+nProt              40
+nNeut              51
+
+[action]
+basisOptimization  False
+jobName            91Zr_deformed_2x9
+
+[basis]
+nOscil             9
+d_0                5.0
+b_r                1.95
+b_z                1.7
+g_q                1.0
+
+[constraints]
+q10t               0.0
+beta2t             -0.05
+

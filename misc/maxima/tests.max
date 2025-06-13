@@ -1,0 +1,615 @@
+/*============================================================================*/
+/* HFB3                                                                       */
+/* Copyright CEA, DAM F-91297 Arpajon, France                                 */
+/*                                                                            */
+/* This program is free software: you can redistribute it and/or modify       */
+/* it under the terms of the GNU General Public License as published by       */
+/* the Free Software Foundation, either version 3 of the License, or          */
+/* (at your option) any later version.                                        */
+/*                                                                            */
+/* This program is distributed in the hope that it will be useful,            */
+/* but WITHOUT ANY WARRANTY; without even the implied warranty of             */
+/* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the              */
+/* GNU General Public License for more details.                               */
+/*                                                                            */
+/* You should have received a copy of the GNU General Public License          */
+/* along with this program.  If not, see <http://www.gnu.org/licenses/>.      */
+/*============================================================================*/
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+
+/*
+ * This maxima script generates target values for the unit tests of HFB3.
+ */
+
+/******************************************************************************/
+/******************************** Definitions *********************************/
+/******************************************************************************/
+
+fpprec: 50$
+orthopoly_returns_intervals: false$
+quad_control(control, 0)$
+
+/******************************************************************************/
+
+xpart(x, nx):=exp(-x^2/(2*bx^2))*hermite(nx,x/bx)/sqrt(bx*sqrt(%pi)*2^nx*nx!)$
+ypart(y, ny):=exp(-y^2/(2*by^2))*hermite(ny,y/by)/sqrt(by*sqrt(%pi)*2^ny*ny!)$
+zpart(z, nz, d, bz, d0):=exp(-(z-(1/2-d)*d0)^2/(2*bz^2))*hermite(nz,(z-(1/2-d)*d0)/bz)/sqrt(bz*sqrt(%pi)*2^nz*nz!)$
+apart(z, nz, bz):=exp(-z^2/(2*bz^2))*hermite(nz,z/bz)/sqrt(bz*sqrt(%pi)*2^nz*nz!)$
+rpart(r, m, n, br):=exp(-r^2/(2*br^2))*gen_laguerre(n, m, r^2/br^2)*(r/br)^m/(br*sqrt(%pi))*sqrt(n!/(n+m)!)$
+
+z0recouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*zpart(z, n2, d2, bz, d0),z,minf,inf))[1]$
+
+r2recouv(m, n1, n2) := (quad_qagi(rpart(r, m, n1, br)*r^2*r*rpart(r, m, n2, br),r,0,inf))[1]*2*%pi$
+r4recouv(m, n1, n2) := (quad_qagi(rpart(r, m, n1, br)*r^4*r*rpart(r, m, n2, br),r,0,inf))[1]*2*%pi$
+r6recouv(m, n1, n2) := (quad_qagi(rpart(r, m, n1, br)*r^6*r*rpart(r, m, n2, br),r,0,inf))[1]*2*%pi$
+
+z1recouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*z^1*zpart(z, n2, d2, bz, d0),z,minf,inf))[1]$
+z2recouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*z^2*zpart(z, n2, d2, bz, d0),z,minf,inf))[1]$
+z3recouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*z^3*zpart(z, n2, d2, bz, d0),z,minf,inf))[1]$
+z4recouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*z^4*zpart(z, n2, d2, bz, d0),z,minf,inf))[1]$
+z5recouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*z^5*zpart(z, n2, d2, bz, d0),z,minf,inf))[1]$
+z6recouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*z^6*zpart(z, n2, d2, bz, d0),z,minf,inf))[1]$
+
+irecouv(n1, n2, d1, d2)  := (quad_qagi(zpart(z, n1, d1, bz, d0)*zpart(z, n2, d2, bz, d0),z,0,inf))[1]$
+izrecouv(n1, n2, d1, d2) := (quad_qagi(zpart(z, n1, d1, bz, d0)*z*zpart(z, n2, d2, bz, d0),z,0,inf))[1]$
+hcyl(m,n,nz,nzp,d,dp):=20.735*(-(quad_qagi(zpart(z, nz, d, bz, d0)*diff(diff(zpart(z, nzp, dp, bz, d0),z),z),z,minf,inf))[1]+(quad_qagi(zpart(z, nz, d, bz, d0)*(abs(z)-d0/2)^2/bz^4*zpart(z, nzp, dp, bz, d0),z,minf,inf))[1]+2*(2*n+m+1)/br^2*z0recouv(nz,nzp,d,dp))$
+htriax(nx,ny,nz,nzp,d,dp):=20.735*(-(quad_qagi(zpart(z, nz, d, bz, d0)*diff(diff(zpart(z, nzp, dp, bz, d0),z),z),z,minf,inf))[1]+(quad_qagi(zpart(z, nz, d, bz, d0)*(abs(z)-d0/2)^2/bz^4*zpart(z, nzp, dp, bz, d0),z,minf,inf))[1]+2*((nx+1/2)/bx^2+(ny+1/2)/by^2)*z0recouv(nz,nzp,d,dp))$
+
+q20(ma,na,nza,da,sa,mb,nb,nzb,db,sb):= 1/4 * sqrt(5 / %pi) * (
+                                          2 *                      z2recouv(nza,nzb,da,db) * kron_delta(na,nb) * kron_delta(ma,mb)
+                                        - 1 * r2recouv(ma,na,nb) * z0recouv(nza,nzb,da,db) * kron_delta(ma,mb)
+                                      ) * kron_delta(sa,sb)$
+q30(ma,na,nza,da,sa,mb,nb,nzb,db,sb):= 1/4 * sqrt(7 / %pi) * (
+                                          2 *                      z3recouv(nza,nzb,da,db) * kron_delta(na,nb) * kron_delta(ma,mb)
+                                        - 3 * r2recouv(ma,na,nb) * z1recouv(nza,nzb,da,db) * kron_delta(ma,mb)
+                                      ) * kron_delta(sa,sb)$
+q40(ma,na,nza,da,sa,mb,nb,nzb,db,sb):= 1/16 * sqrt(9 / %pi) * (
+                                           8 *                      z4recouv(nza,nzb,da,db) * kron_delta(na,nb) * kron_delta(ma,mb)
+                                        - 24 * r2recouv(ma,na,nb) * z2recouv(nza,nzb,da,db) * kron_delta(ma,mb)
+                                        +  3 * r4recouv(ma,na,nb) * z0recouv(nza,nzb,da,db)
+                                      ) * kron_delta(sa,sb)$
+q50(ma,na,nza,da,sa,mb,nb,nzb,db,sb):= 1/16 * sqrt(11 / %pi) * (
+                                           8 *                      z5recouv(nza,nzb,da,db) * kron_delta(na,nb) * kron_delta(ma,mb)
+                                        - 40 * r2recouv(ma,na,nb) * z3recouv(nza,nzb,da,db) * kron_delta(ma,mb)
+                                        + 15 * r4recouv(ma,na,nb) * z1recouv(nza,nzb,da,db)
+                                      ) * kron_delta(sa,sb)$
+q60(ma,na,nza,da,sa,mb,nb,nzb,db,sb):= 1/32 * sqrt(13 / %pi) * (
+                                           16 *                      z6recouv(nza,nzb,da,db) * kron_delta(na,nb) * kron_delta(ma,mb)
+                                        - 120 * r2recouv(ma,na,nb) * z4recouv(nza,nzb,da,db) * kron_delta(ma,mb)
+                                        +  90 * r4recouv(ma,na,nb) * z2recouv(nza,nzb,da,db) 
+                                        -   5 * r6recouv(ma,na,nb) * z0recouv(nza,nzb,da,db)
+                                      ) * kron_delta(sa,sb)$
+
+fullz(ma,na,nza,da,sa,mb,nb,nzb,db,sb):=z1recouv(nza,nzb,da,db)*kron_delta(na,nb)*kron_delta(ma,mb)*kron_delta(sa,sb)$
+fullz2(ma,na,nza,da,sa,mb,nb,nzb,db,sb):=z2recouv(nza,nzb,da,db)*kron_delta(na,nb)*kron_delta(ma,mb)*kron_delta(sa,sb)$
+gaussianIntegralz(da, db, dc, dd, nz, d0, bz, p):=(quad_qagi(apart(z - ((1/2-da)+(1/2-dc)-(1/2-db)-(1/2-dd))*d0/(2*sqrt(2)), 0, bz)*apart(z - ((1/2-da)+(1/2-dc)-(1/2-db)-(1/2-dd))*d0/(2*sqrt(2)), nz, bz)*exp(-2*z^2/p^2),z,minf,inf))[1]$
+mnz(nz):=sqrt(2^nz/(nz!))$
+lrecouv(n1, n2, d1, d2) := if (n1 # n2) then 0 elseif (d1 # d2) then 0 else 1$
+talmanz(nza,da,nzb,db,nzc,d0,bz):=1/(
+                                       mnz(nza)
+                                     * mnz(nzb)
+                                     * mnz(nzc)
+                                    )
+                                   *sum(
+                                         (mnz(nzd) * mnz(nzc-nzd))^2
+                                       * mnz(nza-nzd)
+                                       * mnz(nzb-nzc+nzd)
+                                       * z0recouv(nza-nzd,nzb-nzc+nzd,da,db)
+                                       , nzd
+                                       , max(nzc-nzb,0)
+                                       , min(nzc,nza)
+                                       )$
+x(m,n):=2*n+abs(m)$
+talmanr(ma,na,mb,nb,mc,nc):= sqrt(na!*(na+abs(ma))!*nb!*(nb+abs(mb))!*nc!*(nc+abs(mc))!)
+                           * (-1)^(na+nb-nc)
+                           * sum(1/(
+                                      (((x(mc,nc)+x(mb,nb)-x(ma,na))/2+(md*2+ma))/2)!
+                                    * (((x(mc,nc)+x(mb,nb)-x(ma,na))/2-(md*2+ma))/2)!
+                                    * (((x(mc,nc)+x(ma,na)-x(mb,nb))/2+(md*2+mb))/2)!
+                                    * (((x(mc,nc)+x(ma,na)-x(mb,nb))/2-(md*2+mb))/2)!
+                                    * (((x(ma,na)+x(mb,nb)-x(mc,nc))/2+(md*2+ma+mb))/2)!
+                                    * (((x(ma,na)+x(mb,nb)-x(mc,nc))/2-(md*2+ma+mb))/2)!
+                                   )
+                                 , md
+                                 , -min((x(mc,nc)+x(mb,nb)-x(ma,na))/2+ma,
+                                        (x(mc,nc)+x(ma,na)-x(mb,nb))/2+mb,
+                                        (x(mb,nb)+x(ma,na)-x(mc,nc))/2+ma+mb) / 2
+                                 ,  min((x(mc,nc)+x(mb,nb)-x(ma,na))/2-ma,
+                                        (x(mc,nc)+x(ma,na)-x(mb,nb))/2-mb,
+                                        (x(mb,nb)+x(ma,na)-x(mc,nc))/2-ma-mb) / 2
+                                )$
+
+/* cylindrical coordinates */
+c3rule : [x = rh*cos(p), y = rh*sin(p)]$
+c3sub(expr) := (subst(c3rule,expr),trigsimp(%%))$
+rhxy : sqrt(x^2 + y^2)$
+assume(rh > 0)$
+drhdx : (diff(rhxy,x),c3sub(%%) )$
+drhdy : (diff(rhxy,y),c3sub(%%) )$
+dpdx : (diff( atan(y/x) ,x),c3sub(%%) )$
+dpdy : (diff( atan(y/x) ,y),c3sub(%%) )$
+( gradef(rh,x,drhdx),gradef(rh,y,drhdy) )$
+( gradef(p,x,dpdx),gradef(p,y,dpdy) )$
+depends ([rh,p],[x,y])$
+depends(f,[rh,p,z])$
+lapla(f):=diff(f,x,2) + diff(f,y,2) + diff(f,z,2)$
+
+/* ===== Gauss - Legendre ===== */
+
+gauss_legendre_coeff(n) := block([p, q, v, w],
+    p: expand(legendre_p(n, x)),
+    q: expand(n/2*diff(p, x)*legendre_p(n-1, x)),
+    v: map(rhs, bfallroots(p)),
+    w: map(lambda([z], 1/subst([x = z], q)), v),
+    [v, w])$
+
+gauss_legendre_int(f, a, b, n) := block([u, x, w, c, h],
+    u: gauss_legendre_coeff(n),
+    x: u[1],
+    w: u[2],
+    c: (a+b)/2,
+    h: (b-a)/2,
+    h*sum(w[i]*f(c+x[i]*h), i, 1, n))$
+
+/* ===== Gauss - Laguerre ===== */
+
+gauss_laguerre_coeff(n) := block([p, q, v, w],
+    p: expand(laguerre(n, x)),
+    q: x/((n+1)^2*laguerre(n+1, x)^2),
+    v: map(rhs, bfallroots(p)),
+    w: map(lambda([z], subst([x = z], q)), v),
+    [v, w])$
+
+gauss_laguerre_int(f, n) := block([u, x, w],
+    u: gauss_laguerre_coeff(n),
+    x: u[1],
+    w: u[2],
+    sum(w[i]*f(x[i])*exp(x[i]), i, 1, n))$
+
+/* ===== Gauss - Hermite ===== */
+
+gauss_hermite_coeff(n) := block([p, q, v, w],
+    p: expand(hermite(n, x)),
+    q: 2^(n+1)*n!*sqrt(%pi)/(hermite(n+1, x)^2),
+    v: map(rhs, bfallroots(p)),
+    w: map(lambda([z], subst([x = z], q)), v),
+    [v, w])$
+
+gauss_hermite_int(f, n) := block([u, x, w],
+    u: gauss_hermite_coeff(n),
+    x: u[1],
+    w: u[2],
+    sum(w[i]*f(x[i])*exp(x[i]^2), i, 1, n))$
+
+/* ===== Coulomb integral ===== */
+icoul(n,nz) := (-1)^(nz) / bz
+             * (br / bz)^(2*n)
+             * ( quad_qags( x^(2*n + nz) / (1+((br/bz)^2 - 1) * x^2 )^(n + 1)
+                 * zpart(0, nz, 0, bz, 0), x, 0, 1)
+               )[1]
+             * sqrt(bz)$
+
+/******************************************************************************/
+/************************* Target value calculations **************************/
+/******************************************************************************/
+
+datafile: openw("../../misc/tests/maxima_targets.h")$
+
+/******************************************************************************/
+
+print("TEST(Basis, zPart)")$
+[br: 1.3, bz: 1.2, d0:12.3]$ /* Basis parameters */
+
+z:-2.238$
+
+printf(datafile, "#define BASIS_ZPART_TARGET00 ~24,16,3e~%", bfloat(zpart(z,  0, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET01 ~24,16,3e~%", bfloat(zpart(z,  1, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET02 ~24,16,3e~%", bfloat(zpart(z,  2, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET03 ~24,16,3e~%", bfloat(zpart(z,  3, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET04 ~24,16,3e~%", bfloat(zpart(z,  4, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET05 ~24,16,3e~%", bfloat(zpart(z,  5, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET06 ~24,16,3e~%", bfloat(zpart(z,  6, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET07 ~24,16,3e~%", bfloat(zpart(z,  7, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET08 ~24,16,3e~%", bfloat(zpart(z,  8, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET09 ~24,16,3e~%", bfloat(zpart(z,  9, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET10 ~24,16,3e~%", bfloat(zpart(z, 10, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET11 ~24,16,3e~%", bfloat(zpart(z, 11, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET12 ~24,16,3e~%", bfloat(zpart(z, 12, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET13 ~24,16,3e~%", bfloat(zpart(z, 13, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET14 ~24,16,3e~%", bfloat(zpart(z, 14, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET15 ~24,16,3e~%", bfloat(zpart(z, 15, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET16 ~24,16,3e~%", bfloat(zpart(z, 16, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET17 ~24,16,3e~%", bfloat(zpart(z, 17, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET18 ~24,16,3e~%", bfloat(zpart(z, 18, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET19 ~24,16,3e~%", bfloat(zpart(z, 19, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_TARGET20 ~24,16,3e~%", bfloat(zpart(z, 20, 0, bz, d0)))$
+
+kill(z)$
+
+/******************************************************************************/
+
+print("TEST(Basis, zPart_big)")$
+[br: 1.3, bz: 5.2, d0:12.3]$ /* Basis parameters */
+
+z:-2.238$
+
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET00 ~24,16,3e~%", bfloat(zpart(z,  0, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET01 ~24,16,3e~%", bfloat(zpart(z,  1, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET02 ~24,16,3e~%", bfloat(zpart(z,  2, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET03 ~24,16,3e~%", bfloat(zpart(z,  3, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET04 ~24,16,3e~%", bfloat(zpart(z,  4, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET05 ~24,16,3e~%", bfloat(zpart(z,  5, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET06 ~24,16,3e~%", bfloat(zpart(z,  6, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET07 ~24,16,3e~%", bfloat(zpart(z,  7, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET08 ~24,16,3e~%", bfloat(zpart(z,  8, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET09 ~24,16,3e~%", bfloat(zpart(z,  9, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET10 ~24,16,3e~%", bfloat(zpart(z, 10, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET11 ~24,16,3e~%", bfloat(zpart(z, 11, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET12 ~24,16,3e~%", bfloat(zpart(z, 12, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET13 ~24,16,3e~%", bfloat(zpart(z, 13, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET14 ~24,16,3e~%", bfloat(zpart(z, 14, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET15 ~24,16,3e~%", bfloat(zpart(z, 15, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET16 ~24,16,3e~%", bfloat(zpart(z, 16, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET17 ~24,16,3e~%", bfloat(zpart(z, 17, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET18 ~24,16,3e~%", bfloat(zpart(z, 18, 0, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET19 ~24,16,3e~%", bfloat(zpart(z, 19, 1, bz, d0)))$
+printf(datafile, "#define BASIS_ZPART_BIG_TARGET20 ~24,16,3e~%", bfloat(zpart(z, 20, 0, bz, d0)))$
+
+kill(z)$
+
+/******************************************************************************/
+
+print("TEST(Basis, rPart)")$
+[br: 1.3, bz: 1.2, d0:12.3]$ /* Basis parameters */
+
+r:-2.238$
+
+printf(datafile, "#define BASIS_RPART_TARGET00 ~24,16,3e~%", bfloat(rpart(r,  0,  2, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET01 ~24,16,3e~%", bfloat(rpart(r,  1,  1, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET02 ~24,16,3e~%", bfloat(rpart(r,  2,  3, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET03 ~24,16,3e~%", bfloat(rpart(r,  3,  2, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET04 ~24,16,3e~%", bfloat(rpart(r,  4,  1, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET05 ~24,16,3e~%", bfloat(rpart(r,  5,  4, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET06 ~24,16,3e~%", bfloat(rpart(r,  6,  3, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET07 ~24,16,3e~%", bfloat(rpart(r,  7,  4, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET08 ~24,16,3e~%", bfloat(rpart(r,  8,  2, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET09 ~24,16,3e~%", bfloat(rpart(r,  9,  5, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET10 ~24,16,3e~%", bfloat(rpart(r, 10,  2, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET11 ~24,16,3e~%", bfloat(rpart(r, 11, 11, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET12 ~24,16,3e~%", bfloat(rpart(r, 12,  3, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET13 ~24,16,3e~%", bfloat(rpart(r, 13, 12, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET14 ~24,16,3e~%", bfloat(rpart(r, 14,  1, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET15 ~24,16,3e~%", bfloat(rpart(r, 15, 14, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET16 ~24,16,3e~%", bfloat(rpart(r, 16,  3, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET17 ~24,16,3e~%", bfloat(rpart(r, 17, 14, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET18 ~24,16,3e~%", bfloat(rpart(r, 18,  2, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET19 ~24,16,3e~%", bfloat(rpart(r, 19, 15, br)))$
+printf(datafile, "#define BASIS_RPART_TARGET20 ~24,16,3e~%", bfloat(rpart(r, 20,  5, br)))$
+
+kill(r)$
+
+/******************************************************************************/
+
+print("TEST(Basis, rPart_big)")$
+[br: 5.3, bz: 1.2, d0:12.3]$ /* Basis parameters */
+
+r:-2.238$
+
+printf(datafile, "#define BASIS_RPART_BIG_TARGET00 ~24,16,3e~%", bfloat(rpart(r,  0,  2, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET01 ~24,16,3e~%", bfloat(rpart(r,  1,  1, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET02 ~24,16,3e~%", bfloat(rpart(r,  2,  3, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET03 ~24,16,3e~%", bfloat(rpart(r,  3,  2, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET04 ~24,16,3e~%", bfloat(rpart(r,  4,  1, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET05 ~24,16,3e~%", bfloat(rpart(r,  5,  4, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET06 ~24,16,3e~%", bfloat(rpart(r,  6,  3, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET07 ~24,16,3e~%", bfloat(rpart(r,  7,  4, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET08 ~24,16,3e~%", bfloat(rpart(r,  8,  2, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET09 ~24,16,3e~%", bfloat(rpart(r,  9,  5, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET10 ~24,16,3e~%", bfloat(rpart(r, 10,  2, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET11 ~24,16,3e~%", bfloat(rpart(r, 11, 11, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET12 ~24,16,3e~%", bfloat(rpart(r, 12,  3, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET13 ~24,16,3e~%", bfloat(rpart(r, 13, 12, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET14 ~24,16,3e~%", bfloat(rpart(r, 14,  1, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET15 ~24,16,3e~%", bfloat(rpart(r, 15, 14, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET16 ~24,16,3e~%", bfloat(rpart(r, 16,  3, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET17 ~24,16,3e~%", bfloat(rpart(r, 17, 14, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET18 ~24,16,3e~%", bfloat(rpart(r, 18,  2, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET19 ~24,16,3e~%", bfloat(rpart(r, 19, 15, br)))$
+printf(datafile, "#define BASIS_RPART_BIG_TARGET20 ~24,16,3e~%", bfloat(rpart(r, 20,  5, br)))$
+
+kill(r)$
+
+/******************************************************************************/
+
+print("TEST(Basis, calcHharmo2ct)")$
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET00 ~24,16,3e~%", bfloat(irecouv(9,10,0,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET01 ~24,16,3e~%", bfloat(irecouv(9,10,0,1)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET02 ~24,16,3e~%", bfloat(irecouv(9,10,1,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET03 ~24,16,3e~%", bfloat(irecouv(9,10,1,1)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET04 ~24,16,3e~%", bfloat(izrecouv(11,10,0,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET05 ~24,16,3e~%", bfloat(izrecouv(11,10,0,1)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET06 ~24,16,3e~%", bfloat(izrecouv(11,10,1,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET07 ~24,16,3e~%", bfloat(izrecouv(11,10,1,1)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET08 ~24,16,3e~%", bfloat(hcyl(2,0,5,3,0,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET09 ~24,16,3e~%", bfloat(hcyl(2,0,5,3,0,1)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET10 ~24,16,3e~%", bfloat(hcyl(2,0,5,3,1,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET11 ~24,16,3e~%", bfloat(hcyl(2,0,5,3,1,1)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET12 ~24,16,3e~%", bfloat(hcyl(3,0,3,1,0,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET13 ~24,16,3e~%", bfloat(hcyl(3,0,3,1,0,1)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET14 ~24,16,3e~%", bfloat(hcyl(3,0,3,1,1,0)))$
+printf(datafile, "#define BASIS_CALCHHARMO2CT_TARGET15 ~24,16,3e~%", bfloat(hcyl(3,0,3,1,1,1)))$
+
+/******************************************************************************/
+
+print("TEST(Basis, getOverlapMatrixHOZ)")$
+
+[nza:3, nzb:0, da:0, db:0]$
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+f1(z):=zpart(z, nza, da, ''bz, ''d0)$
+[br: 2.4144410198519912, bz: 3.1170299534289376, d0:0.0]$ /* test_1ct.rhl.dat.gz */
+f2(z):=zpart(z, nzb, db, ''bz, ''d0)$
+printf(datafile, "#define BASIS_GETOVERLAPMATRIXHOZ_TARGET00 ~24,16,3e~%", bfloat((quad_qagi(f1(z)*f2(z),z,minf,inf))[1]))$
+
+[nza:3, nzb:5, da:0, db:1]$
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+f1(z):=zpart(z, nza, da, ''bz, ''d0)$
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+f2(z):=zpart(z, nzb, db, ''bz, ''d0)$
+printf(datafile, "#define BASIS_GETOVERLAPMATRIXHOZ_TARGET01 ~24,16,3e~%", bfloat((quad_qagi(f1(z)*f2(z),z,minf,inf))[1]))$
+
+/******************************************************************************/
+
+print("TEST(BASIS, getOverlapMatrixHOR)")$
+
+[ma:2, na:2, mb:2, nb:1]$
+[br: 2.4144410198519912, bz: 3.1170299534289376, d0:0.0]$ /* test_1ct.rhl.dat.gz */
+f1(r):=rpart(r, ma, na, ''br)$
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+f2(r):=rpart(r, mb, nb, ''br)$
+printf(datafile, "#define BASIS_GETOVERLAPMATRIXHOR_TARGET00 ~24,16,3e~%", bfloat((quad_qagi(f1(r)*f2(r)*r*2*%pi,r,0,inf))[1]))$
+
+[ma:2, na:1, mb:2, nb:2]$
+[br: 2.4144410198519912, bz: 3.1170299534289376, d0:0.0]$ /* test_1ct.rhl.dat.gz */
+f1(r):=rpart(r, ma, na, ''br)$
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+f2(r):=rpart(r, mb, nb, ''br)$
+printf(datafile, "#define BASIS_GETOVERLAPMATRIXHOR_TARGET01 ~24,16,3e~%", bfloat((quad_qagi(f1(r)*f2(r)*r*2*%pi,r,0,inf))[1]))$
+
+/******************************************************************************/
+
+print("TEST(BASIS, calcTab)")$
+
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+printf(datafile, "#define BASIS_CALCTAB_TARGET00 ~24,16,3e~%", bfloat(z0recouv(5,3,0,1)))$
+printf(datafile, "#define BASIS_CALCTAB_TARGET01 ~24,16,3e~%", bfloat(z0recouv(3,5,0,1)))$
+printf(datafile, "#define BASIS_CALCTAB_TARGET02 ~24,16,3e~%", bfloat(z0recouv(2,7,0,1)))$
+printf(datafile, "#define BASIS_CALCTAB_TARGET03 ~24,16,3e~%", bfloat(z0recouv(7,2,0,1)))$
+printf(datafile, "#define BASIS_CALCTAB_TARGET04 ~24,16,3e~%", bfloat(z0recouv(10,10,0,1)))$
+printf(datafile, "#define BASIS_CALCTAB_TARGET05 ~24,16,3e~%", bfloat(z0recouv(9,10,0,1)))$
+
+/******************************************************************************/
+
+print("TEST(BASIS, calcTalmanz)")$
+
+[br: 5.3, bz: 5.2, d0:0.0]$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET00 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  0, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET01 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  1, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET02 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  2, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET03 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET04 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  4, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET05 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  5, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET06 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  6, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET07 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  7, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET08 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  8, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET09 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0,  9, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET10 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 10, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET11 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 11, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET12 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 12, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET13 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 13, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET14 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 14, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET15 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 15, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET16 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 16, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET17 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 17, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET18 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 18, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET19 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 19, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET20 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 20, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET21 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 21, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET22 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 22, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET23 ~24,16,3e~%", bfloat(talmanz(11, 0, 11, 0, 23, d0, bz)))$
+
+[br: 5.3, bz: 5.2, d0:12.0]$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET24 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 0, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET25 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 1, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET26 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 2, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET27 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET28 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 4, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET29 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 5, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET30 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 6, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET31 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 7, d0, bz)))$
+
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET32 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET33 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 1, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET34 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 0, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET35 ~24,16,3e~%", bfloat(talmanz( 9, 0, 8, 1, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET36 ~24,16,3e~%", bfloat(talmanz( 9, 1, 8, 0, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET37 ~24,16,3e~%", bfloat(talmanz( 9, 1, 8, 1, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET38 ~24,16,3e~%", bfloat(talmanz( 9, 1, 8, 0, 3, d0, bz)))$
+printf(datafile, "#define BASIS_CALCTALMANZ_TARGET39 ~24,16,3e~%", bfloat(talmanz( 9, 1, 8, 1, 3, d0, bz)))$
+
+/******************************************************************************/
+
+print("TEST(FieldCentralDirect, calcGaussianIntegralz)")$
+
+p: 0.7$ /* portee */
+
+[br: 2.4144410198519912, bz: 3.1170299534289376, d0:0.0]$ /* test_1ct.rhl.dat.gz */
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET00 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  0,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET01 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  1,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET02 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  2,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET03 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  3,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET04 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  4,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET05 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  5,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET06 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  6,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET07 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  7,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET08 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  8,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET09 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  9,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET10 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 10,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET11 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 11,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET12 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 12,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET13 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 13,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET14 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 14,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET15 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 15,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET16 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 16,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET17 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 17,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET18 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 18,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET19 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 19,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET20 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 20,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET21 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 21,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET22 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 22,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET23 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 23,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET24 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 24,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET25 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 25,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET26 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 26,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET27 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 27,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET28 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 28,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET29 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 29,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET30 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 30,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET31 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 31,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET32 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 32,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET33 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 33,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET34 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 34,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET35 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 35,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET36 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 36,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET37 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 37,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET38 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 38,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET39 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 39,  0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET40 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 40,  0, bz, p)))$
+
+[br: 2.3878704919130063, bz: 3.1087425890539850, d0:5.0]$ /* test_2ct.rhl.dat.gz */
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET41 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0,  0, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET42 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,1,  1, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET43 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,1,0,  2, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET44 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,1,1,  3, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET45 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,0,0,  4, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET46 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,0,1,  5, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET47 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,1,0,  6, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET48 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,1,1,  7, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET49 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,0,0,  8, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET50 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,0,1,  9, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET51 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,1,0, 10, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET52 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,1,1, 11, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET53 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,0,0, 12, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET54 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,0,1, 13, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET55 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,1,0, 14, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET56 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,1,1, 15, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET57 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 16, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET58 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,1, 17, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET59 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,1,0, 18, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET60 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,1,1, 19, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET61 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,0,0, 20, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET62 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,0,1, 21, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET63 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,1,0, 22, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET64 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,1,1, 23, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET65 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,0,0, 24, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET66 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,0,1, 25, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET67 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,1,0, 26, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET68 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,1,1, 27, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET69 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,0,0, 28, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET70 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,0,1, 29, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET71 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,1,0, 30, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET72 ~24,16,3e~%", bfloat(gaussianIntegralz(1,1,1,1, 31, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET73 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,0, 32, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET74 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,0,1, 33, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET75 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,1,0, 34, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET76 ~24,16,3e~%", bfloat(gaussianIntegralz(0,0,1,1, 35, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET77 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,0,0, 36, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET78 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,0,1, 37, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET79 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,1,0, 38, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET80 ~24,16,3e~%", bfloat(gaussianIntegralz(0,1,1,1, 39, d0, bz, p)))$
+printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET81 ~24,16,3e~%", bfloat(gaussianIntegralz(1,0,0,0, 40, d0, bz, p)))$
+
+/******************************************************************************/
+
+print("TEST(Moments, calcQl0Matrices)")$
+
+[br: 2.4144410198519912, bz: 3.1170299534289376, d0:0.0]$ /* test_1ct.rhl.dat.gz */
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET00 ~24,16,3e~%", float(z1recouv(8,9,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET01 ~24,16,3e~%", float(z1recouv(8,0,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET02 ~24,16,3e~%", float(z1recouv(1,1,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET03 ~24,16,3e~%", float(z2recouv(1,2,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET04 ~24,16,3e~%", float(z2recouv(1,2,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET05 ~24,16,3e~%", float(z2recouv(1,3,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET06 ~24,16,3e~%", float(z3recouv(2,5,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET07 ~24,16,3e~%", float(z3recouv(2,6,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET08 ~24,16,3e~%", float(z3recouv(3,4,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET09 ~24,16,3e~%", float(z4recouv(3,5,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET10 ~24,16,3e~%", float(z4recouv(7,2,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET11 ~24,16,3e~%", float(z4recouv(7,3,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET12 ~24,16,3e~%", float(z5recouv(1,2,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET13 ~24,16,3e~%", float(z5recouv(1,3,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET14 ~24,16,3e~%", float(z5recouv(0,3,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET15 ~24,16,3e~%", float(z6recouv(0,0,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET16 ~24,16,3e~%", float(z6recouv(0,1,0,0)))$
+
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET17 ~24,16,3e~%", float(r2recouv( 0,1,1)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET18 ~24,16,3e~%", float(r2recouv( 0,1,2)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET19 ~24,16,3e~%", float(r2recouv( 8,0,1)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET20 ~24,16,3e~%", float(r2recouv(10,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET21 ~24,16,3e~%", float(r4recouv( 0,1,1)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET22 ~24,16,3e~%", float(r4recouv( 0,1,2)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET23 ~24,16,3e~%", float(r4recouv( 8,0,1)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET24 ~24,16,3e~%", float(r4recouv(10,0,0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET25 ~24,16,3e~%", float(r6recouv( 0,1,1)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET26 ~24,16,3e~%", float(r6recouv( 0,1,2)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET27 ~24,16,3e~%", float(r6recouv( 8,0,1)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET28 ~24,16,3e~%", float(r6recouv(10,0,0)))$
+
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET29 ~24,16,3e~%", float(q20(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET30 ~24,16,3e~%", float(q20(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET31 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET32 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET33 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET34 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET35 ~24,16,3e~%", float(q20(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET36 ~24,16,3e~%", float(q20(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET37 ~24,16,3e~%", float(q30(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET38 ~24,16,3e~%", float(q30(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET39 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET40 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET41 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET42 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET43 ~24,16,3e~%", float(q30(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET44 ~24,16,3e~%", float(q30(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET45 ~24,16,3e~%", float(q40(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET46 ~24,16,3e~%", float(q40(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET47 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET48 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET49 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET50 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET51 ~24,16,3e~%", float(q40(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET52 ~24,16,3e~%", float(q40(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET53 ~24,16,3e~%", float(q50(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET54 ~24,16,3e~%", float(q50(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET55 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET56 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET57 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET58 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET59 ~24,16,3e~%", float(q50(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET60 ~24,16,3e~%", float(q50(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+                                                          
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET61 ~24,16,3e~%", float(q60(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET62 ~24,16,3e~%", float(q60(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET63 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET64 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET65 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET66 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET67 ~24,16,3e~%", float(q60(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET68 ~24,16,3e~%", float(q60(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$

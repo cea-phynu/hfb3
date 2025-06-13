@@ -1,0 +1,28 @@
+@clear
+@slot 0
+@mat "tutu [plop]" 3 3 0 -3 1 2
+@mat "tutu [plop]" 3 3 1 3 4 5
+@mat "tutu [plop]" 3 3 2 6 7 8
+@slot 1
+@xy_data "totox" "totoy" 2 4
+@xy_data "totox" "totoy" 3 5
+@xy_data "totox" "totoy" 4 7
+@xy_data "totox" "totoy" 5 5
+@slot 2
+@xy_data "tutux" "tutuy" 2 4
+@xy_data "tutux" "tutuy" 3 5
+@xy_data "tutux" "tutuy" 4 7
+@slot 3
+@temp_data "tempy" 3
+@temp_data "tempy" 4
+@temp_data "tempy" 5
+@slot 4
+@map "map0" "xlabel" "ylabel" -10 -10 10 10 3 3 0 0 1 2
+@map "map0" "xlabel" "ylabel" -10 -10 10 10 3 3 1 3 4 5
+@map "map0" "xlabel" "ylabel" -10 -10 10 10 3 3 2 6 7 8
+@slot 2
+@xy_data "tutux" "tutuy" 2 4
+@xy_data "tutux" "tutuy" 3 5
+@xy_data "tutux" "tutuy" 4 7
+@xy_data "tutux" "tutuy" 5 8
+@xy_data "tutux" "tutuy" 6 9

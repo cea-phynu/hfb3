@@ -1,0 +1,106 @@
+##==============================================================================
+## HFB3
+## Copyright CEA, DAM F-91297 Arpajon, France
+##
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+##
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##==============================================================================
+
+#===============================================================================
+#= General Options =============================================================
+#===============================================================================
+
+SHELL = bash
+# RED    = "\x1b[38;2;255;150;150m"
+# YELLOW = "\x1b[38;2;255;255;100m"
+# GREEN  = "\x1b[38;2;150;255;150m"
+# BLUE   = "\x1b[38;2;150;150;255m"
+# NORM   = "\x1b[0m"
+RED    = "\e[1;91m"
+GREEN  = "\e[1;92m"
+YELLOW = "\e[1;93m"
+BLUE   = "\e[1;94m"
+NORM   = "\e[0m"
+
+directory = echo -e "["$1"]" $(BLUE)"Create directory"$(GREEN) $2$(NORM)
+compile   = echo -e "["$1"]" $(BLUE)"Compile"$(GREEN) $2$(NORM)
+link      = echo -e "["$1"]" $(BLUE)"Link"$(GREEN) $2$(BLUE) $3$(NORM)
+generate  = echo -e "["$1"]" $(BLUE)"Generate"$(GREEN) $2$(NORM)
+warning   = echo -e "["$1"]" $(RED)$2$(NORM)
+clean     = echo -e "["$1"]" $(BLUE)"Clean"$(NORM)
+install   = echo -e "["$1"]" $(BLUE)"Install"$(GREEN) $2$(NORM)
+
+
+ifeq ($(GIT_VERSION_FLAG),)
+GIT_VERSION_FLAG = -DCFG_GIT_VERSION=\"1.0.0rc21\"
+endif
+
+
+# Comment out the following line to show compilation commands
+QUIET = TRUE
+
+# Logo type (possible values: ANSI24B, ANSI8B, ASCII, NONE)
+LOGO = ASCII
+
+ifeq ($(QUIET),TRUE)
+	MAKEFLAGS+ = --no-print-directory
+	MAKE_GLOBAL_FLAGS = -s
+endif
+
+# msgpack options
+MSGPACK_INCDIR = misc/deps/msgpack-c/include
+
+# gtest options
+GTEST_LIB = misc/deps/googletest/build/lib/libgtest.a
+GTEST_INCDIR = misc/deps/googletest/googletest/include
+
+# system libraries
+GLOBAL_LDFLAGS = -lz -lpthread
+
+# global C++ compiler options
+REQFLAGS = -std=c++14
+# WARNFLAGS = -Wall -Wextra -Werror -Wno-sign-compare -Wfatal-errors -Wconversion
+WARNFLAGS = -Wall -Wextra -Werror -Wno-sign-compare -Wfatal-errors
+GLOBAL_CXXFLAGS = -fPIC $(REQFLAGS) $(WARNFLAGS)
+
+ifeq ($(ARMADILLO_LDFLAGS),)
+	ARMADILLO_LDFLAGS=-larmadillo
+endif
+
+ifeq ($(CXX),)
+	CXX=g++
+endif
+
+ifeq ($(SKILL),)
+	SKILL=SKILL3
+endif
+
+
+# Make sure to also update the skills options in misc/python/setup.py:get_skill_opts
+SKILLOPTS=
+ifeq ($(SKILL),SKILL0) # I'M TOO YOUNG TO DIE
+  SKILLOPTS = -O0 -ggdb3 -fno-inline-functions -D_GLIBCXX_DEBUG -DCHECKBOUNDS_FMULTI -DCHECK_ACCU
+endif
+ifeq ($(SKILL),SKILL1) # HEY, NOT TOO ROUGH
+  SKILLOPTS = -O1 -g -march=native -DCHECKBOUNDS_FMULTI -DCHECK_ACCU
+endif
+ifeq ($(SKILL),SKILL2) # HURT ME PLENTY
+  SKILLOPTS = -O2 -g -march=native -DCHECKBOUNDS_FMULTI
+endif
+ifeq ($(SKILL),SKILL3) # ULTRA-VIOLENCE
+  SKILLOPTS = -O3 -g -march=native -DARMA_NO_DEBUG
+endif
+ifeq ($(SKILL),SKILL4) # NIGHTMARE!
+  SKILLOPTS = -O3 -g -march=native -DARMA_NO_DEBUG -DNO_DBG_STACK
+endif
+

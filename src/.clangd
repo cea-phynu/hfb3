@@ -1,0 +1,2 @@
+CompileFlags:
+  Add: [-Wall, -I../../src/, -I../misc/deps/msgpack-c/include]

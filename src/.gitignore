@@ -1,0 +1,7 @@
+.objs
+*.csv
+*.tex
+logs
+*.log
+*.e
+*.pyc

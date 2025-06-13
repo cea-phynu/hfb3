@@ -1,0 +1,27 @@
+#!HFB3!#
+
+# Example of an HFB calculation for a deformed 42Ca nucleus using a 2ct basis (basis/d_0 > 0.0).
+
+action hfb
+
+[interaction]
+name               D1S
+
+[system]
+nProt              20
+nNeut              22
+
+[action]
+basisOptimization  False
+jobName            42Ca_deformed_2x9
+
+[basis]
+nOscil             9
+d_0                5.0
+b_r                2.3878704919130063
+b_z                3.108742589053985
+g_q                1.3
+
+[constraints]
+q10t               0.0
+q20t               10.0
