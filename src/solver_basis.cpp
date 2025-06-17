@@ -38,9 +38,10 @@
 
 std::list<KeyStruct > SolverBasis::validKeys =
   {
-    { "solver/basis/sphericalBasis", "Force the use of a spherical basis (b_r = b_z)", "false", "B" },
-    { "solver/basis/cvgTarget"     , "Convergence target value"                      , "1e-4" , "D" },
-    { "solver/basis/maxIter"       , "Maximum number of iterations"                  , "40"   , "I" },
+    { "solver/basis/sphericalBasis", "Force the use of a spherical basis (b_r = b_z)"       , "false", "B" },
+    { "solver/basis/cvgTarget"     , "Convergence target value"                             , "1e-4" , "D" },
+    { "solver/basis/maxIter"       , "Maximum number of iterations"                         , "40"   , "I" },
+    { "solver/alternate/maxIter"   , "Maximum number of iterations when alternating solvers", "2000" , "I" },
   };
 
 //==============================================================================
@@ -234,7 +235,7 @@ void SolverBasis::finalize(void)
 /** Calculate a Bogoliubov state solution of the HFB equations using SolverHFBGradient and SolverHFBBroyden.
  */
 
-State SolverBasis::calcSingleHFB(const DataTree &_dataTree, const State &_state, bool quiet, bool _plotDensities)
+State SolverBasis::calcSingleHFB(const DataTree &_dataTree, const State &_state, INT maxIterTotal, bool quiet, bool _plotDensities)
 {
   DBG_ENTER;
 
@@ -312,7 +313,6 @@ State SolverBasis::calcSingleHFB(const DataTree &_dataTree, const State &_state,
   bool working = true;
   bool converged = false;
   double eneTot = 1e99;
-  INT maxIterTotal = 2000;
 
   Interaction *interaction;
 
@@ -472,7 +472,10 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
   dataTree.get(cvgTarget, "solver/broyden/cvgTarget");
   customDataTree.set("solver/broyden/cvgTarget", cvgTarget * 100.0);
 
-  state = calcSingleHFB(customDataTree, state, false, true);
+  INT maxIterTotal = 2000;
+  dataTree.get(maxIterTotal, "solver/alternate/maxIter");
+
+  state = calcSingleHFB(customDataTree, state, maxIterTotal, false, true);
   value = state.totalEnergy;
 
   histCoords = arma::resize(histCoords, dim, nbIter + 1);

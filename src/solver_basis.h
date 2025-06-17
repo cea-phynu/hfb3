@@ -71,6 +71,7 @@ public:
 
   static State calcSingleHFB(const DataTree &,                         // #TEST#
                              const State &,
+                             INT maxIterTotal = 2000,
                              bool quiet = false,
                              bool _plotDensities = false);
 

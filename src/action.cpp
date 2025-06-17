@@ -71,7 +71,7 @@ Action::Action(const DataTree &_dataTree) : dataTree(_dataTree), state(_dataTree
   dataTree.get(jobName,           "action/jobName",           true );
   dataTree.get(basisOptimization, "action/basisOptimization", true );
   dataTree.get(saveResultFiles,   "action/saveResultFiles",   true );
-  dataTree.get(nbBlockingTrials,  "action/nbBlockingTrie",    true );
+  dataTree.get(nbBlockingTrials,  "action/nbBlockingTrials",  true );
 
   DBG_LEAVE;
 }
@@ -156,7 +156,10 @@ void Action::calcHFBquiet(void)
 
   Tools::mesg("ActHFB", PF_GREEN("=== Fixed basis HFB calculation ==="));
 
-  state = SolverBasis::calcSingleHFB(dataTree, state, false, true);
+  INT maxIterTotal = 2000;
+  dataTree.get(maxIterTotal, "solver/alternate/maxIter");
+
+  state = SolverBasis::calcSingleHFB(dataTree, state, maxIterTotal, false, true);
 
   // Merge the solution with the initial DataTree instance
   dataTree = dataTree + state.getDataTree();
@@ -304,7 +307,10 @@ void Action::calcHFBblocking(void)
 
       Tools::mesg("ActBlo", "New blocking try: " + blockingName);
 
-      State state = SolverBasis::calcSingleHFB(dataTree, bestState, false, true);
+      INT maxIterTotal = 2000;
+      dataTree.get(maxIterTotal, "solver/alternate/maxIter");
+
+      State state = SolverBasis::calcSingleHFB(dataTree, bestState, maxIterTotal, false, true);
 
       if (state.converged)
       {

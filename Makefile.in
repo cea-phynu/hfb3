@@ -42,7 +42,7 @@ install   = echo -e "["$1"]" $(BLUE)"Install"$(GREEN) $2$(NORM)
 
 
 ifeq ($(GIT_VERSION_FLAG),)
-GIT_VERSION_FLAG = -DCFG_GIT_VERSION=\"1.0.0rc21\"
+GIT_VERSION_FLAG = -DCFG_GIT_VERSION=\"1.0.2\"
 endif
 
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NOCOPY=(misc/amedee_python misc/berger_python misc/docs gen_release_pip.sh go.sh src/drop.cpp src/drop.h src/link.cpp src/link.h src/field_spin_orbit_fr.cpp src/field_spin_orbit_fr.h src/field_tensor_fr.cpp src/field_tensor_fr.h gen_release.sh gen_pip_release.sh misc/studies/180Hg_asym_drop misc/pip)
+NOCOPY=(misc/amedee_python misc/berger_python misc/docs misc/releases/gen_private.sh misc/releases/gen_pip_private.sh go.sh src/drop.cpp src/drop.h src/link.cpp src/link.h src/field_spin_orbit_fr.cpp src/field_spin_orbit_fr.h src/field_tensor_fr.cpp src/field_tensor_fr.h gen_release.sh gen_pip_release.sh misc/studies/180Hg_asym_drop misc/pip)
 
 echo "===== Cleaning project ====="
 make clean
