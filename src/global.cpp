@@ -30,7 +30,6 @@
 bool useBokeh = false;
 bool saveToFile = false;
 bool useColors = true;
-bool darkMode = true;
 bool forceInvalidDataTree = false;
 bool exitOnError = true;
 INT  tableStyle = 1;

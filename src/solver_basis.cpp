@@ -255,6 +255,8 @@ State SolverBasis::calcSingleHFB(const DataTree &_dataTree, const State &_state,
 
   int maxIterGradient = solverHFBGradient.maxIter;
   int maxIterBroyden = solverHFBBroyden.maxIter;
+
+
   double cvgTargetSwitch = solverHFBGradient.cvgTargetSwitchToBroyden;
 
   //============================================================================
@@ -332,6 +334,8 @@ State SolverBasis::calcSingleHFB(const DataTree &_dataTree, const State &_state,
           working = solverHFBGradient.nextIter();
           nbIter++;
 
+          if (nbIter >= maxIterTotal) working = false;
+
           if (!working)
           {
             interaction = &(solverHFBGradient.interaction);
@@ -363,6 +367,8 @@ State SolverBasis::calcSingleHFB(const DataTree &_dataTree, const State &_state,
       {
         working = solverHFBBroyden.nextIter();
         nbIter++;
+
+        if (nbIter >= maxIterTotal) working = false;
 
         if (!working)
         {

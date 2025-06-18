@@ -311,9 +311,6 @@ extern bool useColors;
 /// Generate bokeh plots.
 extern bool useBokeh;
 
-/// Use dark mode colors in output.
-extern bool darkMode;
-
 /// A Logger instance.
 extern Logger logger;
 

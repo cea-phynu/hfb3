@@ -2495,38 +2495,19 @@ std::string Tools::color(const std::string &c)
 
 #ifdef ANSI_TRUECOLORS
 
-    if (darkMode)
-    {
-      if (c == "red"    ) DBG_RETURN(trueColor(255, 200, 200));
+    if (c == "red"    ) DBG_RETURN(trueColor(255, 200, 200));
 
-      if (c == "green"  ) DBG_RETURN(trueColor(200, 255, 200));
+    if (c == "green"  ) DBG_RETURN(trueColor(200, 255, 200));
 
-      if (c == "yellow" ) DBG_RETURN(trueColor(200, 255, 255));
+    if (c == "yellow" ) DBG_RETURN(trueColor(200, 255, 255));
 
-      if (c == "blue"   ) DBG_RETURN(trueColor(200, 200, 255));
+    if (c == "blue"   ) DBG_RETURN(trueColor(200, 200, 255));
 
-      if (c == "magenta") DBG_RETURN(trueColor(255, 200, 255));
+    if (c == "magenta") DBG_RETURN(trueColor(255, 200, 255));
 
-      if (c == "cyan"   ) DBG_RETURN(trueColor(200, 255, 255));
+    if (c == "cyan"   ) DBG_RETURN(trueColor(200, 255, 255));
 
-      if (c == "orange" ) DBG_RETURN(trueColor(255, 200,   0));
-    }
-    else
-    {
-      if (c == "red"    ) DBG_RETURN(trueColor(200,   0,   0));
-
-      if (c == "green"  ) DBG_RETURN(trueColor(  0, 200,   0));
-
-      if (c == "yellow" ) DBG_RETURN(trueColor(  0, 200, 200));
-
-      if (c == "blue"   ) DBG_RETURN(trueColor(  0,   0, 200));
-
-      if (c == "magenta") DBG_RETURN(trueColor(200,   0, 200));
-
-      if (c == "cyan"   ) DBG_RETURN(trueColor(  0, 200, 200));
-
-      if (c == "orange" ) DBG_RETURN(trueColor(200, 100,   0));
-    }
+    if (c == "orange" ) DBG_RETURN(trueColor(255, 200,   0));
 
 #endif
 

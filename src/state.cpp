@@ -223,6 +223,8 @@ DataTree State::getDataTree(void)
   Multi<arma::mat> multiKappa;
   for (INT iso: {NEUTRON, PROTON})
   {
+    if (rho(iso).empty()) break; // no rho or kappa matrices to save
+
     for (INT omega = 0; omega < basis.mMax; omega++)
     {
 

@@ -71,7 +71,6 @@ CliParser::CliParser(INT argc, char **argv)
       else if (arg == "-l")         showLogo = true;
       else if (arg == "--no-utf8")  useUtf8 = false;
       else if (arg == "--no-color") useColors = false;
-      else if (arg == "--no-dark")  darkMode = false;
 
       else if (arg == "-v0")        msgToOut = {MSG_ERROR, MSG_MAIN};
       else if (arg == "-v1")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO};
@@ -125,7 +124,6 @@ void CliParser::help(void)
   std::cout << "  -v[0...6]    verbosity level (default 1)" << std::endl;
   std::cout << "  -t[0...2]    style of the printed tables" << std::endl;
   std::cout << "  --no-colors  no colored output" << std::endl;
-  std::cout << "  --no-dark    no dark mode" << std::endl;
   std::cout << "  --no-utf8    do not use utf8 characters in the output" << std::endl;
   std::cout << "  -l           show the HFB3 logo at start" << std::endl;
   std::cout << std::endl;
@@ -137,8 +135,8 @@ void CliParser::help(void)
   std::cout << "  {key1:val1, key2:val2, ...}" << std::endl;
   std::cout << std::endl;
   std::cout << "Examples:" << std::endl;
-  std::cout << "  * launch an HFB calculation using the file 'examples/16O_groundstate.hfb3' with a constraint on <Q20> (30fm) and 500 HFB iterations max.:" << std::endl;
-  std::cout << "  ./hfb3 examples/16O_groundstate.hfb3 '{constraints/q20t:30.0, HFB/maxIter:500}'" << std::endl;
+  std::cout << "  * launch an HFB calculation using the file 'examples/16O_groundstate.hfb3' with a constraint on <Q20> (30fm) and 50 HFB iterations max.:" << std::endl;
+  std::cout << "  bin/hfb3 examples/16O_groundstate.hfb3 '{constraints/q20t:30.0,solver/alternate/maxIter:50}'" << std::endl;
   Tools::end(0);
 }
 
