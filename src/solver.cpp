@@ -22,7 +22,6 @@
  *  \brief Methods of the Solver class.
  */
 
-
 //==============================================================================
 //==============================================================================
 //==============================================================================
@@ -30,6 +29,15 @@
 std::list<KeyStruct > Solver::validKeys =
   {
     { "solver/forceNonEmptyKappa", "Force non-empty kappa matrices at the start of HFB iterations", "True", "B" },
+  };
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+std::vector<std::string> Solver::statusStr =
+  {
+    "Starting", "Iterating", "Converged", "Diverged", "Maxiter"
   };
 
 //==============================================================================
@@ -98,10 +106,10 @@ void Solver::init(void)
 /** Calculate the next iteration.
  */
 
-bool Solver::nextIter(void)
+INT Solver::nextIter(void)
 {
   DBG_ENTER;
 
-  DBG_RETURN(true);
+  DBG_RETURN(ITERATING);
 }
 

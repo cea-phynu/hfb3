@@ -1,0 +1,38 @@
+#!HFB3!#
+
+# Example of an HFB calculation for a deformed 202Rn nucleus.
+
+[action]
+basisOptimization False
+jobName           202Rn_deformed
+
+[solver]
+broyden/cvgTarget 1e-8
+alternator/scheme WB
+
+[basis]
+nOscil            16
+d_0               0.0
+b_r               2.223
+b_z               2.223
+g_q               1.0
+
+[constraints]
+q10t         0.0
+q20t         3000.0
+q30t         1000.0
+q40t         11322.27
+q50t         0.0
+q60t         244516.0
+
+[system]
+nProt             86
+nNeut             116
+
+[general]
+compatibility     hfbtho
+
+[interaction]
+name                D1S
+cdm2                False
+

@@ -2,8 +2,6 @@
 
 # Example of an HFB calculation for a deformed 42Ca nucleus using a 1ct basis (basis/d_0 = 0.0).
 
-action ws_hfb
-
 [interaction]
 name               D1S
 

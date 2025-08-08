@@ -2,32 +2,28 @@
 
 # Example of an HFB calculation for a deformed 16O nucleus.
 
-action ws_hfb
-
 [action]
-basisOptimization True
-jobName           16O_deformed
+basisOptimization  True
+jobName            16O_deformed
 
 [interaction]
-name              D1S
+name               D1S
 
 [solver]
-broyden/maxIter   500
-gradient/maxIter  20
-basis/maxIter     50
+alternator/scheme  WB
 
 [basis]
-nOscil            7
-d_0               0.0
-b_r               1.6
-b_z               1.7
-g_q               1.0
+nOscil             7
+d_0                0.0
+b_r                1.6
+b_z                1.7
+g_q                1.0
 
 [constraints]
-q10t              0.0
-q20t              8.0
-q30t              0.0
+q10t               0.0
+q20t               8.0
+q30t               0.0
 
 [system]
-nProt             8
-nNeut             8
+nProt              8
+nNeut              8

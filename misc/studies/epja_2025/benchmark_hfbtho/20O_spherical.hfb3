@@ -1,0 +1,41 @@
+#!HFB3!#
+
+# Example of an HFB calculation for a spherical 20O nucleus.
+
+action hfb
+
+[action]
+basisOptimization False
+jobName           20O_spherical
+
+[solver]
+broyden/maxIter   500
+broyden/cvgTarget 1e-8
+alternator/scheme WB
+
+[basis]
+nOscil            8
+d_0               0.0
+b_r               1.457
+b_z               1.457
+g_q               1.0
+
+[constraints]
+q10t              0.0
+q20t              0.0
+q30t              0.0
+q40t              0.0
+q50t              0.0
+q60t              0.0
+
+[system]
+nProt             8
+nNeut             12
+
+[general]
+compatibility     hfbtho
+
+[interaction]
+name              D1S
+cdm2              False
+

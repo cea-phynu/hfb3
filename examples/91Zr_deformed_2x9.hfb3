@@ -7,8 +7,6 @@
 # $ bin/hfb3 examples/90Zr_deformed_2x9.hfb3
 # $ bin/hfb3 90Zr_deformed_2x9.msg.gz examples/91Zr_deformed_2x9.hfb3
 
-action hfb
-
 [interaction]
 name               D1S
 

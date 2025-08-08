@@ -42,7 +42,7 @@ def plot_matplotlib(_state, zmin, zmax, xmin, xmax):
 # ==============================================================================
 
 
-def plot_contour_matplotlib(_state, zmin, zmax, xmin, xmax, xstp, outputFile):
+def plot_contour_matplotlib(_state, zmin, zmax, xmin, xmax, xstp, outputFile=None):
     """plot using Matplotlib"""
     import numpy as np
     import matplotlib.pyplot as plt
@@ -74,8 +74,12 @@ def plot_contour_matplotlib(_state, zmin, zmax, xmin, xmax, xstp, outputFile):
 
     plt.subplots_adjust(hspace=0, left=0.12, right=0.97, top=0.97, bottom=0.12)
 
-    plt.savefig(outputFile)
-    # plt.show()
+    if outputFile:
+        plt.savefig(outputFile)
+        print(f"File {outputFile} generated.")
+    else:
+        plt.show()
+
     plt.close(fig)
 
 # ==============================================================================
@@ -114,18 +118,28 @@ def plot_bokeh(_state, zmin, zmax, xmin, xmax):
 
 if __name__ == "__main__":
 
-    forPublication = False
-    # forPublication = True
-    if forPublication:
-        plot_contour_matplotlib(hfb3.State("240Pu_deformed.msg.gz"), -15, 15, 0, 10, 2.0, "240Pu_deformed_density.eps")
-        plot_contour_matplotlib(hfb3.State("16O_deformed.msg.gz"), -6, 6, 0, 4, 1.0, "16O_deformed_density.eps")
+    if len(sys.argv) == 1:
+        print("Trying to reproduce the figures from the manuscript.")
+        try:
+            plot_contour_matplotlib(hfb3.State("240Pu_deformed.msg.gz"), -15, 15, 0, 10, 2.0, "240Pu_deformed_density.eps")
+        except Exception:
+            print("Please generate '240Pu_deformed.msg.gz' first with 'bin/hfb3 examples/240Pu_deformed.hfb3'.")
+        try:
+            plot_contour_matplotlib(hfb3.State("16O_deformed.msg.gz"), -6, 6, 0, 4, 1.0, "16O_deformed_density.eps")
+        except Exception:
+            print("Please generate '16O_deformed.msg.gz' first with 'bin/hfb3 examples/16O_deformed.hfb3'.")
 
     else:
-        if len(sys.argv) < 2:
+        if len(sys.argv) > 2:
             print(f"Usage: {sys.argv[0]} filename.msg[.gz]")
             sys.exit(0)
 
         fileName = sys.argv[1]
         state = hfb3.State(fileName)
-        plot_matplotlib(state, -20, 20, -10, 10)
+        plot_contour_matplotlib(state, -15, 15, 0, 10, 1.0)
+
+        # possible other visualization
+        # plot_matplotlib(state, -20, 20, -10, 10)
+
+        # possible other visualization
         # plot_bokeh(state, -20, 20, -10, 10)

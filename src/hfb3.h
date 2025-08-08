@@ -17,6 +17,7 @@
 //==============================================================================
 
 #include "action.h"
+#include "solver_alternator.h"
 #include "axis.h"
 #include "base64.h"
 #include "basis.h"

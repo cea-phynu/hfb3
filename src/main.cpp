@@ -127,19 +127,23 @@ INT main(INT argc, char **argv)
   else if (actionStr == "test")
   {
     // insert some testing code here, get it executed with 'hfb3 "{action:test}"'
+    auto solverAlternator = SolverAlternator(dataTree);
 
+    // Tools::mesg("_main_", solverAlternator.info());
+
+    solverAlternator.init();
+    while(solverAlternator.nextIter() == Solver::ITERATING);
+    solverAlternator.finalize();
   }
   else if (actionStr == "info")
   {
     INFO(dataTree.info());
     INFO(State(dataTree).info());
+    INFO(Basis(dataTree).info());
     // INFO(State(dataTree).getOmegaContributionsInfo());
   }
   else
   {
-    // ===== Validate the dataTree =====
-    dataTree.validate();
-
     // Create an Action instance
     Action action(dataTree);
 

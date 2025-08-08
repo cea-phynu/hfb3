@@ -31,7 +31,10 @@
 
 std::list<KeyStruct > SolverWS::validKeys =
   {
-    { "solver/ws/beta20tInit", "Temporary constraint on beta20t if no other constraint is used.", "0.1", "D" },
+    { "solver/ws/beta20tInit", "Temporary constraint on beta20t.", "0.1"   , "D" },
+    { "solver/ws/q30tInit"   , "Temporary constraint on q30t."   , "1000.0", "D" },
+    { "solver/ws/maxIter"    , "Maximum number of iterations"    , "50"    , "I" },
+    { "solver/ws/cvgTarget"  , "Error target value."             , "1e-6"  , "D" },
   };
 
 //==============================================================================
@@ -55,15 +58,31 @@ SolverWS::SolverWS(const std::string filename) : SolverWS(DataTree(filename))
 /** The constructor from a DataTree object.
  */
 
-SolverWS::SolverWS(const DataTree &_dataTree) : Solver(_dataTree, State(_dataTree)),
-  wsInteraction(dataTree, &state)
+SolverWS::SolverWS(const DataTree &_dataTree) : SolverWS(_dataTree, State(_dataTree))
+{
+  DBG_ENTER;
+
+  DBG_LEAVE;
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** The constructor from a DataTree object.
+ */
+
+SolverWS::SolverWS(const DataTree &_dataTree, State _state) : Solver(_dataTree, _state),
+  wsInteraction(dataTree, &_state)
 {
   DBG_ENTER;
 
   multipoleOperators = MultipoleOperators(state);
   discrete = Discrete(&state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 51, 1, 51));
 
-  dataTree.get(beta20tInit, "solver/ws/beta20tInit", true);
+  dataTree.get(beta20tInit, "solver/ws/beta20tInit" , true);
+  dataTree.get(q30tInit   , "solver/ws/q30tInit"    , true);
+  dataTree.get(maxIter    , "solver/ws/maxIter"     , true);
 
   DBG_LEAVE;
 }
@@ -319,6 +338,8 @@ void SolverWS::init()
 
   startTime = Tools::clock();
 
+  bool constraintOnQ20t = false;
+  bool constraintOnQ30t = false;
 
   for (auto &c : state.constraints)
   {
@@ -328,19 +349,32 @@ void SolverWS::init()
 
     currentDef(c.second.lm, 0) = 0.0;
     // INFO("currentDef: %d %e", c.second.lm, c.second.val);
+
+    if (c.second.lm == 2) constraintOnQ20t = true;
+    if (c.second.lm == 3) constraintOnQ30t = true;
   }
 
   dim = currentDef.size();
 
-  if (dim == 0) // no constraints given by the user (except q10) => we use beta20tInit as a temporary constraint
+  originalConstraints = state.constraints;
+
+  if (!constraintOnQ20t) // no constraint on Q20t given by the user => we use beta20tInit as a temporary constraint
   {
     double nPart = state.sys.nProt + state.sys.nNeut;
     double q20tValue = MultipoleOperators::getQ20FromBeta(nPart, nPart, beta20tInit);
     state.constraints["q20t"] = Constraint("q20t", q20tValue);
-    temporaryConstraint = true;
     Tools::mesg("SolWS.", PF("Temporary constraint created <beta20t>=%.3f (converted to <q20t>=%.3f)", beta20tInit, q20tValue));
 
     currentDef(2, 0) = 0.0;
+    dim = currentDef.size();
+  }
+
+  if (!constraintOnQ30t) // no constraint on Q30t given by the user => we use q30tInit as a temporary constraint
+  {
+    state.constraints["q30t"] = Constraint("q30t", q30tInit);
+    Tools::mesg("SolWS.", PF("Temporary constraint created <q30t>=%.3f", q30tInit));
+
+    currentDef(3, 0) = 0.0;
     dim = currentDef.size();
   }
 
@@ -377,7 +411,7 @@ void SolverWS::bokehPlot(void)
     Plot::curve("a20", "q20", currentDef(2, 0), multipoleOperators.qlm(2));
 
     Plot::slot(1);
-    Plot::curve("a20", "Error", currentDef(2, 0), wsError);
+    Plot::curve("a20", "Error", currentDef(2, 0), value);
 
     Plot::slot(2);
     arma::mat densn = discrete.getLocalXZ(state.rho(NEUTRON), true);
@@ -409,7 +443,7 @@ void SolverWS::bokehPlot(void)
  * Calculate the next iteration.
  */
 
-bool SolverWS::nextIter()
+INT SolverWS::nextIter()
 {
   DBG_ENTER;
 
@@ -417,66 +451,75 @@ bool SolverWS::nextIter()
 
   if (next.empty())
   {
-    Tools::mesg("SolWS.", "Target value reached, exiting WS loop");
+    Tools::mesg("SolWS.", "Minimum found, exiting WS loop");
 
-    converged = false;
-    status = ENDEVAL;
-
+    status = Solver::CONVERGED;
     finalize();
 
-    DBG_RETURN(false);
+    DBG_RETURN(status);
   }
   else
   {
     updateCurrentDef(next);
     calcWS();
-    wsError = getError();
+    value = getError();
 
     bokehPlot();
 
-    gradientWalk.addEval(next, -wsError, true);
+    gradientWalk.addEval(next, -value, true);
     //Tools::mesg("SolWS.", getHistTable());
   }
 
+  bool isBest = false;
+
+  if (value < bestError)
+  {
+    bestError = value;
+    bestDef = currentDef;
+    bestState = state;
+    isBest = true;
+  }
+
+  Tools::mesg("SolWS.",
+              PF("#it: %03d ", nbIter) +
+              PF("def: ") + niceStr(currentDef) + " " +
+              PF("err: %9.2e ", value) +
+              (isBest ? PF_GREEN(" *") : "")
+              );
+
+  // optional
+  // Tools::mesg(PF("WS_%03d", nbIter), multipoleOperators.getNiceInfo());
+
   nbIter++;
+  status = Solver::ITERATING;
 
   if (nbIter >= maxIter)
   {
     Tools::mesg("SolWS.", PF_RED("maximum number of iterations reached (%d)", nbIter));
 
-    converged = true;
-    status = ITERMAX;
+    status = Solver::MAXITER;
 
     finalize();
 
-    DBG_RETURN(false);
+    DBG_RETURN(status);
   }
 
-  if (wsError < bestError)
+
+  if (value < cvgTarget)
   {
-    bestError = wsError;
-    bestDef = currentDef;
-    bestState = state;
-  }
+    Tools::mesg("SolWS.", PF_GREEN("target value reached %e < %e", value, cvgTarget));
 
-  if (wsError < targetError)
-  {
-    Tools::mesg("SolWS.", PF_GREEN("target value reached %e < %e", wsError, targetError));
-
-    converged = true;
-    status = CONV;
-
-    Tools::mesg(PF("WS_%03d", nbIter), niceStr(bestDef) + PF(" err:%9.2e", bestError) + PF_GREEN(" *"));
+    status = Solver::CONVERGED;
 
     finalize();
 
-    DBG_RETURN(false);
+    state.converged = true;
+
+    DBG_RETURN(status);
   }
 
-  Tools::mesg(PF("WS_%03d", nbIter), niceStr(currentDef) + PF(" err:%9.2e", wsError));
-  // Tools::mesg(PF("WS_%03d", nbIter), multipoleOperators.getNiceInfo());
 
-  DBG_RETURN(true);
+  DBG_RETURN(status);
 }
 
 
@@ -490,18 +533,11 @@ void SolverWS::finalize(void)
 
   state = bestState;
 
-  Tools::mesg("SolWS.", "End of optimization");
-  Tools::mesg(PF("WS_res", nbIter), niceStr(bestDef) + PF(" err:%9.2e", bestError) + PF_GREEN(" *"));
+  // Tools::mesg("SolWS.", "End of optimization");
+  // Tools::mesg(PF("WS_res", nbIter), niceStr(bestDef) + PF(" err:%9.2e", bestError) + PF_GREEN(" *"));
 
-  if (temporaryConstraint)
-  {
-    // remove the temporary constraint
-    auto iter = state.constraints.find("q20t");
-    ASSERT(iter != state.constraints.end(), "Temporary constraint not found");
-
-    state.constraints.erase(iter);
-    Tools::mesg("SolWS.", "Temporary constraint on <beta20t> removed");
-  }
+  // Restore the original constraints.
+  state.constraints = originalConstraints;
 
   DBG_LEAVE;
 }
@@ -551,6 +587,7 @@ const std::string SolverWS::info(bool isShort) const
       {"basis ", state.basis.info(true)},
       {"momen.", multipoleOperators.info(true)},
       {"dim.  ", Tools::infoStr(dim)},
+      {"status", Solver::statusStr[status]},
     }, true);
   }
   else
@@ -562,6 +599,8 @@ const std::string SolverWS::info(bool isShort) const
       {"basis ", state.basis.info(true)},
       {"momen.", multipoleOperators.info(true)},
       {"dim.  ", Tools::infoStr(dim)},
+      {"status", Solver::statusStr[status]},
+      {"target", Tools::infoStr(cvgTarget)},
       {"max.it", Tools::infoStr(maxIter)},
       {"vmin  ", Tools::vecToStr(vmin)},
       {"vmax  ", Tools::vecToStr(vmax)},

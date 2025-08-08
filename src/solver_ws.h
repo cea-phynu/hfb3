@@ -31,6 +31,7 @@
 #include "discrete.h"
 #include "multi.h"
 #include "multipole_operators.h"
+#include "state.h"
 
 class DataTree;
 
@@ -43,15 +44,9 @@ class SolverWS : public Solver
 {
 public:
 
-  enum
-  {
-    ITERMAX,
-    CONV,
-    ENDEVAL
-  };
-
-  explicit SolverWS(const DataTree &);                                 // #TEST#
   explicit SolverWS(const std::string filename);                       // #TEST#
+  explicit SolverWS(const DataTree &);                                 // #TEST#
+  explicit SolverWS(const DataTree &_dataTree, State _state);          // #TEST#
 
   //============================================================================
 
@@ -63,9 +58,9 @@ public:
   void updateCurrentDef(const arma::vec &v);                           // #TEST#
 
   void init(void);                                                     // #TEST#
-  bool nextIter(void);                                                 // #TEST#
+  INT nextIter(void);                                                  // #TEST#
   void finalize(void);                                                 // #TEST#
-  State calc();                                              // #TEST#
+  State calc();                                                        // #TEST#
   void bokehPlot(void);
 
   const std::string info(bool isShort = USE_SHORT_INFO) const;
@@ -110,23 +105,23 @@ public:
   /// Initial constraint for $\langle \beta_{20}\rangle$.
   double beta20tInit = 0.1;
 
+  /// Initial constraint for $\langle Q_{30}\rangle$.
+  double q30tInit = 1000.0;
+
   //============================================================================
   //============================================================================
   //============================================================================
 
 private:
 
-  // An instance of the current deformation for calcWS.
+  /// Original constraints.
+  std::map<std::string, Constraint> originalConstraints;
+
+  /// An instance of the current deformation for calcWS.
   Multi<double> currentDef;
 
   /// An instance of GradientWalk.
   GradientWalk gradientWalk;
-
-  /// The error for the WS preconditionner.
-  double wsError = 0.0;
-
-  /// minimum allowed for the error
-  double targetError = 1e-6;
 
   /// Minimal values of the basis parameters.
   arma::vec vmin;

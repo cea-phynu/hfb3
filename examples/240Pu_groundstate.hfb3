@@ -2,7 +2,7 @@
 
 # Example of an HFB calculation for the ground state of a 240Pu nucleus.
 
-action ws_hfb
+# action hfb
 
 [action]
 basisOptimization True
@@ -12,9 +12,11 @@ jobName           240Pu_groundstate
 name              D1S
 
 [solver]
-broyden/maxIter   500
-gradient/maxIter  20
-basis/maxIter     50
+basis/maxIter      100
+broyden/maxIter    500
+gradient/maxIter   50
+alternator/maxIter 550
+alternator/scheme  WB
 
 [basis]
 nOscil            11

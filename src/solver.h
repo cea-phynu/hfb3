@@ -38,12 +38,15 @@ class Solver : public Generic
 {
 public:
 
+  /// Return codes.
+  enum {STARTING, ITERATING, CONVERGED, DIVERGED, MAXITER};
+
   explicit Solver(const std::string &filename);                        // #TEST#
   explicit Solver(const DataTree &);                                   // #TEST#
   explicit Solver(const DataTree &, State);                            // #TEST#
 
   virtual void init(void);
-  virtual bool nextIter(void);
+  virtual INT nextIter(void);
 
   //============================================================================
   //============================================================================
@@ -51,6 +54,9 @@ public:
 
   /// List of keys used by this class.
   static std::list<KeyStruct > validKeys;
+
+  /// List of status types.
+  static std::vector<std::string> statusStr;
 
   /// The current State.
   State state;
@@ -67,7 +73,7 @@ public:
   /// The current iteration index.
   INT nbIter = 0;
 
-  /// Status of the solver
+  /// Status of the solver.
   INT status = 0;
 
   /// Starting time of the calculation [s].
@@ -81,9 +87,6 @@ public:
 
   /// The current value to be minimized.
   double value = 999.0;
-
-  /// Has a final State been found ?
-  bool converged = false;
 
   /// Must plot local densities ?
   bool plotDensities = false;

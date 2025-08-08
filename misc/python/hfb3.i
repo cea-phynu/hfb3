@@ -143,6 +143,7 @@ namespace std
   %template(vec_qnumbers) vector<Qnumbers>;
   %template(map_constraints) map<string, Constraint>;
   %template(FieldMap) map<int, shared_ptr<Field>>;
+  %template(FieldVec) vector<shared_ptr<Field>>;
   %template(map_string_int) map<string, int>;
   %template(map_string_double) map<string, double>;
   %template(map_string_string) map<string, string>;

@@ -19,7 +19,7 @@ def calc16O():
     defaultDataTree = hfb3.DataTree.getDefault()
 
     # load a DataTree instance
-    dataTree = hfb3.DataTree("16O_deformed.hfb3")
+    dataTree = hfb3.DataTree("examples/16O_deformed.hfb3")
 
     # complete with default values
     dataTree = defaultDataTree + dataTree
@@ -27,8 +27,8 @@ def calc16O():
     # create an Action instance
     action = hfb3.Action(dataTree)
 
-    # launch an HFB calculation, starting from a WS solution
-    action.calcWSHFB()
+    # launch an HFB calculation
+    action.calcHFB()
 
 # ==============================================================================
 # ==============================================================================

@@ -74,10 +74,8 @@ class Action : public Generic
   void calcHFBquiet(void);
   void calcHFB(void);
   void calcWS(void);
-  void calcWSHFB(void);
   void calcEnergies(void);
   void calcObservables(void);
-  void calcBasis(void);
   void calcMultipoleExpansion(void);
 
   // Misc

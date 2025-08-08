@@ -19,6 +19,7 @@
 #include <regex>
 #include "datatree.h"
 #include "action.h"
+#include "solver_alternator.h"
 #include "tools.h"
 #include "io_amedee.h"
 #include "io_berger.h"
@@ -65,6 +66,7 @@ DataTree::DataTree(const std::string &filename)
   }
 
   ADDLIST(listOfKeys,            Action::validKeys);
+  ADDLIST(listOfKeys,  SolverAlternator::validKeys);
   ADDLIST(listOfKeys,             Basis::validKeys);
   ADDLIST(listOfKeys,            Solver::validKeys);
   ADDLIST(listOfKeys,       SolverBasis::validKeys);

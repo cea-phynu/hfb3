@@ -109,9 +109,7 @@ void SolverHFBBroyden::init()
 
   startTime = Tools::clock();
 
-  converged = false;
-
-  localNbIter = 0;
+  nbIter = 0;
 
   if (maxIter < 1) maxIter = 1;
 
@@ -221,7 +219,7 @@ void SolverHFBBroyden::bokehPlot(void)
 /** Prepare and perform the next HFB iteration.
  */
 
-bool SolverHFBBroyden::nextIter()
+INT SolverHFBBroyden::nextIter()
 {
   DBG_ENTER;
 
@@ -234,9 +232,10 @@ bool SolverHFBBroyden::nextIter()
 
   if (!singleHFBiter())
   {
+    status = Solver::DIVERGED;
     bestEne = 0.0;
 
-    DBG_RETURN(false);
+    DBG_RETURN(status);
   }
 
   bokehPlot();
@@ -267,46 +266,42 @@ bool SolverHFBBroyden::nextIter()
 
   //============================================================================
 
-  // Continue or break ?
-  bool mustContinue = true;
+  nbIter++;
+  state.nbIter = nbIter;
+  status = Solver::ITERATING;
 
-  if (localNbIter + 1 >= maxIter)
+  if (nbIter >= maxIter)
   {
     Tools::mesg("SolBro", "Maximum number of iterations reached, exiting HFB loop");
-    mustContinue = false;
+    status = Solver::MAXITER;
+    DBG_RETURN(status);
   }
 
-  if ((value < cvgTarget) && (localNbIter > 1))
+  if ((value < cvgTarget) && (nbIter > 1))
   {
     Tools::mesg("SolBro", "Target value reached, exiting HFB loop");
-    mustContinue = false;
+    state.totalEnergy = ene;
+    state.converged = true;
+
+    status = Solver::CONVERGED;
+    DBG_RETURN(status);
   }
 
-  if (value > 1e20)
+  if (fabs(value) > 1e20)
   {
     Tools::mesg("SolBro", "Convergence is too high, exiting HFB loop");
-    mustContinue = false;
+    status = Solver::DIVERGED;
+    DBG_RETURN(status);
+  }
+
+  if (fabs(ene) > 1e16)
+  {
+    Tools::mesg("SolBro", "Energy is too high, exiting HFB loop");
+    status = Solver::DIVERGED;
+    DBG_RETURN(status);
   }
 
   state.calculationLength = Tools::clock() - startTime;
-
-  if (!mustContinue)
-  {
-    bestEne = 0.0;
-
-    if (localNbIter >= 0)
-    {
-      if ((value <= cvgTarget) && (fabs(ene) < 1e6))
-      {
-        bestEne = ene;
-        converged = true;
-      }
-    }
-
-    state.nbIter = nbIter;
-
-    DBG_RETURN(false);
-  }
 
   //============================================================================
 
@@ -343,10 +338,7 @@ bool SolverHFBBroyden::nextIter()
     }
   }
 
-  nbIter++;
-  localNbIter++;
-
-  DBG_RETURN(true);
+  DBG_RETURN(status);
 }
 
 //==============================================================================
@@ -465,13 +457,13 @@ void SolverHFBBroyden::calc()
   //===== HFB LOOP START =====
   //==========================
 
-  while (nextIter());
+  while (nextIter() == Solver::ITERATING);
 
   //========================
   //===== HFB LOOP END =====
   //========================
 
-  if (converged)
+  if (status == Solver::CONVERGED)
     Tools::mesg("SolBro", PF("iter: %3d, ene: %9.3f MeV", nbIter + 1, bestEne));
   else
     Tools::mesg("SolBro", PF("iter: %3d, NOT CONVERGED", nbIter + 1));
@@ -1094,11 +1086,12 @@ const std::string SolverHFBBroyden::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"bogoSt", state.info(true)},
+      {"state.", state.info(true)},
       {"basis ", state.basis.info(true)},
       {"interaction", interaction.info(true)},
       {"momen.", multipoleOperators.info(true)},
       {"mixing", mixing.info(true)},
+      {"status", Solver::statusStr[status]},
       {"block.", Tools::infoStr((state.blockedQP(NEUTRON) > -1) ||
                                 (state.blockedQP(PROTON ) > -1))},
     }, true);
@@ -1118,11 +1111,12 @@ const std::string SolverHFBBroyden::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"SolverHFBBroyden", ""},
-      {"bogoSt", state.info(true)},
+      {"state.", state.info(true)},
       {"basis ", state.basis.info(true)},
       {"interaction", interaction.info(true)},
       {"momen.", multipoleOperators.info(true)},
       {"mixing", mixing.info(true)},
+      {"status", Solver::statusStr[status]},
       {"maxIt.", Tools::infoStr(maxIter)},
       {"target", Tools::infoStr(cvgTarget)},
       {"maxItL", Tools::infoStr(lambdaIterMax)},

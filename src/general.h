@@ -73,6 +73,9 @@ public:
 
   /// SKILL level (related to compilation optimization options) of the HFB3 library.
   std::string skill = SKILL;
+
+  /// Flag to display the compatibility warning once.
+  bool compatWarningDisplayed = false;
 };
 
 #endif // GENERAL_H

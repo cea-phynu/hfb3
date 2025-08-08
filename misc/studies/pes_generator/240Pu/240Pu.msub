@@ -1,0 +1,26 @@
+#!/bin/bash
+#MSUB -r 240Pu      # Request name
+#MSUB -c 128        # Number of threads per MPI process
+#MSUB -n 1          # Number of MPI processes
+#MSUB -T 86400      # Elapsed time limit in seconds
+#MSUB -q milan-bxi  # Partition name
+
+set -x
+cd ${BRIDGE_MSUB_PWD}
+
+# path to the HFB3 project (used only for list of modules to load)
+HFB3=/ccc/scratch/cont001/ocre/dubrayn/codes/hfb3
+
+# path to a Python venv containing the HFB3 bindings and some dependencies
+VENV=/ccc/scratch/cont001/ocre/dubrayn/venv
+
+# working directory
+DIR="$HFB3"/misc/study/pes_generator/240Pu/
+
+cd $DIR
+source $HFB3/misc/modules/modules.sh
+source $VENV/bin/activate
+
+python3 -u ../pes_gen.py 240Pu.hfb3 -1.0 5.0 0.01 2 11 1.0 128 &
+
+wait

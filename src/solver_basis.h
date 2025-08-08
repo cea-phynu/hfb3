@@ -44,14 +44,6 @@ class DataTree;
 class SolverBasis : public Solver
 {
 public:
-  enum
-  {
-    FAIL,
-    ITERMAX,
-    DETMAX,
-    CONV,
-    FAILEDINIT,
-  };
 
   explicit SolverBasis(const std::string &filename);                   // #TEST#
   explicit SolverBasis(const DataTree &, const State &);               // #TEST#
@@ -60,20 +52,11 @@ public:
   //============================================================================
 
   void init(void);                                                     // #TEST#
-  bool nextIter(void);                                                 // #TEST#
+  INT nextIter(void);                                                  // #TEST#
   void finalize(void);                                                 // #TEST#
-
   bool calcHFB(const arma::vec &, const std::string &label = "");      // #TEST#
-
   const std::string info(bool isShort = USE_SHORT_INFO) const;         // #TEST#
-
   const std::string getHistTable(void) const;                          // #TEST#
-
-  static State calcSingleHFB(const DataTree &,                         // #TEST#
-                             const State &,
-                             INT maxIterTotal = 2000,
-                             bool quiet = false,
-                             bool _plotDensities = false);
 
   //============================================================================
   //============================================================================

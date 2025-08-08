@@ -17,6 +17,7 @@ import time
 import logging
 import psutil
 import gzip
+import shutil
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -63,11 +64,7 @@ def worker(workDir, resultsQueue, dataTree, beta2, fromMD5):
     dataTree.setD("constraints/beta2t", beta2)
     dataTree.setB("action/saveResultFiles", False)
     action = hfb3.Action(dataTree)
-
-    if fromMD5:
-        action.calcHFB()
-    else:
-        action.calcWSHFB()
+    action.calcHFB()
 
     content = hfb3.dataTreeToBytes(action.state.getDataTree())
     md5sum = hashlib.md5(content).hexdigest()
@@ -223,6 +220,7 @@ class Pes:
                     self.points[id]["totalEnergy"] = totalEnergy
                     logging.debug(f"{self.name}: update {id}({beta2}): {oldEnergy} -> {totalEnergy} [{md5sum}]")
                     self.printCsv(f"result_{self.plotId:06d}.csv")
+                    shutil.copyfile(self.workDir + "/" + f"result_{self.plotId:06d}.csv", self.workDir + "/" + "result.csv")
                     self.plotId += 1
 
                 newResults = True
@@ -236,8 +234,12 @@ class Pes:
 
                 launchedAny = False
                 launchedAny |= self.propag(0)  # initial mesh
+                launchedAny |= self.propag(8)
+                launchedAny |= self.propag(-8)
                 launchedAny |= self.propag(4)
                 launchedAny |= self.propag(-4)
+                launchedAny |= self.propag(2)
+                launchedAny |= self.propag(-2)
                 launchedAny |= self.propag(1)
                 launchedAny |= self.propag(-1)
 
@@ -259,7 +261,7 @@ class Pes:
             for id in range(0, len(self.beta2) + step, -step):
                 launchedAny |= self.launch(id - step, id)
         else:
-            for id in range(0, len(self.beta2), 32):
+            for id in range(0, len(self.beta2), 8):
                 launchedAny |= self.launch(None, id)
 
         return launchedAny

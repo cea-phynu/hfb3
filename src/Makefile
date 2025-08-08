@@ -29,6 +29,7 @@ OBJ_DIR=.objs
 MAIN_OBJECT=$(OBJ_DIR)/main.o
 
 LIB_OBJECTS=$(OBJ_DIR)/action.o                       \
+            $(OBJ_DIR)/solver_alternator.o                   \
             $(OBJ_DIR)/axis.o                         \
             $(OBJ_DIR)/base64.o                       \
             $(OBJ_DIR)/basis.o                        \

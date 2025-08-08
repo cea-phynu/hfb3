@@ -6,9 +6,10 @@
 # ==============================================================================
 
 
-import pickle
-import numpy as np
+import sys
 import logging
+import hfb3
+import numpy as np
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
@@ -17,39 +18,31 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s.%(msecs)03d [%(leve
 # ==============================================================================
 
 
-def genCsv(path, beta2min, beta2max, beta2step):
-    pickleFile = path + "/checkpoint.pickle"
-    try:
-        data = pickle.load(open(pickleFile, "rb"))
-        points, history, plotId = data
+def process(fileName):
 
-        nbPoints = 0
-        for p in points:
-            if p["md5sum"]:
-                nbPoints += 1
+    logging.info(f"{fileName}")
 
-        logging.info(f"found checkpoint ({len(history)} hist. {nbPoints} points)")
+    d = hfb3.DataTree.getDefault() + hfb3.DataTree(fileName)
+    s = hfb3.State(d)
+    multipoleOperators = hfb3.MultipoleOperators(s)
+    s.calcUVFromRhoKappa(d)
+    # a = hfb3.Action(d)
+    # a.calcObservables()
 
-    except Exception:
-        return
-
-    beta2   = [round(float(beta2), 2) for beta2 in np.arange(beta2min, beta2max + .001, beta2step)]
-
-    # find minimum energy
-    eneMin = 1e99
-    for id in range(len(points)):
-        if points[id]['totalEnergy'] < eneMin and abs(beta2[id]) < 0.55:
-            eneMin = points[id]['totalEnergy']
-
-    # generate .csv file
-    path = path + "_normalized.csv"
-    logging.info(f"saving in {path}")
-
-    with open(path, "w+") as fp:
-        fp.write("beta2,Ehfb,Ehfb normalized\n")
-        for id in range(len(points)):
-            if points[id]["md5sum"]:
-                fp.write(f"{beta2[id]},{points[id]['totalEnergy']},{points[id]['totalEnergy'] - eneMin}\n")
+    coords = np.array((2,), dtype=np.int32  , order='F')
+    s.calcInertia(coords)
+    result = {}
+    result["beta2"]       = multipoleOperators.beta[hfb3.TOTAL]
+    result["q20"]         = multipoleOperators.qlm[2, hfb3.TOTAL]
+    result["q30"]         = multipoleOperators.qlm[3, hfb3.TOTAL]
+    result["energy"]      = s.totalEnergy
+    result["converged"]   = 1 if s.converged else 0
+    result["zpeATDHF00"]  = s.zpeATDHF[0, 0]
+    result["massATDHF00"] = s.massATDHF[0, 0]
+    result["zpeGCM"]      = s.zpeGCM[0, 0]
+    result["massGCM"]     = s.massGCM[0, 0]
+    # result.append(fileName)
+    return result
 
 # ==============================================================================
 # ==============================================================================
@@ -58,12 +51,41 @@ def genCsv(path, beta2min, beta2max, beta2step):
 
 if __name__ == "__main__":
 
-    import sys
-    if len(sys.argv) < 4:
-        print(f"Usage: {sys.argv[0]} path beta2min beta2max beta2step")
-        sys.exit(0)
+    from multiprocessing import Pool
 
-    beta2min = float(sys.argv[2])
-    beta2max = float(sys.argv[3])
-    beta2step = float(sys.argv[4])
-    genCsv(sys.argv[1], beta2min, beta2max, beta2step)
+    path = "."
+
+    if len(sys.argv) > 1:
+        files = sys.argv[1:]
+
+    hfb3.cvar.msgToOut = (hfb3.MSG_ERROR,)
+
+    p = Pool(11)
+    results = p.map(process, files)
+
+    final = {}
+
+    columnNames = []
+    for r in results:
+        beta2 = round(r["beta2"], 3)
+        if r["converged"] == 0:
+            continue
+        if beta2 not in final:
+            final[beta2] = r
+        if r["energy"] < final[beta2]["energy"]:
+            final[beta2] = r
+        columnNames = [c for c in r.keys()]
+
+    sortedResults = sorted(final.values(), key=lambda v: v["beta2"])
+
+    print(",".join(columnNames))
+
+    for r in sortedResults:
+        ifirst = True
+        for f in columnNames:
+            if ifirst:
+                ifirst = False
+            else:
+                print(",", end='')
+            print(f"{r[f]}", end='')
+        print("")

@@ -2,19 +2,17 @@
 
 # Example of an HFB calculation for a deformed 240Pu nucleus.
 
-action ws_hfb
+action hfb
 
 [action]
 basisOptimization True
 jobName           240Pu_deformed
 
+[solver]
+alternator/scheme WB
+
 [interaction]
 name              D1S
-
-[solver]
-broyden/maxIter   500
-gradient/maxIter  20
-basis/maxIter     50
 
 [basis]
 nOscil            11

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 
+
+import pandas as pd
 from bokeh.plotting import figure, show
-from bokeh.models import HoverTool
-from bokeh.palettes import Category10_10
-import csv
+from bokeh.models import CustomJS, HoverTool, ColumnDataSource
+from bokeh.models.widgets import Select
+from bokeh.layouts import row, column
+# from bokeh.layouts import gridplot
+from bokeh.palettes import Category10
 import sys
 
 # ==============================================================================
@@ -11,53 +15,94 @@ import sys
 # ==============================================================================
 
 
-def main():
-    if len(sys.argv) < 2:
-        print(f"Usage: {sys.argv[0]} file.csv")
-        sys.exit(-1)
+def create_plot(dataFrames, titles):
 
-    files = sys.argv[1:]
+    sources = [ColumnDataSource(df) for df in dataFrames]
 
-    curves = []
+    render_sources = [ColumnDataSource({"x": df[df.columns[0]],
+                                        "y": df[df.columns[1]],
+                                        "f": [titles[i]] * len(df),
+                                        }) for i, df in enumerate(dataFrames)]
 
-    for f in files:
-        with open(f, newline='') as csvfile:
-            data = csv.reader(csvfile, delimiter=',')
-            x = []
-            y = []
-            for d in data:
-                x.append(float(d[0]))
-                y.append(float(d[1]))
-            curves.append([f, x, y])
+    tools = "crosshair,pan,wheel_zoom,box_zoom,reset,hover"
 
-    # Adding the plot
-    p = figure(title='Main Title',
-               x_axis_label='x',
-               y_axis_label='y'
+    colors = Category10[len(dataFrames)]
+
+    f = figure(tools=tools,
+               title='',
+               x_axis_label=dataFrames[0].columns[0],
+               y_axis_label=dataFrames[0].columns[1],
+               sizing_mode="stretch_both",
                )
 
-    # Rendering the graph
-    color = iter(Category10_10)
-    for c in curves:
-        line = p.line(c[1], c[2],
-                      legend_label=c[0],
-                      line_width=1.5,
-                      color=next(color))
-        # p.circle(c[1], c[2])
+    f.select_one(HoverTool).tooltips = [('f', '@f'), ('x', '$x'), ('y', '$y')]
 
-    p.tools.append(HoverTool(tooltips=[('y', '@y'), ('x', '@x')],
-                             renderers=[line], mode='vline'))
+    for i, rs in enumerate(render_sources):
+        f.scatter(source=rs, x="x", y="y", color=colors[i], line_width=1, legend_label=titles[i])
 
-    p.legend.click_policy = "hide"
+    f.legend.location = "top_right"
+    f.legend.click_policy="hide"
 
-    # Display the results
-    # show(row(p, sizing_mode='stretch_both'))
-    show(p)
+    columnNames = list(dataFrames[0].columns)
+
+    select0 = Select(title="X axis:", options=columnNames, value=columnNames[0])
+    select1 = Select(title="Y axis:", options=columnNames, value=columnNames[1])
+
+    jsArgs = dict(
+        render_sources=render_sources,
+        sources=sources,
+        x_selector=select0,
+        y_selector=select1,
+        xaxis=f.xaxis,
+        yaxis=f.yaxis,)
+
+    jsCode = """
+    // Extract what we want to color by from selector
+    // let colorby = colorby_selector.value;
+
+    // View of the colors for convenience
+    // let colors = render_sources[0].data['color'];
+
+    // Convenient to have the number of data points
+    // let n = colors.length;
+
+    // New data
+    for (var i = 0; i < render_sources.length; i++)
+    {
+      render_sources[i].data['x'] = sources[i].data[x_selector.value];
+      render_sources[i].data['y'] = sources[i].data[y_selector.value];
+    }
+
+    console.log(x_selector.value, y_selector.value)
+
+    // Update axis labels to reflect what was selected
+    xaxis[0].axis_label = x_selector.value;
+    yaxis[0].axis_label = y_selector.value;
+
+    for (var i = 0; i < render_sources.length; i++)
+    {
+      render_sources[i].change.emit();
+    }
+    """
+
+    select0.js_on_change("value", CustomJS(code=jsCode, args=jsArgs))
+    select1.js_on_change("value", CustomJS(code=jsCode, args=jsArgs))
+
+    # layout = row(
+    #     f,
+    #     Spacer(width=15),
+    #     column( select0, Spacer(height=15), select1, Spacer(height=15),))
+
+    # show(row(column(select0, select1, height=100, width=100, sizing_mode="fixed"), f), sizing_mode='stretch_width')
+    # show(gridplot([row([select0, select1], height=100, width=100, sizing_mode="fixed"), f], ncols=1, sizing_mode='stretch_both'))
+    show(row(column(select0, select1, width=100), f, sizing_mode="stretch_both"))
 
 # ==============================================================================
 # ==============================================================================
 # ==============================================================================
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == "__main__":
+    fileNames = sys.argv[1:]
+    datas = [pd.read_csv(f) for f in fileNames]
+    create_plot(datas, fileNames)

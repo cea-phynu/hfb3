@@ -72,34 +72,34 @@ def test_energy_contributions():
     # print(f'{interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.PAIRING )}')
     # print(f'{interaction("rearrangement"   ).energy(hfb3.PROTON , hfb3.Field.DIRECT  )}')
 
-    assert abs(interaction("kinetic"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 370.7063672673921     ) < err
+    assert abs(interaction("kinetic"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 370.7063781241833     ) < err
     assert abs(interaction("coulomb (Slater)").energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 0.0                   ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -1007.1241532035914   ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -44.992952058861974   ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - 458.1643288145652     ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - -529.4984207720548    ) < err
-    assert abs(interaction("spin-orbit"      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -7.154443599388073    ) < err
-    assert abs(interaction("density"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 557.0563434138456     ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 4.629347682559987     ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 0.20174258670395293   ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -1007.1241737151211   ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -44.99295410086126    ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - 458.1643379762423     ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - -529.4984300020753    ) < err
+    assert abs(interaction("spin-orbit"      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -7.154444942665547    ) < err
+    assert abs(interaction("density"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 557.0563576122474     ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 4.629347801175354     ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 0.2017425947668461    ) < err
     assert abs(interaction("coulomb (Slater)").energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - 0.0                   ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 4.329007759557796     ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - -8.604895883359408    ) < err
-    assert abs(interaction("rearrangement"   ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 96.94064120019276     ) < err
-    assert abs(interaction("kinetic"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 310.3215733441709     ) < err
-    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 79.17077057548208     ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1014.983196657679    ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -21.069868044009247   ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - 451.1226385016961     ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -516.2029836301575    ) < err
-    assert abs(interaction("spin-orbit"      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1.6851980874629398   ) < err
-    assert abs(interaction("density"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 557.0563454575162     ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 3.6782755305554016    ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 1.9522566366369246e-13) < err
-    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -7.449355269633595    ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 3.799943157779036e-12 ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - -7.681252310532097e-12) < err
-    assert abs(interaction("rearrangement"   ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 88.74405645476861     ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 4.3290080492855925    ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - -8.604896438113661    ) < err
+    assert abs(interaction("rearrangement"   ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 96.94064401135599     ) < err
+    assert abs(interaction("kinetic"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 310.3215775897014     ) < err
+    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 79.1707708857875      ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1014.9832180212761   ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -21.069867520981752   ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - 451.12264690139205    ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -516.2029914482013    ) < err
+    assert abs(interaction("spin-orbit"      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1.6851985153994653   ) < err
+    assert abs(interaction("density"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 557.0563596559182     ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 3.678275542521838     ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 1.0979146908949613e-14) < err
+    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -7.449355308595433    ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 2.54976917753385e-13  ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - -5.16531165995875e-13 ) < err
+    assert abs(interaction("rearrangement"   ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 88.74405837632038     ) < err
 
 # ==============================================================================
 # ==============================================================================
@@ -372,6 +372,10 @@ def test_multi():
     multiIC[(2, -6, 87)] = np.zeros((4, 2, 3), dtype=np.int32, order="F")
     multiIC[(2, -2)] = np.zeros((0, 0, 0), dtype=np.int32, order="F")
     assert multiIC.size() == 2
+
+    # TODO: make the following work
+    # assert multiIC.contains((2, -2))
+    # assert not multiIC.contains((5, 2))
 
     multiUC = hfb3.MultiUC()
     multiUC[(2, -6, 87)] = np.zeros((4, 2, 3), dtype=np.uint64, order="F")

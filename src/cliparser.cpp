@@ -136,7 +136,7 @@ void CliParser::help(void)
   std::cout << std::endl;
   std::cout << "Examples:" << std::endl;
   std::cout << "  * launch an HFB calculation using the file 'examples/16O_groundstate.hfb3' with a constraint on <Q20> (30fm) and 50 HFB iterations max.:" << std::endl;
-  std::cout << "  bin/hfb3 examples/16O_groundstate.hfb3 '{constraints/q20t:30.0,solver/alternate/maxIter:50}'" << std::endl;
+  std::cout << "  bin/hfb3 examples/16O_groundstate.hfb3 '{constraints/q20t:30.0,solver/alternator/maxIter:50}'" << std::endl;
   Tools::end(0);
 }
 

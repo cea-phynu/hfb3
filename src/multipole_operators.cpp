@@ -52,8 +52,9 @@ MultipoleOperators::MultipoleOperators(State _state) : state(_state)
 
   Basis &basis = state.basis;
 
-  if (general.compatibility != General::COMPAT_NONE)
+  if ((general.compatibility != General::COMPAT_NONE) && (!general.compatWarningDisplayed))
   {
+    general.compatWarningDisplayed = true;
     Tools::warning("Using non-standard Multipole Moment Operators ! (general.compatibility mode set)");
   }
 

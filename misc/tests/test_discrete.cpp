@@ -46,10 +46,16 @@ TEST(Discrete, getLocalXZ)
 
     double precision = 1e-12;
 
-    ASSERT_NEAR(densn(0,  0), 6.030255e-10, precision);
-    ASSERT_NEAR(densn(5, 17), 3.970773e-06, precision);
-    ASSERT_NEAR(densp(0,  0), 1.076742e-10, precision);
-    ASSERT_NEAR(densp(5, 17), 1.066794e-06, precision);
+    // ALL_OUT;
+    // INFO("%.6e", densn(0,  0));
+    // INFO("%.6e", densn(5, 17));
+    // INFO("%.6e", densp(0,  0));
+    // INFO("%.6e", densp(5, 17));
+
+    ASSERT_NEAR(densn(0,  0), 6.030257e-10, precision);
+    ASSERT_NEAR(densn(5, 17), 3.970771e-06, precision);
+    ASSERT_NEAR(densp(0,  0), 1.076740e-10, precision);
+    ASSERT_NEAR(densp(5, 17), 1.066791e-06, precision);
   }
 
   {
@@ -67,10 +73,10 @@ TEST(Discrete, getLocalXZ)
     // INFO("%.6e", densp(0,  0));
     // INFO("%.6e", densp(5, 17));
 
-    ASSERT_NEAR(densn(0,  0), 1.172237e-07, precision);
-    ASSERT_NEAR(densn(5, 17), 3.358346e-06, precision);
-    ASSERT_NEAR(densp(0,  0), 1.786819e-08, precision);
-    ASSERT_NEAR(densp(5, 17), 5.842598e-07, precision);
+    ASSERT_NEAR(densn(0,  0), 1.172235e-07, precision);
+    ASSERT_NEAR(densn(5, 17), 3.358336e-06, precision);
+    ASSERT_NEAR(densp(0,  0), 1.786813e-08, precision);
+    ASSERT_NEAR(densp(5, 17), 5.842514e-07, precision);
   }
 }
 

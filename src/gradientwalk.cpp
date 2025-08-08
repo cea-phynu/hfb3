@@ -135,7 +135,7 @@ arma::vec GradientWalk::getEval(void)
     if (direction != candidateDirection)
     {
       direction = candidateDirection;
-      Tools::mesg("GradWa", PF_RED("New direction: " + Tools::ivecToStr(direction)));
+      // Tools::mesg("GradWa", PF_RED("New direction: " + Tools::ivecToStr(direction)));
     }
 
     if (nEval > 1)

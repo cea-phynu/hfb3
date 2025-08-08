@@ -49,7 +49,7 @@ public:
   //============================================================================
 
   void init(void);                                                     // #TEST#
-  bool nextIter(void);                                                 // #TEST#
+  INT nextIter(void);                                                  // #TEST#
 
   //============================================================================
   //============================================================================
@@ -89,9 +89,6 @@ public:
 
   /// Activate to enable the calculation of fragment properties at each HFB iteration.
   bool fragInLoop = false;
-
-  /// Convergence value under which we switch to the Broyden Mixing HFB solver.
-  double cvgTargetSwitchToBroyden = 1e-02;
 
   //============================================================================
   //============================================================================

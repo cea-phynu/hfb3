@@ -2,8 +2,6 @@
 
 # Example of an HFB calculation for the ground state of a 16O nucleus.
 
-action ws_hfb
-
 [action]
 basisOptimization True
 jobName           16O_groundstate
@@ -11,15 +9,10 @@ jobName           16O_groundstate
 [interaction]
 name              D1S
 
-[solver]
-broyden/maxIter   500
-gradient/maxIter  20
-basis/maxIter     50
-
 [basis]
 nOscil            7
 d_0               0.0
-b_r               1.6
+b_r               1.65
 b_z               1.7
 g_q               1.0
 

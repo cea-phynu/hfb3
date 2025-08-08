@@ -1,0 +1,26 @@
+#!HFB3!#
+
+# Example of an HFB calculation for the ground state of a 240Pu nucleus.
+
+action hfb
+
+[action]
+basisOptimization True
+jobName           236U
+
+[interaction]
+name              D1S
+
+[basis]
+nOscil            11
+d_0               10.5
+b_r               2.0
+b_z               2.6
+g_q               1.3
+
+[constraints]
+q10t              0.0
+
+[system]
+nProt             92
+nNeut             144

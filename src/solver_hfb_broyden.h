@@ -51,7 +51,7 @@ public:
 
   void calc(void);                                                     // #TEST#
   void init(void);                                                     // #TEST#
-  bool nextIter(void);                                                 // #TEST#
+  INT nextIter(void);                                                 // #TEST#
 
   bool singleHFBiter(void);                                            // #TEST#
   const std::string info(bool isShort = USE_SHORT_INFO) const;         // #TEST#
@@ -123,9 +123,6 @@ public:
   //============================================================================
 
 private:
-
-  /// Local number of iterations.
-  int localNbIter = 0;
 
   /// Next Rho matrices.
   Multi<arma::mat> rhoNext;

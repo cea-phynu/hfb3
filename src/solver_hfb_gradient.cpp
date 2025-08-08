@@ -31,12 +31,11 @@
 
 std::list<KeyStruct > SolverHFBGradient::validKeys =
   {
-    { "solver/gradient/cvgTarget"               , "Convergence target value"                                                  , "1e-6" , "D" },
-    { "solver/gradient/maxIter"                 , "Maximum number of iterations"                                              , "20"   , "I" },
-    { "solver/gradient/cvgTargetLambda"         , "Convergence target value for lambda-iterations"                            , "1e-5" , "D" },
-    { "solver/gradient/maxIterLambda"           , "Maximum number of iterations for lambda-iterations"                        , "20"   , "I" },
-    { "solver/gradient/randomSeed"              , "Seed used for the generation of initial random U and V matrices"           , "1337" , "I" },
-    { "solver/gradient/cvgTargetSwitchToBroyden", "Convergence value under which we switch to the Broyden Mixing HFB solver"  , "1e-3" , "D" },
+    { "solver/gradient/cvgTarget"               , "Convergence target value"                                                  , "1e-1", "D" },
+    { "solver/gradient/maxIter"                 , "Maximum number of iterations"                                              , "500" , "I" },
+    { "solver/gradient/cvgTargetLambda"         , "Convergence target value for lambda-iterations"                            , "1e-5", "D" },
+    { "solver/gradient/maxIterLambda"           , "Maximum number of iterations for lambda-iterations"                        , "20"  , "I" },
+    { "solver/gradient/randomSeed"              , "Seed used for the generation of initial random U and V matrices"           , "1337", "I" },
   };
 
 //==============================================================================
@@ -89,7 +88,6 @@ SolverHFBGradient::SolverHFBGradient(const DataTree &dataTree, State _state) : S
   dataTree.get(lambdaMax,                "solver/gradient/lambdaMax",                true);
   dataTree.get(lambdaIterMax,            "solver/gradient/lambdaIterMax",            true);
   dataTree.get(randomSeed,               "solver/gradient/randomSeed",               true);
-  dataTree.get(cvgTargetSwitchToBroyden, "solver/gradient/cvgTargetSwitchToBroyden", true);
 
   Tools::setSeed(randomSeed);
 
@@ -109,9 +107,7 @@ void SolverHFBGradient::init()
 
   startTime = Tools::clock();
 
-  converged = false;
-
-  localNbIter = 0;
+  nbIter = 0;
 
   if (maxIter < 1) maxIter = 1;
 
@@ -124,8 +120,8 @@ void SolverHFBGradient::init()
   // Initialize objects.
   if (!state.empty())
   {
-    if (nbIter == 0)
-      Tools::mesg("SolGra", "starting from previous rho and kappa");
+    // if (nbIter == 0)
+    //   Tools::mesg("SolGra", "starting from previous rho and kappa");
 
     state.calcUVFromRhoKappa(dataTree);
 
@@ -232,7 +228,7 @@ void SolverHFBGradient::init()
 /** Prepare and perform the next HFB iteration.
  */
 
-bool SolverHFBGradient::nextIter()
+INT SolverHFBGradient::nextIter()
 {
   DBG_ENTER;
 
@@ -335,30 +331,37 @@ bool SolverHFBGradient::nextIter()
 
   //============================================================================
 
-  // Continue or break ?
-  bool mustContinue = true;
+  nbIter++;
+  state.nbIter = nbIter;
+  status = Solver::ITERATING;
 
-  if (localNbIter + 1 >= maxIter)
+  if (nbIter >= maxIter)
   {
     Tools::mesg("SolGra", "Maximum number of iterations reached, exiting HFB loop");
-    mustContinue = false;
+    status = Solver::MAXITER;
   }
 
-  if ((value < cvgTarget) && (localNbIter > 1))
+  if ((value < cvgTarget) && (nbIter > 1))
   {
     Tools::mesg("SolGra", "Target value reached, exiting HFB loop");
-    mustContinue = false;
+    status = Solver::CONVERGED;
   }
 
-  if (value > 1e20)
+  if (fabs(value) > 1e20)
   {
     Tools::mesg("SolGra", "Convergence is too high, exiting HFB loop");
-    mustContinue = false;
+    status = Solver::DIVERGED;
+  }
+
+  if (fabs(ene) > 1e16)
+  {
+    Tools::mesg("SolGra", "Energy is too high, exiting HFB loop");
+    status = Solver::DIVERGED;
   }
 
   state.calculationLength = Tools::clock() - startTime;
 
-  if (!mustContinue)
+  if (status != Solver::ITERATING)
   {
     // Last HFB iteration
     finalize(G, 1.0);
@@ -368,25 +371,24 @@ bool SolverHFBGradient::nextIter()
 
     bestEne = 0.0;
 
-    if (localNbIter >= 0)
+    if (nbIter >= 0)
     {
       if ((value <= cvgTarget) && (fabs(ene) < 1e6))
       {
         bestEne = ene;
-        converged  = true;
+        status = Solver::CONVERGED;
+        state.converged = true;
+        state.totalEnergy = bestEne;
       }
     }
     state.nbIter = nbIter;
 
-    DBG_RETURN(false);
+    DBG_RETURN(status);
   }
 
   //============================================================================
 
-  nbIter++;
-  localNbIter++;
-
-  DBG_RETURN(true);
+  DBG_RETURN(status);
 }
 
 //==============================================================================
@@ -817,7 +819,7 @@ arma::mat SolverHFBGradient::calcConstraints(UINT iso, UVEC &idxHO, arma::mat &M
 
     if ((c.second.iso == iso) || (c.second.iso == TOTAL))
     {
-      if (c.second.itermax < 0 || localNbIter < c.second.itermax)
+      if (c.second.itermax < 0 || nbIter < c.second.itermax)
       {
         if (c.second.gender == Constraint::MM) e -= c.second.lambda * M.t() * multipoleOperators.ql0(c.second.lm)(idxHO, idxHO) * M;
 
@@ -938,7 +940,7 @@ void SolverHFBGradient::calcConstraintsQP(Multi<arma::mat> &U, Multi<arma::mat> 
 
   for (auto &c : state.constraints)
   {
-    if (c.second.itermax > 0 && c.second.itermax < localNbIter) continue;
+    if (c.second.itermax > 0 && c.second.itermax < nbIter) continue;
 
     if (c.second.itermax == 0) continue;
 
@@ -1148,10 +1150,11 @@ const std::string SolverHFBGradient::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"bogoSt", state.info(true)},
+      {"state.", state.info(true)},
       {"basis ", state.basis.info(true)},
       {"interaction", interaction.info(true)},
       {"multipoleOp.", multipoleOperators.info(true)},
+      {"status", Solver::statusStr[status]},
       //  {"geomOp.", geometricalOperators.info(true)},
     },
     true);
@@ -1161,10 +1164,11 @@ const std::string SolverHFBGradient::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"SolverHFBGradient", ""},
-      {"bogoSt", state.info(true)},
+      {"state.", state.info(true)},
       {"basis ", state.basis.info(true)},
       {"interaction", interaction.info(true)},
       {"multipoleOp.", multipoleOperators.info(true)},
+      {"status", Solver::statusStr[status]},
       // {"geomOp.", geometricalOperators.info(true)},
       {"maxIt.", Tools::infoStr(maxIter)},
       {"target", Tools::infoStr(cvgTarget)},

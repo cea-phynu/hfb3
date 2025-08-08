@@ -109,19 +109,21 @@ State::State(const DataTree &dataTree) :
 
   if ((multiRho.size() > 2) && (multiKappa.size() > 2))
   {
+    Basis stateBasis = Basis(dataTree, "state/");
+
     for (INT iso: {NEUTRON, PROTON})
     {
-      rho(iso) = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
-      kappa(iso) = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
+      rho(iso) = arma::zeros(stateBasis.HOqn.nb, stateBasis.HOqn.nb);
+      kappa(iso) = arma::zeros(stateBasis.HOqn.nb, stateBasis.HOqn.nb);
 
-      for (INT omega = 0; omega < basis.mMax; omega++)
+      for (INT omega = 0; omega < stateBasis.mMax; omega++)
       {
         // INFO("%d %d", iso, omega);
         // Tools::info("multiRho", multiRho(iso, omega));
         // Tools::info("multiKappa", multiKappa(iso, omega));
 
-        rho(  iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega)) = multiRho(iso, omega);
-        kappa(iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega)) = multiKappa(iso, omega);
+        rho(  iso).submat(stateBasis.omegaIndexHO(omega), stateBasis.omegaIndexHO(omega)) = multiRho(iso, omega);
+        kappa(iso).submat(stateBasis.omegaIndexHO(omega), stateBasis.omegaIndexHO(omega)) = multiKappa(iso, omega);
       }
     }
   }
@@ -444,15 +446,27 @@ void State::calcUVFromRhoKappa(const DataTree &dataTree)
 {
   DBG_ENTER;
 
-  if (rho(NEUTRON).empty()) DBG_LEAVE;
-  if (rho(PROTON ).empty()) DBG_LEAVE;
-  if (kappa(NEUTRON).empty()) DBG_LEAVE;
-  if (kappa(PROTON ).empty()) DBG_LEAVE;
-
-  if (!U(NEUTRON).empty()) DBG_LEAVE;
-  if (!U(PROTON ).empty()) DBG_LEAVE;
-  if (!V(NEUTRON).empty()) DBG_LEAVE;
-  if (!V(PROTON ).empty()) DBG_LEAVE;
+#if true
+  // without messages
+  if (rho(NEUTRON  ).empty()) { DBG_LEAVE; };
+  if (rho(PROTON   ).empty()) { DBG_LEAVE; };
+  if (kappa(NEUTRON).empty()) { DBG_LEAVE; };
+  if (kappa(PROTON ).empty()) { DBG_LEAVE; };
+  if (!U(NEUTRON).empty()   ) { DBG_LEAVE; };
+  if (!U(PROTON ).empty()   ) { DBG_LEAVE; };
+  if (!V(NEUTRON).empty()   ) { DBG_LEAVE; };
+  if (!V(PROTON ).empty()   ) { DBG_LEAVE; };
+#else
+  // with messages
+  if (rho(NEUTRON  ).empty()) { Tools::mesg("State.", std::string("rho(NEUTRON)"  ) + " is empty... no U and V calculation"); DBG_LEAVE; };
+  if (rho(PROTON   ).empty()) { Tools::mesg("State.", std::string("rho(PROTON)"   ) + " is empty... no U and V calculation"); DBG_LEAVE; };
+  if (kappa(NEUTRON).empty()) { Tools::mesg("State.", std::string("kappa(NEUTRON)") + " is empty... no U and V calculation"); DBG_LEAVE; };
+  if (kappa(PROTON ).empty()) { Tools::mesg("State.", std::string("kappa(PROTON)" ) + " is empty... no U and V calculation"); DBG_LEAVE; };
+  if (!U(NEUTRON).empty()   ) { Tools::mesg("State.", std::string("U(NEUTRON)") + " is not empty... no U and V calculation"); DBG_LEAVE; };
+  if (!U(PROTON ).empty()   ) { Tools::mesg("State.", std::string("U(PROTON)" ) + " is not empty... no U and V calculation"); DBG_LEAVE; };
+  if (!V(NEUTRON).empty()   ) { Tools::mesg("State.", std::string("V(NEUTRON)") + " is not empty... no U and V calculation"); DBG_LEAVE; };
+  if (!V(PROTON ).empty()   ) { Tools::mesg("State.", std::string("V(PROTON)" ) + " is not empty... no U and V calculation"); DBG_LEAVE; };
+#endif
 
   Tools::mesg("State.", "Updating U and V matrices from rho and kappa matrices");
 
@@ -680,7 +694,7 @@ const std::string State::getNiceInfo(const std::string &what)
 {
   DBG_ENTER;
 
-  std::string state = "";
+  std::string result = "";
 
   std::list<std::string> names;
   std::list<std::string> units;
@@ -690,54 +704,61 @@ const std::string State::getNiceInfo(const std::string &what)
   std::list<std::list<std::string> > valuesMassATDHF;
   std::list<std::list<std::string> > valuesZpeATDHF;
 
-  if ((what == "inertia") && (!metric.empty()))
+  if (what == "inertia")
   {
-    INT ic = 0;
-    for (auto &c : collectiveCoordinates)
+    if (!metric.empty())
     {
-      names.push_back(PF("q%01d0", c));
-      units.push_back(PF("[fm%01d]", c));
+      INT ic = 0;
+      for (auto &c : collectiveCoordinates)
+      {
+        names.push_back(PF("q%01d0", c));
+        units.push_back(PF("[fm%01d]", c));
 
-      std::list<std::string> val;
-      val.push_back(PF("q%01d0 [fm%01d]", c, c));
-      for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", metric(ic, ic2)));
-      valuesMetric.push_back(val);
+        std::list<std::string> val;
+        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", metric(ic, ic2)));
+        valuesMetric.push_back(val);
 
-      val.clear();
-      val.push_back(PF("q%01d0 [fm%01d]", c, c));
-      for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", massGCM(ic, ic2)));
-      valuesMassGCM.push_back(val);
+        val.clear();
+        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", massGCM(ic, ic2)));
+        valuesMassGCM.push_back(val);
 
-      val.clear();
-      val.push_back(PF("q%01d0 [fm%01d]", c, c));
-      for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", zpeGCM(ic, ic2)));
-      valuesZpeGCM.push_back(val);
+        val.clear();
+        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", zpeGCM(ic, ic2)));
+        valuesZpeGCM.push_back(val);
 
-      val.clear();
-      val.push_back(PF("q%01d0 [fm%01d]", c, c));
-      for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", massATDHF(ic, ic2)));
-      valuesMassATDHF.push_back(val);
+        val.clear();
+        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", massATDHF(ic, ic2)));
+        valuesMassATDHF.push_back(val);
 
-      val.clear();
-      val.push_back(PF("q%01d0 [fm%01d]", c, c));
-      for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", zpeATDHF(ic, ic2)));
-      valuesZpeATDHF.push_back(val);
+        val.clear();
+        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", zpeATDHF(ic, ic2)));
+        valuesZpeATDHF.push_back(val);
 
-      ic++;
+        ic++;
+      }
+
+      result += Tools::valueTable("Metric"         , names, units, valuesMetric   ) + "\n";
+      result += Tools::valueTable("Mass GCM"       , names, units, valuesMassGCM  ) + "\n";
+      result += Tools::valueTable("ZPE GCM [MeV]"  , names, units, valuesZpeGCM   ) + "\n";
+      result += Tools::valueTable("Mass ATDHF"     , names, units, valuesMassATDHF) + "\n";
+      result += Tools::valueTable("ZPE ATDHF [MeV]", names, units, valuesZpeATDHF );
     }
-
-    state += Tools::valueTable("Metric"         , names, units, valuesMetric   ) + "\n";
-    state += Tools::valueTable("Mass GCM"       , names, units, valuesMassGCM  ) + "\n";
-    state += Tools::valueTable("ZPE GCM [MeV]"  , names, units, valuesZpeGCM   ) + "\n";
-    state += Tools::valueTable("Mass ATDHF"     , names, units, valuesMassATDHF) + "\n";
-    state += Tools::valueTable("ZPE ATDHF [MeV]", names, units, valuesZpeATDHF );
+    else
+    {
+      result += PF_YELLOW("No inertia (no valid constraints).");
+    }
   }
   else
   {
-    state += info();
+    result += info();
   }
 
-  DBG_RETURN(state);
+  DBG_RETURN(result);
 }
 
 //==============================================================================
@@ -828,11 +849,18 @@ void State::calcInertia(const IVEC &_collectiveCoordinates)
   metric = 0.5 * M1i * M2 * M1i;
 
   //===== GCM prescription =====
+  //    Eq. (95) in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
+  //    Eq. (45) in R. Navarro Perez et al, Comp. Phys. Comm. 220, (2017) 263
   massGCM = 4.0 * metric * M1 * metric;
+  //    Eq. (82) and Eq. (96) in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
+  // != Eq. (41) and Eq. (46) in R. Navarro Perez et al, Comp. Phys. Comm. 220, (2017) 263
   zpeGCM = 0.5 * massGCM.i() * metric;
 
   //===== ATDHF prescription =====
+  // != Eq. (110) in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
+  // != Eq. (48)  in R. Navarro Perez et al, Comp. Phys. Comm. 220, (2017) 263
   massATDHF = M1i * M3 * M1i;
+  // May or may not be used. See discussion p. 28-29 in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
   zpeATDHF = 0.5 * massATDHF.i() * metric;
 
   // Tools::info("M1", M1, true);

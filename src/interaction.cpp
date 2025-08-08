@@ -44,7 +44,7 @@ std::list<KeyStruct > Interaction::validKeys =
     { "interaction/name"              , "Interaction name (use --list-interactions to list them)"              , "D1S", "S" },
     { "interaction/cdm2"              , "Use a 2-body center-of-mass correction field"                         , ""   , "B" },
     { "interaction/central"           , "Include a central field"                                              , ""   , "B" },
-    { "interaction/central/p"         , "Central field: p parameter (width)"                                   , ""   , "V" },
+    { "interaction/central/p"         , "Central field: p parameter"                                           , ""   , "V" },
     { "interaction/central/w"         , "Central field: w parameter"                                           , ""   , "V" },
     { "interaction/central/b"         , "Central field: b parameter"                                           , ""   , "V" },
     { "interaction/central/h"         , "Central field: h parameter"                                           , ""   , "V" },
@@ -56,7 +56,8 @@ std::list<KeyStruct > Interaction::validKeys =
     { "interaction/density/x"         , "Zero-range density-dependent field: x parameter"                      , ""   , "V" },
     { "interaction/density/t"         , "Zero-range density-dependent field: t parameter"                      , ""   , "V" },
     { "interaction/densityFR"         , "Include a finite-range density-dependent field"                       , ""   , "B" },
-    { "interaction/densityFR/p"       , "Finite-range density-dependent field: p parameter (width)"            , ""   , "V" },
+    { "interaction/densityFR/a"       , "Finite-range density-dependent field: a parameter"                    , ""   , "V" },
+    { "interaction/densityFR/p"       , "Finite-range density-dependent field: p parameter"                    , ""   , "V" },
     { "interaction/densityFR/w"       , "Finite-range density-dependent field: w parameter"                    , ""   , "V" },
     { "interaction/densityFR/b"       , "Finite-range density-dependent field: b parameter"                    , ""   , "V" },
     { "interaction/densityFR/h"       , "Finite-range density-dependent field: h parameter"                    , ""   , "V" },
@@ -67,14 +68,17 @@ std::list<KeyStruct > Interaction::validKeys =
     { "interaction/rearrangement/x"   , "Zero-range rearrangement field: x parameter"                          , ""   , "V" },
     { "interaction/rearrangement/t"   , "Zero-range rearrangement field: t parameter"                          , ""   , "V" },
     { "interaction/rearrangementFR"   , "Include a finite-range rearrangement field"                           , ""   , "B" },
-    { "interaction/rearrangementFR/p" , "Finite-range rearrangement field: p parameter (width)"                , ""   , "V" },
+    { "interaction/rearrangementFR/a" , "Finite-range rearrangement field: a parameter"                        , ""   , "V" },
+    { "interaction/rearrangementFR/p" , "Finite-range rearrangement field: p parameter"                        , ""   , "V" },
     { "interaction/rearrangementFR/w" , "Finite-range rearrangement field: w parameter"                        , ""   , "V" },
     { "interaction/rearrangementFR/b" , "Finite-range rearrangement field: b parameter"                        , ""   , "V" },
     { "interaction/rearrangementFR/h" , "Finite-range rearrangement field: h parameter"                        , ""   , "V" },
     { "interaction/rearrangementFR/m" , "Finite-range rearrangement field: m parameter"                        , ""   , "V" },
     { "interaction/spinOrbit"         , "Include a zero-range spin-orbit field"                                , ""   , "B" },
     { "interaction/spinOrbit/wso"     , "Zero-range spin-orbit field: wso parameter"                           , ""   , "V" },
-    { "interaction/spinOrbitFR/wso"   , "Finite-range spin-orbit field: wso parameter"                         , ""   , "V" },
+    { "interaction/spinOrbitFR/p"     , "Finite-range spin-orbit field: p parameter"                           , ""   , "V" },
+    { "interaction/spinOrbitFR/w"     , "Finite-range spin-orbit field: w parameter"                           , ""   , "V" },
+    { "interaction/spinOrbitFR/h"     , "Finite-range spin-orbit field: h parameter"                           , ""   , "V" },
     { "interaction/woodsSaxon"        , "Include a Woods-Saxon field"                                          , ""   , "B" },
   };
 
@@ -805,7 +809,7 @@ rearrangementFR/h   (  377.600)
 rearrangementFR/m   ( -633.220)
 rearrangementFR/a   (    0.33333333333333333)
 spinOrbitFR/p       (    0.200)
-spinOrbitFR/w       (  146.483)
+spinOrbitFR/w       (  145.483)
 spinOrbitFR/h       (   29.634)
 tensorFR/p          (    1.100)
 tensorFR/w          ( -392.544)

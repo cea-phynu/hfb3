@@ -24,6 +24,7 @@
 #include "gradientwalk.h"
 #include "solver_hfb_gradient.h"
 #include "solver_hfb_broyden.h"
+#include "solver_alternator.h"
 #include "basis.h"
 #include "plot.h"
 #include "tools.h"
@@ -41,7 +42,6 @@ std::list<KeyStruct > SolverBasis::validKeys =
     { "solver/basis/sphericalBasis", "Force the use of a spherical basis (b_r = b_z)"       , "false", "B" },
     { "solver/basis/cvgTarget"     , "Convergence target value"                             , "1e-4" , "D" },
     { "solver/basis/maxIter"       , "Maximum number of iterations"                         , "40"   , "I" },
-    { "solver/alternate/maxIter"   , "Maximum number of iterations when alternating solvers", "2000" , "I" },
   };
 
 //==============================================================================
@@ -155,9 +155,11 @@ void SolverBasis::init()
  * Calculate the next iteration.
  */
 
-bool SolverBasis::nextIter()
+INT SolverBasis::nextIter()
 {
   DBG_ENTER;
+
+  status = Solver::ITERATING;
 
   arma::vec next;
   next = minimizer.getEval();
@@ -166,13 +168,11 @@ bool SolverBasis::nextIter()
   {
     Tools::mesg("SolBas", PF_GREEN("no points left to eval => minimum found"));
 
-    converged = true;
-    status = CONV;
+    status = Solver::CONVERGED;
 
     finalize();
 
-    DBG_RETURN(false);
-
+    DBG_RETURN(status);
   }
 
   bool valid;
@@ -180,18 +180,17 @@ bool SolverBasis::nextIter()
   minimizer.addEval(next, -value, valid);
   Tools::mesg("SolBas", getHistTable());
 
+  status = Solver::ITERATING;
+
   nbIter++;
 
   if (nbIter >= maxIter)
   {
     Tools::mesg("SolBas", PF_RED("maximum number of iterations reached (%d)", nbIter));
 
-    converged = false;
-    status = ITERMAX;
+    status = Solver::MAXITER;
 
     finalize();
-
-    DBG_RETURN(false);
   }
 
   double convergence = minimizer.getConvergence();
@@ -200,15 +199,12 @@ bool SolverBasis::nextIter()
   {
     Tools::mesg("SolBas", PF_GREEN("target value reached %e < %e", convergence, cvgTarget));
 
-    converged = true;
-    status = CONV;
+    status = Solver::CONVERGED;
 
     finalize();
-
-    DBG_RETURN(false);
   }
 
-  DBG_RETURN(true);
+  DBG_RETURN(status);
 }
 
 //==============================================================================
@@ -227,193 +223,6 @@ void SolverBasis::finalize(void)
   DBG_LEAVE;
 }
 
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-/** Calculate a Bogoliubov state solution of the HFB equations using SolverHFBGradient and SolverHFBBroyden.
- */
-
-State SolverBasis::calcSingleHFB(const DataTree &_dataTree, const State &_state, INT maxIterTotal, bool quiet, bool _plotDensities)
-{
-  DBG_ENTER;
-
-  double startTime = Tools::clock();
-
-  State result = _state;
-
-  // TODO: find a nice way to share a single instance of Interaction in the following objects ?
-  SolverHFBGradient solverHFBGradient(_dataTree, _state);
-  SolverHFBBroyden  solverHFBBroyden( _dataTree, _state);
-
-  solverHFBGradient.plotDensities = _plotDensities;
-  solverHFBBroyden.plotDensities = _plotDensities;
-
-  solverHFBBroyden.discrete = Discrete(&result.basis, Mesh::regular(-10.0, 0.0, -25.0, 10.0, 0.0, 25.0, 101, 1, 251));
-  solverHFBGradient.discrete = Discrete(&result.basis, Mesh::regular(-10.0, 0.0, -25.0, 10.0, 0.0, 25.0, 101, 1, 251));
-
-  int maxIterGradient = solverHFBGradient.maxIter;
-  int maxIterBroyden = solverHFBBroyden.maxIter;
-
-
-  double cvgTargetSwitch = solverHFBGradient.cvgTargetSwitchToBroyden;
-
-  //============================================================================
-
-  ASSERT((maxIterGradient > 0) || (maxIterBroyden > 0), "at least one of `maxIterGradient` and `maxIterBroyden` must be strictly positive.");
-
-  //============================================================================
-
-  // If no initial state is given, SolverHFBGradient should be used first .
-  if (_state.empty())
-  {
-    if (maxIterGradient <= 0)
-    {
-      Tools::warning("No initial state is given and solver/gradient/maxIter=0 ? Recipe for disaster...");
-    }
-  }
-
-  bool skipFirstGradient = false;
-
-  // If an initial state is given, SolverHFBBroyden should be used first.
-  if (!_state.empty())
-  {
-    if (maxIterBroyden <= 0)
-    {
-      maxIterBroyden = 10;
-      Tools::warning(PF("An initial state is given and solver/broyden/maxIter=0 ? => setting solver/broyden/maxIter to %d.", maxIterBroyden));
-    }
-
-    skipFirstGradient = true;
-    Tools::mesg("SolBas", "An initial state is given => starting with SolverHFBBroyden.");
-  }
-
-  //============================================================================
-
-  if (skipFirstGradient) Tools::mesg("SolBas", PF("Solver scheme: (%d BROY, %d GRAD)", maxIterBroyden , maxIterGradient));
-  else                   Tools::mesg("SolBas", PF("Solver scheme: (%d GRAD, %d BROY)", maxIterGradient, maxIterBroyden));
-
-  //============================================================================
-
-  if (!quiet)
-  {
-    if (maxIterBroyden > 0)
-    {
-      Tools::mesg("SolBas", solverHFBBroyden.info());
-    }
-    else
-    {
-      Tools::mesg("SolBas", solverHFBGradient.info());
-    }
-  }
-
-  //============================================================================
-
-  INT nbIter = 0;
-  INT it = 0;
-  bool working = true;
-  bool converged = false;
-  double eneTot = 1e99;
-
-  Interaction *interaction;
-
-  while (working)
-  {
-    if ((it > 0) || !skipFirstGradient)
-    {
-      if (working && (maxIterGradient > 0))
-      {
-        solverHFBGradient.state = result;
-        solverHFBGradient.nbIter = nbIter;
-        solverHFBGradient.init();
-        it = 0;
-
-        while (working && (it < maxIterGradient) && (solverHFBGradient.value > cvgTargetSwitch))
-        {
-          working = solverHFBGradient.nextIter();
-          nbIter++;
-
-          if (nbIter >= maxIterTotal) working = false;
-
-          if (!working)
-          {
-            interaction = &(solverHFBGradient.interaction);
-            converged = solverHFBGradient.converged;
-            eneTot = arma::accu(solverHFBGradient.interaction.totalEnergy);
-          }
-
-          it++;
-        }
-
-        result = solverHFBGradient.state;
-      }
-    }
-
-    //==========================================================================
-
-    if ((nbIter < maxIterTotal)&&(!converged)) working = true;
-
-    //==========================================================================
-
-    if (working && (maxIterBroyden > 0))
-    {
-      solverHFBBroyden.state = result;
-      solverHFBBroyden.init();
-      solverHFBBroyden.nbIter = nbIter;
-      it = 0;
-
-      while (working && (it < maxIterBroyden))
-      {
-        working = solverHFBBroyden.nextIter();
-        nbIter++;
-
-        if (nbIter >= maxIterTotal) working = false;
-
-        if (!working)
-        {
-          interaction = &(solverHFBBroyden.interaction);
-          converged = solverHFBBroyden.converged;
-          eneTot = arma::accu(solverHFBBroyden.interaction.totalEnergy);
-        }
-
-        it++;
-      }
-
-      result = solverHFBBroyden.state;
-    }
-
-    if ((nbIter < maxIterTotal)&&(!converged)) working = true;
-  }
-
-  result.nbIter = nbIter;
-  result.converged = converged;
-  result.totalEnergy = converged ? eneTot : 1e99;
-
-  //============================================================================
-
-  result.energyContributions = interaction->getEnergyContributions();
-
-  if ((!quiet) && converged)
-  {
-    // print energy contributions
-
-    // Tools::mesg("SolBas", interaction->getNiceInfo());
-
-    // MultipoleOperators multipoleOperators(result);
-    // Tools::mesg("SolBas", multipoleOperators.getNiceInfo());
-
-    // Tools::mesg("SolBas", result.info());
-  }
-
-  //============================================================================
-
-  result.calculationLength = Tools::clock() - startTime;
-
-  //============================================================================
-
-  DBG_RETURN(result);
-}
 
 //==============================================================================
 //==============================================================================
@@ -459,7 +268,6 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
     ERROR("wrong number of basis parameters");
   }
 
-
   Basis newBasis = Basis(d_0, b_r, b_z, nOscil, n_zMaxImposed, g_q);
 
   Tools::mesg("SolBas", PF_GREEN("HFB calculation with basis parameters " + newBasis.getNiceInfo()));
@@ -478,11 +286,12 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
   dataTree.get(cvgTarget, "solver/broyden/cvgTarget");
   customDataTree.set("solver/broyden/cvgTarget", cvgTarget * 100.0);
 
-  INT maxIterTotal = 2000;
-  dataTree.get(maxIterTotal, "solver/alternate/maxIter");
+  SolverAlternator solverAlternator(customDataTree, state);
+  solverAlternator.init();
+  while (solverAlternator.nextIter() == Solver::ITERATING);
+  state = solverAlternator.state;
 
-  state = calcSingleHFB(customDataTree, state, maxIterTotal, false, true);
-  value = state.totalEnergy;
+  value = state.converged ? state.totalEnergy: 1e99;
 
   histCoords = arma::resize(histCoords, dim, nbIter + 1);
   histValues = arma::resize(histValues, nbIter + 1,   1);
@@ -490,9 +299,10 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
 
   histCoords.col(nbIter) = basisParams;
   histValues(nbIter) = value;
-  histIters(nbIter) = state.nbIter;
+  histIters(nbIter) = solverAlternator.nbIter;
 
   newBest = false;
+
 
   if ((value < bestValue) && state.converged)
   {
@@ -514,7 +324,7 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
     Plot::curve("#iter basis", "Best Ene HFB [MeV]", nbIter, value);
   }
 
-  if (state.converged)
+  if (solverAlternator.status == Solver::CONVERGED)
   {
     Tools::mesg("SolBas",
                 PF("#it: %03d ", nbIter) +
@@ -597,9 +407,10 @@ const std::string SolverBasis::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"bogoSt", state.info(true)},
+      {"state.", state.info(true)},
       {"basis ", state.basis.info(true)},
       {"dim.  ", Tools::infoStr(dim)},
+      {"status", Solver::statusStr[status]},
     }, true);
   }
   else
@@ -607,10 +418,11 @@ const std::string SolverBasis::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"SolverBasis", ""},
-      {"bogoSt", state.info(true)},
+      {"state.", state.info(true)},
       {"basis ", state.basis.info(true)},
       {"maxIt.", Tools::infoStr(maxIter)},
       {"dim.  ", Tools::infoStr(dim)},
+      {"status", Solver::statusStr[status]},
       {"vmin  ", Tools::vecToStr(vmin)},
       {"vmax  ", Tools::vecToStr(vmax)},
       {"vstep ", Tools::vecToStr(vstep)},

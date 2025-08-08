@@ -18,6 +18,7 @@
 
 #include "action.h"
 #include "multipole_operators.h"
+#include "solver_alternator.h"
 #include "tools.h"
 #include "solver_basis.h"
 #include "solver_hfb_broyden.h"
@@ -35,11 +36,11 @@
 //==============================================================================
 
 std::list<KeyStruct > Action::validKeys = {
-    { "action"                  , "Action to be performed (can be: 'hfb_quiet', 'hfb', 'ener', 'obs', 'basis')", "hfb"    , "S" },
-    { "action/basisOptimization", "Optimize the basis deformation parameters"                                  , "True"   , "B" },
-    { "action/saveResultFiles"  , "Save result files"                                                          , "True"   , "B" },
-    { "action/jobName"          , "Name of the job"                                                            , "unnamed", "S" },
-    { "action/nbBlockingTrials" , "Number of blocking trials by isospin value"                                 , "4"      , "I" },
+    { "action"                  , "Action to be performed (can be: 'hfb', 'ener', 'obs', 'ws')", "hfb"    , "S" },
+    { "action/jobName"          , "Name of the job"                                            , "unnamed", "S" },
+    { "action/saveResultFiles"  , "Save result files"                                          , "True"   , "B" },
+    { "action/nbBlockingTrials" , "Number of blocking trials by isospin value"                 , "4"      , "I" },
+    { "action/basisOptimization", "Optimize the basis deformation parameters"                  , "True"   , "B" },
   };
 
 //==============================================================================
@@ -67,11 +68,13 @@ Action::Action(const DataTree &_dataTree) : dataTree(_dataTree), state(_dataTree
 {
   DBG_ENTER;
 
-  dataTree.get(action,            "action",                   true );
-  dataTree.get(jobName,           "action/jobName",           true );
-  dataTree.get(basisOptimization, "action/basisOptimization", true );
-  dataTree.get(saveResultFiles,   "action/saveResultFiles",   true );
-  dataTree.get(nbBlockingTrials,  "action/nbBlockingTrials",  true );
+  // dataTree = DataTree::getDefault() + dataTree;
+
+  dataTree.get(action           , "action"                  , true);
+  dataTree.get(jobName          , "action/jobName"          , true);
+  dataTree.get(saveResultFiles  , "action/saveResultFiles"  , true);
+  dataTree.get(nbBlockingTrials , "action/nbBlockingTrials" , true);
+  dataTree.get(basisOptimization, "action/basisOptimization", true);
 
   DBG_LEAVE;
 }
@@ -102,13 +105,10 @@ void Action::run(void)
   //== CALCULATE STUFF ==
   //=====================
 
-  if      (action == "hfb_quiet") calcHFBquiet();
-  else if (action == "hfb"      ) calcHFB();
-  else if (action == "ws"       ) calcWS();
-  else if (action == "ws_hfb"   ) calcWSHFB();
+  if      (action == "hfb"      ) calcHFB();
   else if (action == "ener"     ) calcEnergies();
   else if (action == "obs"      ) calcObservables();
-  else if (action == "basis"    ) calcBasis();
+  else if (action == "ws"       ) calcWS();
   else if (action == "mult_exp" ) calcMultipoleExpansion();
   else
   {
@@ -142,11 +142,8 @@ void Action::calcHFBquiet(void)
     Tools::mesg("ActHFB", PF_GREEN("=== Optimizing basis parameters ==="));
 
     SolverBasis solverBasis(dataTree, state);
-
     solverBasis.init();
-
-    while (solverBasis.nextIter());
-
+    while (solverBasis.nextIter() == Solver::ITERATING);
     state = solverBasis.state;
   }
 
@@ -156,10 +153,11 @@ void Action::calcHFBquiet(void)
 
   Tools::mesg("ActHFB", PF_GREEN("=== Fixed basis HFB calculation ==="));
 
-  INT maxIterTotal = 2000;
-  dataTree.get(maxIterTotal, "solver/alternate/maxIter");
+  SolverAlternator solverAlternator(dataTree, state);
+  solverAlternator.init();
+  while (solverAlternator.nextIter() == Solver::ITERATING);
+  state = solverAlternator.state;
 
-  state = SolverBasis::calcSingleHFB(dataTree, state, maxIterTotal, false, true);
 
   // Merge the solution with the initial DataTree instance
   dataTree = dataTree + state.getDataTree();
@@ -226,6 +224,7 @@ void Action::calcHFBblocking(void)
     Tools::mesg("ActBlo", PF("Generate the QP states by performing one HFB iteration"));
 
     SolverHFBBroyden solverHFBBroyden(dataTree, state);
+    solverHFBBroyden.init();
     solverHFBBroyden.nextIter();
     startingState = solverHFBBroyden.state;
   }
@@ -245,6 +244,7 @@ void Action::calcHFBblocking(void)
       // generate the QP states by performing one HFB iteration
       Tools::mesg("ActBlo", PF("Generate the QP states by performing one HFB iteration"));
       SolverHFBBroyden solverHFBBroyden(dataTree, state);
+      solverHFBBroyden.init();
       solverHFBBroyden.nextIter();
 
       startingState = solverHFBBroyden.state;
@@ -308,11 +308,14 @@ void Action::calcHFBblocking(void)
       Tools::mesg("ActBlo", "New blocking try: " + blockingName);
 
       INT maxIterTotal = 2000;
-      dataTree.get(maxIterTotal, "solver/alternate/maxIter");
+      dataTree.get(maxIterTotal, "solver/alternator/maxIter");
 
-      State state = SolverBasis::calcSingleHFB(dataTree, bestState, maxIterTotal, false, true);
+      SolverHFBBroyden solverHFBBroyden(dataTree, bestState);
+      solverHFBBroyden.init();
+      while (solverHFBBroyden.nextIter() == Solver::ITERATING);
+      state = solverHFBBroyden.state;
 
-      if (state.converged)
+      if (solverHFBBroyden.status == Solver::CONVERGED)
       {
         // === optional: print some information
         // Tools::mesg("ActBlo", state.qpStates(NEUTRON).info());
@@ -342,7 +345,7 @@ void Action::calcHFBblocking(void)
                                startingState.qpStates(PROTON ).info(bp, 1, true),
                                state.totalEnergy,
                                state.nbIter,
-                               state.converged});
+                               (solverHFBBroyden.status == Solver::CONVERGED)});
 
       Tools::mesg("ActBlo", getBlockingHistTable());
 
@@ -467,9 +470,9 @@ void Action::calcHFB(void)
 
     // calculate the energy contributions
     SolverHFBBroyden solverHFBBroyden(dataTree, state);
+    solverHFBBroyden.init();
     solverHFBBroyden.interaction.calcEnergies();
     Tools::mesg("ActEne", solverHFBBroyden.interaction.getNiceInfo());
-
 
     // calculate and print some observables
     calcObservables();
@@ -486,9 +489,9 @@ void Action::calcHFB(void)
 
     // calculate the energy contributions
     SolverHFBBroyden solverHFBBroyden(dataTree, state);
+    solverHFBBroyden.init();
     solverHFBBroyden.interaction.calcEnergies();
     Tools::mesg("ActEne", solverHFBBroyden.interaction.getNiceInfo());
-
   }
 
   state.calculationLength = Tools::clock() - startTime;
@@ -517,7 +520,9 @@ void Action::calcWS(void)
   SolverWS solverWS(dataTree);
 
   // perform the WS calculation
-  state = solverWS.calc();
+  solverWS.init();
+  while(solverWS.nextIter() == Solver::ITERATING);
+  state = solverWS.state;
 
   // Merge the solution with the initial DataTree instance
   dataTree.merge(state.getDataTree());
@@ -537,32 +542,6 @@ void Action::calcWS(void)
 //==============================================================================
 //==============================================================================
 
-/** Solve the simplified Woods-Saxon then the HFB equations.
- */
-
-void Action::calcWSHFB(void)
-{
-  DBG_ENTER;
-
-  double startTime = Tools::clock();
-
-  // perform the WS calculation
-  calcWS();
-
-  // perform HFB starting from the WS state
-  calcHFB();
-
-  state.calculationLength = Tools::clock() - startTime;
-
-  Tools::mesg("Action", "Execution length (calcWSHFB): " + PF_GREEN("%.3f", state.calculationLength) + "s");
-
-  DBG_LEAVE;
-}
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** Calculate and print HFB field energy contributions.
  */
 
@@ -571,6 +550,7 @@ void Action::calcEnergies(void)
   DBG_ENTER;
 
   SolverHFBBroyden solverHFBBroyden(dataTree, state);
+  solverHFBBroyden.init();
   solverHFBBroyden.interaction.calcEnergies();
   Tools::mesg("ActEne", solverHFBBroyden.interaction.getNiceInfo());
 
@@ -635,22 +615,6 @@ void Action::calcObservables(void)
   //===========
 
   // Tools::mesg("ActObs", state.basis.info());
-
-  DBG_LEAVE;
-}
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-/** Construct a Basis instance and print its characteristics.
- */
-
-void Action::calcBasis(void)
-{
-  DBG_ENTER;
-
-  Tools::mesg("ActBas", Basis(dataTree).info());
 
   DBG_LEAVE;
 }
