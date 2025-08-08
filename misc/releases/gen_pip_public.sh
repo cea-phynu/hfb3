@@ -1,18 +1,27 @@
 #!/bin/bash
 
+if [ -z "$1" ]
+then
+  echo "Usage: $0 PYTHON_VERSION [MODULE_VERSION]"
+  exit 0
+fi
+
+
 NOCOPY=(misc/amedee_python misc/berger_python misc/docs misc/releases src/drop.cpp src/drop.h src/link.cpp src/link.h src/field_spin_orbit_fr.cpp src/field_spin_orbit_fr.h src/field_tensor_fr.cpp src/field_tensor_fr.h)
 
 echo "===== Cleaning project ====="
 make clean
 
-if [ -z "$1" ]
+PYTHON_VERSION=$1
+
+if [ -z "$2" ]
 then
 VERSION=$(git describe --always --dirty --tags)
 else
-VERSION=$1
+VERSION=$2
 fi
 
-DIR=release-pip-$VERSION
+DIR=release-pip-$VERSION-$PYTHON_VERSION
 
 echo "===== Creating PIP release in $DIR ====="
 
@@ -56,4 +65,7 @@ do
   fi
 done
 
+docker run -it --volume $(pwd):/root/ quay.io/pypa/manylinux_2_28_x86_64 /root/go$PYTHON_VERSION.sh
+
 cd ..
+
