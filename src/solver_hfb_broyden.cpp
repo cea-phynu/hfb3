@@ -35,7 +35,7 @@ std::list<KeyStruct > SolverHFBBroyden::validKeys =
     { "solver/broyden/maxIter"             , "Maximum number of iterations"                                      , "200"  , "I" },
     { "solver/broyden/emptyKappaProtection", "Force non-empty kappa matrices"                                    , "False", "B" },
     { "solver/broyden/cvgTargetLambda"     , "Convergence target value for lambda-iterations"                    , "1e-5" , "D" },
-    { "solver/broyden/maxIterLambda"       , "Maximum number of iterations for lambda-iterations"                , "20"   , "I" },
+    { "solver/broyden/maxIterLambda"       , "Maximum number of iterations for lambda-iterations"                , "10"   , "I" },
     { "solver/broyden/earlyLambdaMixing"   , "Mix Lagrange multipliers in the linear phase of the Broyden mixing", "True" , "B" },
   };
 
@@ -85,13 +85,9 @@ SolverHFBBroyden::SolverHFBBroyden(const DataTree &dataTree, State _state) : Sol
   dataTree.get(maxIter,              "solver/broyden/maxIter",              true);
   dataTree.get(emptyKappaProtection, "solver/broyden/emptyKappaProtection", true);
   dataTree.get(cvgTarget,            "solver/broyden/cvgTarget",            true);
-  dataTree.get(lambdaMax,            "solver/broyden/lambdaMax",            true);
-  dataTree.get(lambdaIterMax,        "solver/broyden/lambdaIterMax",        true);
-
-  INT earlyLambdaMixingInt = 1;
-  dataTree.get(earlyLambdaMixingInt, "solver/broyden/earlyLambdaMixing",    true);
-
-  earlyLambdaMixing = (earlyLambdaMixingInt != 0);
+  dataTree.get(cvgTargetLambda,      "solver/broyden/cvgTargetLambda",      true);
+  dataTree.get(maxIterLambda,        "solver/broyden/maxIterLambda",        true);
+  dataTree.get(earlyLambdaMixing,    "solver/broyden/earlyLambdaMixing",    true);
 
   DBG_LEAVE;
 }
@@ -219,7 +215,7 @@ void SolverHFBBroyden::bokehPlot(void)
 /** Prepare and perform the next HFB iteration.
  */
 
-INT SolverHFBBroyden::nextIter()
+bool SolverHFBBroyden::nextIter()
 {
   DBG_ENTER;
 
@@ -235,7 +231,7 @@ INT SolverHFBBroyden::nextIter()
     status = Solver::DIVERGED;
     bestEne = 0.0;
 
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
   bokehPlot();
@@ -249,6 +245,13 @@ INT SolverHFBBroyden::nextIter()
   // print iteration message
 
   std::string eneStr = ((ene > -9999.999 ) && (ene < 0.0)) ? PF_GREEN("%9.3f", ene) : PF_RED("%9.2e", ene);
+
+  std::string lambdaIterStrn = (lambdaIter(NEUTRON) < maxIterLambda) ? PF("#%2d", lambdaIter(NEUTRON)) :
+                                                                       PF_RED("#%2d", lambdaIter(NEUTRON));
+
+  std::string lambdaIterStrp = (lambdaIter(PROTON ) < maxIterLambda) ? PF("#%2d", lambdaIter(PROTON)) :
+                                                                       PF_RED("#%2d", lambdaIter(PROTON));
+
   Tools::mesg("SolBro",
               PF("#it: %03d ", nbIter) +
               PF("cvg: %8.2e ", value) +
@@ -256,9 +259,8 @@ INT SolverHFBBroyden::nextIter()
 #ifdef PRINT_ITER_DURATION
               PF("tot: %6.3fs (fld: %6.3fs)", iterLength, interaction.calcLength) + " " +
 #endif
-              PF("ln: %7.3f(#%2d) ", state.chemPot(NEUTRON), lambdaIter(NEUTRON)) +
-              PF("lp: %7.3f(#%2d)", state.chemPot(PROTON ), lambdaIter(PROTON ))
-              // PF_YELLOW(" " + interaction.getWarningStr())
+              PF("ln: %7.3f(%s) ", state.chemPot(NEUTRON), lambdaIterStrn.c_str()) +
+              PF("lp: %7.3f(%s) ", state.chemPot(PROTON ), lambdaIterStrp.c_str())
              );
   // Tools::mesg("SolBro", multipoleOperators.getNiceInfo());
   // Tools::mesg("SolBro", state.info());
@@ -274,7 +276,7 @@ INT SolverHFBBroyden::nextIter()
   {
     Tools::mesg("SolBro", "Maximum number of iterations reached, exiting HFB loop");
     status = Solver::MAXITER;
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
   if ((value < cvgTarget) && (nbIter > 1))
@@ -284,21 +286,21 @@ INT SolverHFBBroyden::nextIter()
     state.converged = true;
 
     status = Solver::CONVERGED;
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
   if (fabs(value) > 1e20)
   {
     Tools::mesg("SolBro", "Convergence is too high, exiting HFB loop");
     status = Solver::DIVERGED;
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
   if (fabs(ene) > 1e16)
   {
     Tools::mesg("SolBro", "Energy is too high, exiting HFB loop");
     status = Solver::DIVERGED;
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
   state.calculationLength = Tools::clock() - startTime;
@@ -338,7 +340,7 @@ INT SolverHFBBroyden::nextIter()
     }
   }
 
-  DBG_RETURN(status);
+  DBG_RETURN(true);
 }
 
 //==============================================================================
@@ -457,7 +459,7 @@ void SolverHFBBroyden::calc()
   //===== HFB LOOP START =====
   //==========================
 
-  while (nextIter() == Solver::ITERATING);
+  while (nextIter());
 
   //========================
   //===== HFB LOOP END =====
@@ -748,7 +750,7 @@ bool SolverHFBBroyden::singleHFBiter(void)
 
       double v2error = multipoleOperators.nPart(iso) - nPart(iso);
 
-      if ((lambdaIter(iso) >= lambdaIterMax) || (fabs(v2error) < lambdaMax)) {
+      if ((lambdaIter(iso) >= maxIterLambda) || (fabs(v2error) < cvgTargetLambda)) {
 
         // The step for the next iteration should be proportional to the change in λ
         lambdaStep(iso) = fabs(initialLambda(iso) - state.chemPot(iso)) * 10 + 0.001;
@@ -1086,14 +1088,10 @@ const std::string SolverHFBBroyden::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"state.", state.info(true)},
+      {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"interaction", interaction.info(true)},
-      {"momen.", multipoleOperators.info(true)},
-      {"mixing", mixing.info(true)},
+      {"maxIt.", Tools::infoStr(maxIter)},
       {"status", Solver::statusStr[status]},
-      {"block.", Tools::infoStr((state.blockedQP(NEUTRON) > -1) ||
-                                (state.blockedQP(PROTON ) > -1))},
     }, true);
   }
   else
@@ -1107,20 +1105,19 @@ const std::string SolverHFBBroyden::info(bool isShort) const
       pBlocked =state.qpStates(PROTON ).info(state.blockedQP(PROTON ), 0, false);
     }
 
-
     result += Tools::treeStr(
     {
       {"SolverHFBBroyden", ""},
-      {"state.", state.info(true)},
+      {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"interaction", interaction.info(true)},
-      {"momen.", multipoleOperators.info(true)},
-      {"mixing", mixing.info(true)},
-      {"status", Solver::statusStr[status]},
+      {"inter.", interaction.info(true)},
       {"maxIt.", Tools::infoStr(maxIter)},
       {"target", Tools::infoStr(cvgTarget)},
-      {"maxItL", Tools::infoStr(lambdaIterMax)},
-      {"ltarg.", Tools::infoStr(lambdaMax)},
+      {"status", Solver::statusStr[status]},
+      {"mixing", mixing.info(true)},
+      {"momen.", multipoleOperators.info(true)},
+      {"maxItL", Tools::infoStr(maxIterLambda)},
+      {"ltarg.", Tools::infoStr(cvgTargetLambda)},
       {"bloc.n", nBlocked},
       {"bloc.p", pBlocked},
     }, false);

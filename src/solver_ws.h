@@ -58,7 +58,7 @@ public:
   void updateCurrentDef(const arma::vec &v);                           // #TEST#
 
   void init(void);                                                     // #TEST#
-  INT nextIter(void);                                                  // #TEST#
+  bool nextIter(void);                                                  // #TEST#
   void finalize(void);                                                 // #TEST#
   State calc();                                                        // #TEST#
   void bokehPlot(void);

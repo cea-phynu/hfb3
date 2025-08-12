@@ -38,7 +38,7 @@ class IOhfb3
 public :
   IOhfb3(void);                                                       // #TEST#
   DataTree fromContent(const std::string &content) const;             // #TEST#
-  static void updateDataTree(DataTree &, const std::string key, const std::string val, const std::string type);
+  static void updateDataTree(DataTree &, const std::string key, const std::string val, std::string type);
 
   //============================================================================
   //============================================================================

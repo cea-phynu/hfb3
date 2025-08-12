@@ -51,7 +51,7 @@ public:
 
   void calc(void);                                                     // #TEST#
   void init(void);                                                     // #TEST#
-  INT nextIter(void);                                                 // #TEST#
+  bool nextIter(void);                                                 // #TEST#
 
   bool singleHFBiter(void);                                            // #TEST#
   const std::string info(bool isShort = USE_SHORT_INFO) const;         // #TEST#
@@ -92,13 +92,13 @@ public:
   double bestEne = 1e99;
 
   /// Target value for Lambda variation.
-  double lambdaMax = 1e-09;
+  double cvgTargetLambda = 1e-09;
 
   /// Maximum lambda-iterations.
-  INT lambdaIterMax = 20;
+  INT maxIterLambda = 20;
 
   /// Protection against empty kappa matrices.
-  INT emptyKappaProtection = 1;
+  bool emptyKappaProtection = true;
 
   /// Total U matrix.
   Multi<arma::mat> U;

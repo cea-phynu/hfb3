@@ -44,12 +44,12 @@ class SolverHFBGradient : public Solver
 public:
   explicit SolverHFBGradient(const std::string &filename);             // #TEST#
   explicit SolverHFBGradient(const DataTree &);                        // #TEST#
-  explicit SolverHFBGradient(const DataTree &, State);       // #TEST#
+  explicit SolverHFBGradient(const DataTree &, State);                 // #TEST#
 
   //============================================================================
 
   void init(void);                                                     // #TEST#
-  INT nextIter(void);                                                  // #TEST#
+  bool nextIter(void);                                                 // #TEST#
 
   //============================================================================
   //============================================================================
@@ -82,10 +82,10 @@ public:
   double bestEne = 1e99;
 
   /// Target value for Lambda variation.
-  double lambdaMax = 1e-09;
+  double cvgTargetLambda = 1e-09;
 
   /// Maximum lambda-iterations.
-  INT lambdaIterMax = 20;
+  INT maxIterLambda = 20;
 
   /// Activate to enable the calculation of fragment properties at each HFB iteration.
   bool fragInLoop = false;

@@ -39,14 +39,14 @@ class Solver : public Generic
 public:
 
   /// Return codes.
-  enum {STARTING, ITERATING, CONVERGED, DIVERGED, MAXITER};
+  enum {ITERATING, STARTING, CONVERGED, DIVERGED, MAXITER, SCHEME_END};
 
   explicit Solver(const std::string &filename);                        // #TEST#
   explicit Solver(const DataTree &);                                   // #TEST#
   explicit Solver(const DataTree &, State);                            // #TEST#
 
   virtual void init(void);
-  virtual INT nextIter(void);
+  virtual bool nextIter(void);
 
   //============================================================================
   //============================================================================

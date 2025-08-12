@@ -34,8 +34,8 @@
 
 std::list<KeyStruct> SolverAlternator::validKeys =
   {
-    { "solver/alternator/maxIter", "Maximum number of iterations when alternating solvers"           ,  "200", "I" },
-    { "solver/alternator/scheme" , "Scheme for the alternating solvers"                              , "[GB]", "S" },
+    { "solver/alternator/maxIter", "Maximum number of iterations when alternating solvers",  "200", "I" },
+    { "solver/alternator/scheme" , "Scheme for the alternating solvers"                   , "[GB]", "S" },
   };
 
 //==============================================================================
@@ -135,7 +135,7 @@ void SolverAlternator::init()
  * Calculate the next iteration.
  */
 
-INT SolverAlternator::nextIter()
+bool SolverAlternator::nextIter()
 {
   DBG_ENTER;
 
@@ -145,30 +145,28 @@ INT SolverAlternator::nextIter()
   switch (schemeList.at(schemeId))
   {
     case WOODSSAXON:
+    {
       if (solverInit)
       {
         if (!state.empty())
         {
-          Tools::mesg("SolAlt", "skipping WS solver, since an initial state is given");
+          Tools::mesg("SolAlt", "skipping the WS solver, since an initial state is given");
           solverInit = true;
-          status = Solver::ITERATING;
           schemeId++;
           break;
         }
 
-        Tools::mesg("SolAlt", "starting WS solver");
+        Tools::mesg("SolAlt", "Starting the WS solver");
 
         solverWS.init();
         solverInit = false;
       }
-      solverWS.nextIter();
-      status = solverWS.status;
+      bool wsIterating = solverWS.nextIter();
 
-      if ((status == Solver::CONVERGED)||(status == Solver::MAXITER))
+      if (!wsIterating)
       {
         state = solverWS.state;
         solverInit = true;
-        status = Solver::ITERATING;
         schemeId++;
       }
 
@@ -176,52 +174,66 @@ INT SolverAlternator::nextIter()
       // nbIter++;
 
       break;
+    }
     case BROYDEN:
+    {
       if (solverInit)
       {
-        Tools::mesg("SolAlt", "starting the Broyden HFB solver");
+        Tools::mesg("SolAlt", "Starting the Broyden HFB solver");
 
         solverHFBBroyden.state = state;
         solverHFBBroyden.init();
 
         solverInit = false;
       }
-      solverHFBBroyden.nextIter();
-      status = solverHFBBroyden.status;
+      bool broydenIterating = solverHFBBroyden.nextIter();
 
-      if (status != Solver::ITERATING)
+      if (!broydenIterating)
       {
+        state = solverHFBBroyden.state;
+
         // only converge if final solver
-        if ((schemeId != finalId) && (status == Solver::CONVERGED))
+        if ((schemeId == finalId) && (solverHFBBroyden.status == Solver::CONVERGED))
         {
-          status = Solver::MAXITER;
+          status = Solver::CONVERGED;
+          break;
         }
 
-        state = solverHFBBroyden.state;
         solverInit = true;
         schemeId++;
       }
       nbIter++;
       break;
+    }
     case GRADIENT:
+    {
       if (solverInit)
       {
-        Tools::mesg("SolAlt", "starting the Gradient HFB solver");
+        if (!state.empty())
+        {
+          Tools::mesg("SolAlt", "skipping the Gradient HFB solver, since an initial state is given");
+          solverInit = true;
+          schemeId++;
+          break;
+        }
+
+        Tools::mesg("SolAlt", "Starting the Gradient HFB solver");
 
         solverHFBGradient.state = state;
         solverHFBGradient.init();
         solverInit = false;
       }
-      solverHFBGradient.nextIter();
-      status = solverHFBGradient.status;
-      if (status != Solver::ITERATING)
+      bool gradientIterating = solverHFBGradient.nextIter();
+
+      if (!gradientIterating)
       {
         state = solverHFBGradient.state;
 
         // only converge if final solver
-        if ((schemeId != finalId) && (status == Solver::CONVERGED))
+        if ((schemeId == finalId) && (solverHFBGradient.status == Solver::CONVERGED))
         {
-          status = Solver::MAXITER;
+          status = Solver::CONVERGED;
+          break;
         }
 
         solverInit = true;
@@ -229,49 +241,47 @@ INT SolverAlternator::nextIter()
       }
       nbIter++;
       break;
+    }
     case DO:
+    {
       schemeLoopIndex = schemeId;
       schemeId++;
       break;
+    }
     case ENDDO:
+    {
       ASSERT(schemeLoopIndex >= 0, "Missing loop start '[' in scheme.");
       schemeId = schemeLoopIndex;
       schemeId++;
       break;
-  }
-
-  if (schemeId >= scheme.size())
-  {
-    if (status == Solver::CONVERGED)
-    {
-      state.converged = true;
-      DBG_RETURN(status);
     }
-    else
-    {
-      status = Solver::MAXITER;
-      state.converged = false;
-      DBG_RETURN(status);
-    }
-  }
+  } // end of switch
 
-  if (status == Solver::MAXITER)
+  //============================================================================
+
+  if (status == Solver::CONVERGED)
   {
-    status = Solver::ITERATING;
-    state.converged = false;
-    DBG_RETURN(status);
+    state.converged = true;
+    DBG_RETURN(false);
   }
 
   if (nbIter >= maxIter)
   {
     status = Solver::MAXITER;
     state.converged = false;
-    DBG_RETURN(status);
+    DBG_RETURN(false);
+  }
+
+  if (schemeId >= scheme.size())
+  {
+    status = Solver::SCHEME_END;
+    state.converged = false;
+    DBG_RETURN(false);
   }
 
   // INFO(PF("%d/%d ", nbIter, maxIter) + Solver::statusStr[status]);
 
-  DBG_RETURN(status);
+  DBG_RETURN(true);
 }
 
 //==============================================================================
@@ -304,9 +314,10 @@ const std::string SolverAlternator::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"scheme", scheme},
-      {"basis.", state.basis.info(true)},
+      {"state ", state.info(true)},
+      {"basis ", state.basis.info(true)},
       {"maxIt.", Tools::infoStr(maxIter)},
+      {"status", Solver::statusStr[status]},
     }, true);
   }
   else
@@ -314,13 +325,14 @@ const std::string SolverAlternator::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"SolverAlternator", ""},
-      {"state.", state.info(true)},
+      {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"scheme", scheme},
-      {"state.", state.info(true)},
-      {"basis ", state.basis.info(true)},
+      {"inter.", solverHFBBroyden.interaction.info(true)},
       {"maxIt.", Tools::infoStr(maxIter)},
       {"target", Tools::infoStr(cvgTarget)},
+      {"status", Solver::statusStr[status]},
+      {"scheme", scheme},
+      {"momen.", solverHFBBroyden.multipoleOperators.info(true)},
     }, false);
   }
 

@@ -143,7 +143,7 @@ void Action::calcHFBquiet(void)
 
     SolverBasis solverBasis(dataTree, state);
     solverBasis.init();
-    while (solverBasis.nextIter() == Solver::ITERATING);
+    while (solverBasis.nextIter());
     state = solverBasis.state;
   }
 
@@ -155,7 +155,7 @@ void Action::calcHFBquiet(void)
 
   SolverAlternator solverAlternator(dataTree, state);
   solverAlternator.init();
-  while (solverAlternator.nextIter() == Solver::ITERATING);
+  while (solverAlternator.nextIter());
   state = solverAlternator.state;
 
 
@@ -312,7 +312,7 @@ void Action::calcHFBblocking(void)
 
       SolverHFBBroyden solverHFBBroyden(dataTree, bestState);
       solverHFBBroyden.init();
-      while (solverHFBBroyden.nextIter() == Solver::ITERATING);
+      while (solverHFBBroyden.nextIter());
       state = solverHFBBroyden.state;
 
       if (solverHFBBroyden.status == Solver::CONVERGED)
@@ -521,7 +521,7 @@ void Action::calcWS(void)
 
   // perform the WS calculation
   solverWS.init();
-  while(solverWS.nextIter() == Solver::ITERATING);
+  while(solverWS.nextIter());
   state = solverWS.state;
 
   // Merge the solution with the initial DataTree instance

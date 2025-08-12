@@ -712,6 +712,7 @@ TEST(Basis, tabzd)
   {
     // 1ct state
     Basis basis("examples/42Ca_deformed_1x11.msg.gz");
+
     basis.calcTab();
     // Exact quadrature
     Discrete d(&basis, Mesh::gaussLaguerreHermite(20, 30));

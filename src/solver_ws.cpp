@@ -83,6 +83,7 @@ SolverWS::SolverWS(const DataTree &_dataTree, State _state) : Solver(_dataTree, 
   dataTree.get(beta20tInit, "solver/ws/beta20tInit" , true);
   dataTree.get(q30tInit   , "solver/ws/q30tInit"    , true);
   dataTree.get(maxIter    , "solver/ws/maxIter"     , true);
+  dataTree.get(cvgTarget  , "solver/ws/cvgTarget"   , true);
 
   DBG_LEAVE;
 }
@@ -443,7 +444,7 @@ void SolverWS::bokehPlot(void)
  * Calculate the next iteration.
  */
 
-INT SolverWS::nextIter()
+bool SolverWS::nextIter()
 {
   DBG_ENTER;
 
@@ -456,7 +457,7 @@ INT SolverWS::nextIter()
     status = Solver::CONVERGED;
     finalize();
 
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
   else
   {
@@ -501,7 +502,7 @@ INT SolverWS::nextIter()
 
     finalize();
 
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
 
@@ -515,11 +516,11 @@ INT SolverWS::nextIter()
 
     state.converged = true;
 
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
 
-  DBG_RETURN(status);
+  DBG_RETURN(true);
 }
 
 
@@ -555,7 +556,7 @@ State SolverWS::calc()
   DBG_ENTER;
 
   init();
-  while (nextIter()) {  }
+  while (nextIter());
 
   calculationLength = Tools::clock() - startTime;
   state.calculationLength = calculationLength;
@@ -583,10 +584,9 @@ const std::string SolverWS::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"solut.", state.info(true)},
+      {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"momen.", multipoleOperators.info(true)},
-      {"dim.  ", Tools::infoStr(dim)},
+      {"maxIt.", Tools::infoStr(maxIter)},
       {"status", Solver::statusStr[status]},
     }, true);
   }
@@ -595,13 +595,13 @@ const std::string SolverWS::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"SolverWS", ""},
-      {"solut.", state.info(true)},
+      {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"momen.", multipoleOperators.info(true)},
-      {"dim.  ", Tools::infoStr(dim)},
-      {"status", Solver::statusStr[status]},
-      {"target", Tools::infoStr(cvgTarget)},
       {"max.it", Tools::infoStr(maxIter)},
+      {"target", Tools::infoStr(cvgTarget)},
+      {"status", Solver::statusStr[status]},
+      {"dim.  ", Tools::infoStr(dim)},
+      {"momen.", multipoleOperators.info(true)},
       {"vmin  ", Tools::vecToStr(vmin)},
       {"vmax  ", Tools::vecToStr(vmax)},
       {"vstep ", Tools::vecToStr(vstep)},

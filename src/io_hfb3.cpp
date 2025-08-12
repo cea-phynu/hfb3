@@ -146,9 +146,11 @@ DataTree IOhfb3::fromContent(const std::string &content) const
  *  \param type The type of the value (can be deduced from the value).
  */
 
-void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std::string val, const std::string type)
+void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std::string val, std::string type)
 {
   DBG_ENTER;
+
+  if (type == "") type = dataTree.getType(key);
 
   if (type == "")
   {
@@ -185,6 +187,23 @@ void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std
   if (type == "empty")
   {
     dataTree.set(key);
+  }
+  else if (type == "B")
+  {
+    int bval = -1;
+    if ((val == "True")||(val == "true")||(val == "T")) bval = 1;
+    if ((val == "False")||(val == "false")||(val == "F")) bval = 0;
+
+    if (bval != -1)
+    {
+      dataTree.set(key, bval == 1);
+    }
+    else
+    {
+      std::stringstream ss;
+      ss << "wrong bool value in '" << val << "'";
+      Tools::warning(ss.str());
+    }
   }
   else if (type == "I")
   {

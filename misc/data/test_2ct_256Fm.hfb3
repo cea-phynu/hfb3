@@ -1,22 +1,13 @@
 #!HFB3!#
 
-action hfb
-
 [action]
-nNeut        156
-nProt        100
-basisOptimization T
+basisOptimization True
+jobName test_2ct_256Fm
 
 [interaction]
-type  D1S
-maxIter      300
-targetValue  1e-6
-mixingFactor 0.6
-
-active       1
+name         D1S
 
 [basis]
-type    Cylindrical
 nOscil  11
 d_0     5.5
 b_r     2.1
@@ -29,5 +20,6 @@ q10t 0.0
 q20t 1000.0
 q30t 2000.0
 
-[misc]
-jobname test_2ct_256Fm
+[system]
+nNeut        156
+nProt        100

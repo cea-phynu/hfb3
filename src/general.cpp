@@ -19,6 +19,16 @@
 #include "global.h"
 #include "general.h"
 #include "datatree.h"
+#include "action.h"
+#include "interaction.h"
+#include "solver.h"
+#include "system.h"
+#include "solver_alternator.h"
+#include "solver_basis.h"
+#include "solver_hfb_broyden.h"
+#include "solver_hfb_gradient.h"
+#include "solver_ws.h"
+#include "state.h"
 
 /** \file
  *  \brief Methods of the General class.
@@ -57,6 +67,8 @@ General::General()
 
 General::General(const DataTree &dataTree)
 {
+  setGlobalValidKeys();
+
   // Set the general.compatibility mode.
   std::string compatibilityStr;
   dataTree.get(compatibilityStr, "general/compatibility", true);
@@ -80,3 +92,33 @@ General::General(const DataTree &dataTree)
   if (dataTree.get(version, "general/version", true)) Tools::warning("Modifying the automatic version value");
   if (dataTree.get(skill,   "general/skill",   true)) Tools::warning("Modifying the automatic skill value");
 }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Gather the valid keys.
+ */
+
+void General::setGlobalValidKeys(void)
+{
+  if (globalValidKeys.size() == 0)
+  {
+    ADDLIST(globalValidKeys,            Action::validKeys);
+    ADDLIST(globalValidKeys,             Basis::validKeys);
+    ADDLIST(globalValidKeys,            Solver::validKeys);
+    ADDLIST(globalValidKeys,       SolverBasis::validKeys);
+    ADDLIST(globalValidKeys,  SolverAlternator::validKeys);
+    ADDLIST(globalValidKeys,  SolverHFBBroyden::validKeys);
+    ADDLIST(globalValidKeys, SolverHFBGradient::validKeys);
+    ADDLIST(globalValidKeys,          SolverWS::validKeys);
+    ADDLIST(globalValidKeys,        Constraint::validKeys);
+    ADDLIST(globalValidKeys,       Interaction::validKeys);
+    ADDLIST(globalValidKeys,            Mixing::validKeys);
+    ADDLIST(globalValidKeys,             State::validKeys);
+    ADDLIST(globalValidKeys,            System::validKeys);
+    ADDLIST(globalValidKeys,           General::validKeys);
+  }
+}
+
+

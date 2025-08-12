@@ -121,9 +121,9 @@ public:
 
   DataTree getSection(const std::string &sectionName) const;
 
-  bool         getB( const std::string &key, bool ignore = false, bool *isFound = NULL) const;
 
   // For python
+  bool         getB( const std::string &key, bool ignore = false, bool *isFound = NULL) const;
   INT          getI( const std::string &key, bool ignore = false) const;
   double       getD( const std::string &key, bool ignore = false) const;
   std::string  getS( const std::string &key, bool ignore = false) const;
@@ -173,8 +173,6 @@ public:
   void setDefault(void);
   static DataTree getDefault(void);
 
-  std::list<KeyStruct > listOfKeys;
-
   void clear(void);
   void clean(void);
   void merge(const DataTree &other);
@@ -183,7 +181,8 @@ public:
   INT del(const std::string &key);
 
   void validate(void) const;
-  bool isValid(const std::string &key, const std::string &type) const;
+  bool isValid(const std::string &key, const std::string &type = "") const;
+  const std::string getType(const std::string &key) const;
 
   void save(const std::string &filename, bool verbose = true) const;
 
@@ -283,71 +282,77 @@ public:
   //============================================================================
   //============================================================================
 
-  /// Data tree for ints.
+  /// std::map for bool.
+  std::map<std::string, bool> boolMap;
+
+  /// std::map for int.
   std::map<std::string, INT> intMap;
 
-  /// Data tree for doubles.
+  /// std::map for double.
   std::map<std::string, double> doubleMap;
 
-  /// Data tree for std::strings.
+  /// std::map for std::string.
   std::map<std::string, std::string> stringMap;
 
-  /// Data tree for IVEC.
+  /// std::map for IVEC.
   std::map<std::string, IVEC > ivecMap;
 
-  /// Data tree for UVEC.
+  /// std::map for UVEC.
   std::map<std::string, UVEC > uvecMap;
 
-  /// Data tree for IMAT.
+  /// std::map for IMAT.
   std::map<std::string, IMAT > imatMap;
 
-  /// Data tree for UMAT.
+  /// std::map for UMAT.
   std::map<std::string, UMAT > umatMap;
 
-  /// Data tree for ICUBE.
+  /// std::map for ICUBE.
   std::map<std::string, ICUBE > icubeMap;
 
-  /// Data tree for UCUBE.
+  /// std::map for UCUBE.
   std::map<std::string, UCUBE > ucubeMap;
 
-  /// Data tree for arma::vec.
+  /// std::map for arma::vec.
   std::map<std::string, arma::vec> vecMap;
 
-  /// Data tree for arma::mat.
+  /// std::map for arma::mat.
   std::map<std::string, arma::mat > matMap;
 
-  /// Data tree for arma::cube.
+  /// std::map for arma::cube.
   std::map<std::string, arma::cube > cubeMap;
 
-  /// Data tree for Multi<IVEC >.
+  /// std::map for Multi<IVEC >.
   std::map<std::string, Multi<IVEC > > multiIVecMap;
 
-  /// Data tree for Multi<UVEC >.
+  /// std::map for Multi<UVEC >.
   std::map<std::string, Multi<UVEC > > multiUVecMap;
 
-  /// Data tree for Multi<IMAT >.
+  /// std::map for Multi<IMAT >.
   std::map<std::string, Multi<IMAT > > multiIMatMap;
 
-  /// Data tree for Multi<UMAT >.
+  /// std::map for Multi<UMAT >.
   std::map<std::string, Multi<UMAT > > multiUMatMap;
 
-  /// Data tree for Multi<ICUBE>.
+  /// std::map for Multi<ICUBE>.
   std::map<std::string, Multi<ICUBE > > multiICubeMap;
 
-  /// Data tree for Multi<UCUBE>.
+  /// std::map for Multi<UCUBE>.
   std::map<std::string, Multi<UCUBE > > multiUCubeMap;
 
-  /// Data tree for Multi<arma::vec>.
+  /// std::map for Multi<arma::vec>.
   std::map<std::string, Multi<arma::vec> > multiVecMap;
 
-  /// Data tree for Multi<arma::mat>.
+  /// std::map for Multi<arma::mat>.
   std::map<std::string, Multi<arma::mat> > multiMatMap;
 
-  /// Data tree for Multi<arma::cube>.
+  /// std::map for Multi<arma::cube>.
   std::map<std::string, Multi<arma::cube> > multiCubeMap;
 
-  /// Empty keys : keys that are automatically suppress if a merge appened.
+  /// Empty keys : keys that are to be deleted in case of a merge operation.
   std::set<std::string> emptyKeys;
+
+  /// Enforce valid keys only.
+  bool strict_mode = false;
 };
 
 

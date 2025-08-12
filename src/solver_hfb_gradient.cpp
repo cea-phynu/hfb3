@@ -31,11 +31,11 @@
 
 std::list<KeyStruct > SolverHFBGradient::validKeys =
   {
-    { "solver/gradient/cvgTarget"               , "Convergence target value"                                                  , "1e-1", "D" },
-    { "solver/gradient/maxIter"                 , "Maximum number of iterations"                                              , "500" , "I" },
-    { "solver/gradient/cvgTargetLambda"         , "Convergence target value for lambda-iterations"                            , "1e-5", "D" },
-    { "solver/gradient/maxIterLambda"           , "Maximum number of iterations for lambda-iterations"                        , "20"  , "I" },
-    { "solver/gradient/randomSeed"              , "Seed used for the generation of initial random U and V matrices"           , "1337", "I" },
+    { "solver/gradient/cvgTarget"      , "Convergence target value"                                       , "1e-1", "D" },
+    { "solver/gradient/maxIter"        , "Maximum number of iterations"                                   , "50"  , "I" },
+    { "solver/gradient/cvgTargetLambda", "Convergence target value for lambda-iterations"                 , "1e-5", "D" },
+    { "solver/gradient/maxIterLambda"  , "Maximum number of iterations for lambda-iterations"             , "10"  , "I" },
+    { "solver/gradient/randomSeed"     , "Seed used for the generation of initial random U and V matrices", "1337", "I" },
   };
 
 //==============================================================================
@@ -83,11 +83,11 @@ SolverHFBGradient::SolverHFBGradient(const DataTree &dataTree, State _state) : S
   // interaction.setDisabledInteractionFromDataTree(dataTree);
   // interaction.setCustomNodesFromDataTree(dataTree);
 
-  dataTree.get(maxIter,                  "solver/gradient/maxIter",                  true);
-  dataTree.get(cvgTarget,                "solver/gradient/cvgTarget",                true);
-  dataTree.get(lambdaMax,                "solver/gradient/lambdaMax",                true);
-  dataTree.get(lambdaIterMax,            "solver/gradient/lambdaIterMax",            true);
-  dataTree.get(randomSeed,               "solver/gradient/randomSeed",               true);
+  dataTree.get(maxIter,         "solver/gradient/maxIter",         true);
+  dataTree.get(cvgTarget,       "solver/gradient/cvgTarget",       true);
+  dataTree.get(cvgTargetLambda, "solver/gradient/cvgTargetLambda", true);
+  dataTree.get(maxIterLambda,   "solver/gradient/maxIterLambda",   true);
+  dataTree.get(randomSeed,      "solver/gradient/randomSeed",      true);
 
   Tools::setSeed(randomSeed);
 
@@ -228,7 +228,7 @@ void SolverHFBGradient::init()
 /** Prepare and perform the next HFB iteration.
  */
 
-INT SolverHFBGradient::nextIter()
+bool SolverHFBGradient::nextIter()
 {
   DBG_ENTER;
 
@@ -293,6 +293,10 @@ INT SolverHFBGradient::nextIter()
   // print iteration message
 
   std::string eneStr = ((ene > -9999.999 ) && (ene < 0.0)) ? PF_GREEN("%9.3f", ene) : PF_RED("%9.2e", ene);
+
+  std::string lambdaIterStr = (lambdaIter < maxIterLambda) ? PF("#%2d", lambdaIter) :
+                                                             PF_RED("#%2d", lambdaIter);
+
   Tools::mesg("SolGra",
               PF("#it: %03d ", nbIter) +
               PF("cvg: %8.2e ", value) +
@@ -300,7 +304,7 @@ INT SolverHFBGradient::nextIter()
               // PF("tot: %6.3fs (fld: %6.3fs)", iterLength, interaction.calcLength) + " " +
               PF("ln: %7.3f ", state.chemPot(NEUTRON)) +
               PF("lp: %7.3f ", state.chemPot(PROTON )) +
-              PF("(#%2d)", lambdaIter)
+              PF("(%s)", lambdaIterStr.c_str())
               // PF_YELLOW(" " + interaction.getWarningStr())
              );
 
@@ -383,12 +387,12 @@ INT SolverHFBGradient::nextIter()
     }
     state.nbIter = nbIter;
 
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
   //============================================================================
 
-  DBG_RETURN(status);
+  DBG_RETURN(true);
 }
 
 //==============================================================================
@@ -415,7 +419,7 @@ bool SolverHFBGradient::gradIter(Multi<arma::mat> oG, arma::vec m, arma::vec n)
   Multi<arma::mat> Vj = V;
 
   /// Computing gradient
-  if (lambdaIterMax >= 0)
+  if (maxIterLambda >= 0)
   {
     calcConstraintsQP(U, V, F, b);
 
@@ -500,11 +504,11 @@ bool SolverHFBGradient::gradIter(Multi<arma::mat> oG, arma::vec m, arma::vec n)
   }
 
   /// readjusting the constraints
-  for (lambdaIter = 1; lambdaIter < lambdaIterMax; lambdaIter++)
+  for (lambdaIter = 1; lambdaIter < maxIterLambda; lambdaIter++)
   {
     calcConstraintsQP(Uj, Vj, F, b);
 
-    if (lambdaIter > 0 && arma::norm(b, "inf") < lambdaMax) break;
+    if (lambdaIter > 0 && arma::norm(b, "inf") < cvgTargetLambda) break;
 
     for (INT i = 0; i < b.size(); i++)
     {
@@ -517,7 +521,7 @@ bool SolverHFBGradient::gradIter(Multi<arma::mat> oG, arma::vec m, arma::vec n)
     lda.zeros(b.size());
     UVEC idx = arma::find(arma::diagvec(A) > 1e-7);
 
-    if (arma::norm(b(idx), "inf") < lambdaMax) break;
+    if (arma::norm(b(idx), "inf") < cvgTargetLambda) break;
 
     lda(idx) = arma::solve(A(idx, idx), b(idx));
 
@@ -1150,12 +1154,10 @@ const std::string SolverHFBGradient::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"state.", state.info(true)},
+      {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"interaction", interaction.info(true)},
-      {"multipoleOp.", multipoleOperators.info(true)},
+      {"maxIt.", Tools::infoStr(maxIter)},
       {"status", Solver::statusStr[status]},
-      //  {"geomOp.", geometricalOperators.info(true)},
     },
     true);
   }
@@ -1164,16 +1166,16 @@ const std::string SolverHFBGradient::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"SolverHFBGradient", ""},
-      {"state.", state.info(true)},
+      {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"interaction", interaction.info(true)},
-      {"multipoleOp.", multipoleOperators.info(true)},
-      {"status", Solver::statusStr[status]},
-      // {"geomOp.", geometricalOperators.info(true)},
+      {"inter.", interaction.info(true)},
       {"maxIt.", Tools::infoStr(maxIter)},
       {"target", Tools::infoStr(cvgTarget)},
-      {"litMax", Tools::infoStr(lambdaIterMax)},
-      {"ltarg.", Tools::infoStr(lambdaMax)},
+      {"status", Solver::statusStr[status]},
+      {"multipoleOp.", multipoleOperators.info(true)},
+      // {"geomOp.", geometricalOperators.info(true)},
+      {"litMax", Tools::infoStr(maxIterLambda)},
+      {"ltarg.", Tools::infoStr(cvgTargetLambda)},
     },
     false);
   }

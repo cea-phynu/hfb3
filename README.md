@@ -1,6 +1,6 @@
 ![HFB3 logo](misc/imgs/hfb3.png)
 
-**Version:** 1.0.10  
+**Version:** 1.0.0  
 **Authors:** N. Dubray, J.-P. Ebran, P. Carpentier, M. Frosini, A. Zdeb, N. Pillet, J. Newsome, M. Verrière, G. Accorto, D. Regnier.  
 **Copyright:** CEA, DAM F-91297 Arpajon, France. All rights reserved.  
 **License:** GNU GENERAL PUBLIC LICENSE v3 or higher.

@@ -87,7 +87,7 @@ std::list<KeyStruct > Interaction::validKeys =
 //==============================================================================
 
 /**
- * Constructor from a pointer to a State instance and a DataTree instance.
+ * Constructor from an interaction name and a pointer to a State instance.
  */
 
 Interaction::Interaction(const std::string &_interactionName, State *_state) :
@@ -103,7 +103,7 @@ Interaction::Interaction(const std::string &_interactionName, State *_state) :
 //==============================================================================
 
 /**
- * Constructor from a pointer to a State instance and a DataTree instance.
+ * Constructor from a DataTree instance and a pointer to a State instance.
  */
 
 Interaction::Interaction(DataTree _dataTree, State *_state) :
@@ -361,8 +361,6 @@ const std::map<std::string, double> Interaction::getEnergyContributions(void) co
 std::shared_ptr<Field> Interaction::operator()(std::string name, INT id)
 {
   DBG_ENTER;
-
-  // INFO("new try name='%s' id=%d", name.c_str(), id);
 
   INT idc = 0;
   for (auto f: fieldsList)

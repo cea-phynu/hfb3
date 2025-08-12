@@ -67,6 +67,13 @@ DataTree IOmsgp::fromContent(const std::string &content)
   {
     try
     {
+      auto val = k.second.as<bool>();
+      result.set(k.first, val);
+    }
+    catch (...) { }
+
+    try
+    {
       auto val = k.second.as<INT>();
       result.set(k.first, val);
     }
@@ -229,6 +236,12 @@ std::string IOmsgp::serializeDataTree(const DataTree &d)
   INT size = (INT)(d.size() - d.emptyKeys.size());
 
   pk.pack_map(size);
+
+  for (auto &it : d.boolMap)
+  {
+    pk.pack(it.first);
+    pk.pack(it.second);
+  }
 
   for (auto &it : d.intMap)
   {

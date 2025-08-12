@@ -27,9 +27,24 @@
 #include <string>
 #include <list>
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 class DataTree;
 
-/** \brief A struct to store ax key with its description, default value and type.
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Helper macro to append to an std::list).
+#define ADDLIST(A,B) A.insert(A.end(), B.begin(), B.end())
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** \brief A struct to store a key with its description, default value and type.
  */
 
 struct KeyStruct
@@ -39,6 +54,10 @@ struct KeyStruct
   std::string defaultValue;
   std::string type;
 };
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
 
 /** \brief General parameters.
  *
@@ -53,8 +72,13 @@ public:
   General(void);                                                       // #TEST#
   General(const DataTree &dataTree);                                   // #TEST#
 
+  /// Global list of keys.
+  std::list<KeyStruct > globalValidKeys;
+
   /// List of keys used by this class.
   static std::list<KeyStruct > validKeys;
+
+  void setGlobalValidKeys(void);
 
   /// Possible compatibility values,
   enum

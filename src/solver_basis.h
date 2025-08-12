@@ -52,7 +52,7 @@ public:
   //============================================================================
 
   void init(void);                                                     // #TEST#
-  INT nextIter(void);                                                  // #TEST#
+  bool nextIter(void);                                                 // #TEST#
   void finalize(void);                                                 // #TEST#
   bool calcHFB(const arma::vec &, const std::string &label = "");      // #TEST#
   const std::string info(bool isShort = USE_SHORT_INFO) const;         // #TEST#

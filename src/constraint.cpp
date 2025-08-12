@@ -300,12 +300,11 @@ std::map<std::string, Constraint> Constraint::fromDataTree(const DataTree &dataT
       if (dataTree.get(val, "constraints/" + equivType))
       {
         std::string type = "";
-        INT Z = 0;
-        INT N = 0;
-        dataTree.get(N, "system/nNeut", true);
-        dataTree.get(Z, "system/nProt", true);
-        ASSERT(N > 0, "Can not use beta constraint(s) without 'system/nNeut' and 'system/nProt'.");
-        ASSERT(Z > 0, "Can not use beta constraint(s) without 'system/nNeut' and 'system/nProt'.");
+
+        System system(dataTree);
+        INT Z = system.nProt;
+        INT N = system.nNeut;
+
         double A = double(Z) + double(N);
 
         double parts = -1.0;

@@ -186,7 +186,7 @@ public :
   INT sMax = 0;
 
   /// The number of oscillator shells.
-  INT nOscil = 0;
+  INT nOscil = 11;
 
   /// The global maximum value of \f$n_z + 1\f$.
   INT n_zGlobalMax = 0;
@@ -210,13 +210,13 @@ public :
   INT n_zMaxImposed = 24;
 
   ///  The "deformation" of the basis.
-  double g_q = 0.0;
+  double g_q = 1.0;
 
   /// The \f$b_\perp\f$ parameter.
-  double b_r = 0.0;
+  double b_r = 1.5;
 
   /// The \f$b_z\f$ parameter.
-  double b_z = 0.0;
+  double b_z = 1.5;
 
   /// The n_zMax values in berger2ct.
   IVEC n_zMaxBerger;

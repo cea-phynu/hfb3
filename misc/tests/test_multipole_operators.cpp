@@ -142,21 +142,21 @@ TEST(MultipoleOperators, MultipoleOperators)
     // INFO("%14.10f", multipoleOperators.qlm(3, 2));
     // INFO("%14.10f", multipoleOperators.qlm(4, 2));
 
-    ASSERT_NEAR(multipoleOperators.qlm(0, 0),   6.2060855122, err);
-    ASSERT_NEAR(multipoleOperators.qlm(1, 0),  -0.0000000283, err);
-    ASSERT_NEAR(multipoleOperators.qlm(2, 0),   6.3796773000, err);
-    ASSERT_NEAR(multipoleOperators.qlm(3, 0),   0.0000001754, err);
-    ASSERT_NEAR(multipoleOperators.qlm(4, 0), 137.3175699744, err);
-    ASSERT_NEAR(multipoleOperators.qlm(0, 1),   5.6418958355, err);
-    ASSERT_NEAR(multipoleOperators.qlm(1, 1),   0.0000000283, err);
-    ASSERT_NEAR(multipoleOperators.qlm(2, 1),   3.6203227000, err);
-    ASSERT_NEAR(multipoleOperators.qlm(3, 1),   0.0000003025, err);
-    ASSERT_NEAR(multipoleOperators.qlm(4, 1),  40.7763183346, err);
-    ASSERT_NEAR(multipoleOperators.qlm(0, 2),  11.8479813477, err);
+    ASSERT_NEAR(multipoleOperators.qlm(0, 0),   6.2060854344, err);
+    ASSERT_NEAR(multipoleOperators.qlm(1, 0),  -0.0000000086, err);
+    ASSERT_NEAR(multipoleOperators.qlm(2, 0),   6.3796768665, err);
+    ASSERT_NEAR(multipoleOperators.qlm(3, 0),   0.0000016739, err);
+    ASSERT_NEAR(multipoleOperators.qlm(4, 0), 137.3177593081, err);
+    ASSERT_NEAR(multipoleOperators.qlm(0, 1),   5.6418958363, err);
+    ASSERT_NEAR(multipoleOperators.qlm(1, 1),   0.0000000086, err);
+    ASSERT_NEAR(multipoleOperators.qlm(2, 1),   3.6203231335, err);
+    ASSERT_NEAR(multipoleOperators.qlm(3, 1),   0.0000019036, err);
+    ASSERT_NEAR(multipoleOperators.qlm(4, 1),  40.7764698021, err);
+    ASSERT_NEAR(multipoleOperators.qlm(0, 2),  11.8479812707, err);
     ASSERT_NEAR(multipoleOperators.qlm(1, 2),  -0.0000000000, err);
     ASSERT_NEAR(multipoleOperators.qlm(2, 2),  10.0000000000, err);
-    ASSERT_NEAR(multipoleOperators.qlm(3, 2),   0.0000004779, err);
-    ASSERT_NEAR(multipoleOperators.qlm(4, 2), 178.0938883090, err);
+    ASSERT_NEAR(multipoleOperators.qlm(3, 2),   0.0000035775, err);
+    ASSERT_NEAR(multipoleOperators.qlm(4, 2), 178.0942291102, err);
   }
 
   {
@@ -183,21 +183,21 @@ TEST(MultipoleOperators, MultipoleOperators)
     // INFO("%14.10f", multipoleOperators.qlm(3, 2));
     // INFO("%14.10f", multipoleOperators.qlm(4, 2));
 
-    ASSERT_NEAR(multipoleOperators.qlm(0, 0),  6.2060853073, err);
-    ASSERT_NEAR(multipoleOperators.qlm(1, 0), -0.0000000184, err);
-    ASSERT_NEAR(multipoleOperators.qlm(2, 0),  6.3539582780, err);
-    ASSERT_NEAR(multipoleOperators.qlm(3, 0), -0.0000277463, err);
-    ASSERT_NEAR(multipoleOperators.qlm(4, 0), 64.2798161428, err);
-    ASSERT_NEAR(multipoleOperators.qlm(0, 1),  5.6418958355, err);
-    ASSERT_NEAR(multipoleOperators.qlm(1, 1),  0.0000000184, err);
-    ASSERT_NEAR(multipoleOperators.qlm(2, 1),  3.6460417220, err);
-    ASSERT_NEAR(multipoleOperators.qlm(3, 1), -0.0000282836, err);
-    ASSERT_NEAR(multipoleOperators.qlm(4, 1), 15.9105310677, err);
-    ASSERT_NEAR(multipoleOperators.qlm(0, 2), 11.8479811427, err);
+    ASSERT_NEAR(multipoleOperators.qlm(0, 0),  6.2060836799, err);
+    ASSERT_NEAR(multipoleOperators.qlm(1, 0), -0.0000001621, err);
+    ASSERT_NEAR(multipoleOperators.qlm(2, 0),  6.3539566216, err);
+    ASSERT_NEAR(multipoleOperators.qlm(3, 0), -0.0001746998, err);
+    ASSERT_NEAR(multipoleOperators.qlm(4, 0), 64.2799825149, err);
+    ASSERT_NEAR(multipoleOperators.qlm(0, 1),  5.6418958352, err);
+    ASSERT_NEAR(multipoleOperators.qlm(1, 1),  0.0000001621, err);
+    ASSERT_NEAR(multipoleOperators.qlm(2, 1),  3.6460433784, err);
+    ASSERT_NEAR(multipoleOperators.qlm(3, 1), -0.0001754108, err);
+    ASSERT_NEAR(multipoleOperators.qlm(4, 1), 15.9107568066, err);
+    ASSERT_NEAR(multipoleOperators.qlm(0, 2), 11.8479795151, err);
     ASSERT_NEAR(multipoleOperators.qlm(1, 2), -0.0000000000, err);
     ASSERT_NEAR(multipoleOperators.qlm(2, 2), 10.0000000000, err);
-    ASSERT_NEAR(multipoleOperators.qlm(3, 2), -0.0000560299, err);
-    ASSERT_NEAR(multipoleOperators.qlm(4, 2), 80.1903472105, err);
+    ASSERT_NEAR(multipoleOperators.qlm(3, 2), -0.0003501106, err);
+    ASSERT_NEAR(multipoleOperators.qlm(4, 2), 80.1907393215, err);
   }
 }
 

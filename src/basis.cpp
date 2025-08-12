@@ -30,19 +30,18 @@
 
 std::list<KeyStruct > Basis::validKeys =
   {
-    { "basis/useStateBasis"   , "If possible, re-use the basis parameters from the 'state/basis' section", "True", "B" },
-    { "basis/d_0"             , "d_0 basis deformation parameter"                                        , "10.0", "D" },
-    { "basis/b_r"             , "b_r basis deformation parameter"                                        , "1.9" , "D" },
-    { "basis/b_z"             , "b_z basis deformation parameter"                                        , "1.9" , "D" },
-    { "basis/nOscil"          , "Number of major HO shells in the basis"                                 , "11"  , "I" },
-    { "basis/n_zMax"          , "Maximum value of n_z in the basis"                                      , "24"  , "I" },
-    { "basis/g_q"             , "Previous g_q basis truncation parameter"                                , "1.0" , "D" },
-    { "state/basis/d_0"       , "Previous d_0 basis deformation parameter"                               , ""    , "D" },
-    { "state/basis/b_r"       , "Previous b_r basis deformation parameter"                               , ""    , "D" },
-    { "state/basis/b_z"       , "Previous b_z basis deformation parameter"                               , ""    , "D" },
-    { "state/basis/nOscil"    , "Previous Number of major HO shells in the basis"                        , ""    , "I" },
-    { "state/basis/n_zMax"    , "Previous Maximum value of n_z in the basis"                             , ""    , "I" },
-    { "state/basis/g_q"       , "Previous g_q basis truncation parameter"                                , ""    , "D" },
+    { "basis/d_0"         , "d_0 basis deformation parameter"                , "10.0", "D" },
+    { "basis/b_r"         , "b_r basis deformation parameter"                , "1.9" , "D" },
+    { "basis/b_z"         , "b_z basis deformation parameter"                , "1.9" , "D" },
+    { "basis/nOscil"      , "Number of major HO shells in the basis"         , "11"  , "I" },
+    { "basis/n_zMax"      , "Maximum value of n_z in the basis"              , "24"  , "I" },
+    { "basis/g_q"         , "g_q basis truncation parameter"                 , "1.0" , "D" },
+    { "state/basis/d_0"   , "Previous d_0 basis deformation parameter"       , ""    , "D" },
+    { "state/basis/b_r"   , "Previous b_r basis deformation parameter"       , ""    , "D" },
+    { "state/basis/b_z"   , "Previous b_z basis deformation parameter"       , ""    , "D" },
+    { "state/basis/nOscil", "Previous Number of major HO shells in the basis", ""    , "I" },
+    { "state/basis/n_zMax", "Previous Maximum value of n_z in the basis"     , ""    , "I" },
+    { "state/basis/g_q"   , "Previous g_q basis truncation parameter"        , ""    , "D" },
   };
 
 //==============================================================================

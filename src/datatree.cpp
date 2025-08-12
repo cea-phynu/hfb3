@@ -18,8 +18,6 @@
 
 #include <regex>
 #include "datatree.h"
-#include "action.h"
-#include "solver_alternator.h"
 #include "tools.h"
 #include "io_amedee.h"
 #include "io_berger.h"
@@ -27,14 +25,6 @@
 #include "io_msgp.h"
 #include "io_json.h"
 #include "general.h"
-#include "interaction.h"
-#include "solver.h"
-#include "solver_basis.h"
-#include "solver_hfb_broyden.h"
-#include "solver_hfb_gradient.h"
-#include "solver_ws.h"
-#include "state.h"
-#include "system.h"
 #include "io_hfb3.h"
 
 /** \file
@@ -45,10 +35,7 @@
 //==============================================================================
 //==============================================================================
 
-/// Helper macro to append to an std::list).
-#define ADDLIST(A,B) A.insert(A.end(), B.begin(), B.end())
-
-/// Helper macro to append extract keys matching a pattern from an std::map.
+/// Helper macro to insert keys matching a pattern to an std::map.
 #define FIND_AND_INSERT(K, M) for (auto &K : M) if (K.first.find(pattern) != std::string::npos) result.insert(K.first)
 
 //==============================================================================
@@ -60,25 +47,12 @@
 
 DataTree::DataTree(const std::string &filename)
 {
+  general.setGlobalValidKeys();
+
   if (filename != "")
   {
     (*this) = fromContent(Tools::readFile(filename));
   }
-
-  ADDLIST(listOfKeys,            Action::validKeys);
-  ADDLIST(listOfKeys,  SolverAlternator::validKeys);
-  ADDLIST(listOfKeys,             Basis::validKeys);
-  ADDLIST(listOfKeys,            Solver::validKeys);
-  ADDLIST(listOfKeys,       SolverBasis::validKeys);
-  ADDLIST(listOfKeys,  SolverHFBBroyden::validKeys);
-  ADDLIST(listOfKeys, SolverHFBGradient::validKeys);
-  ADDLIST(listOfKeys,          SolverWS::validKeys);
-  ADDLIST(listOfKeys,        Constraint::validKeys);
-  ADDLIST(listOfKeys,       Interaction::validKeys);
-  ADDLIST(listOfKeys,            Mixing::validKeys);
-  ADDLIST(listOfKeys,             State::validKeys);
-  ADDLIST(listOfKeys,            System::validKeys);
-  ADDLIST(listOfKeys,           General::validKeys);
 }
 
 //==============================================================================
@@ -102,6 +76,7 @@ void DataTree::save(const std::string &filename, bool verbose) const
 UINT DataTree::size(void) const
 {
   UINT size = 0;
+  size += boolMap.size();
   size += intMap.size();
   size += doubleMap.size();
   size += stringMap.size();
@@ -182,6 +157,7 @@ bool DataTree::isEmpty(void) const
 
 void DataTree::clear(void)
 {
+  boolMap.clear();
   intMap.clear();
   doubleMap.clear();
   stringMap.clear();
@@ -250,6 +226,15 @@ INT DataTree::del(const std::string &key)
 
   if (key[key.size() - 1] == '/')
   {
+    for (auto &i : boolMap)
+    {
+      if (i.first.compare(0, key.size(), key) == 0)
+      {
+        nbDeleted++;
+        boolMap.erase(i.first);
+      }
+    }
+
     for (auto &i : intMap)
     {
       if (i.first.compare(0, key.size(), key) == 0)
@@ -441,6 +426,12 @@ INT DataTree::del(const std::string &key)
   }
   else
   {
+    if (boolMap.count(key) == 1)
+    {
+      nbDeleted++;
+      boolMap.erase(key);
+    }
+
     if (intMap.count(key) == 1)
     {
       nbDeleted++;
@@ -581,21 +572,6 @@ INT DataTree::del(const std::string &key)
  *  \param val The value.
  */
 
-void DataTree::set(const std::string &key, const bool &val)
-{
-  set(key, val ? std::string("True") : std::string("False"));
-}
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-/** Create or update a (key, std::string) couple in the data tree.
- *
- *  \param key The key.
- *  \param val The value.
- */
-
 void DataTree::set(const std::string &key, const char *val)
 {
   set(key, std::string(val));
@@ -613,6 +589,9 @@ void DataTree::set(const std::string &key, const char *val)
 
 void DataTree::set(const std::string &key, const std::string &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "S"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   stringMap[key] = std::regex_replace(val, std::regex("\n"), " ");
 }
 
@@ -620,7 +599,7 @@ void DataTree::set(const std::string &key, const std::string &val)
 //==============================================================================
 //==============================================================================
 
-/** Create or set an empty key.
+/** Delete a key or create an empty key.
  *
  *  \param key The key.
  */
@@ -635,6 +614,24 @@ void DataTree::set(const std::string &key)
 //==============================================================================
 //==============================================================================
 
+/** Create or update a (key, bool) couple in the data tree.
+ *
+ *  \param key The key.
+ *  \param val The value.
+ */
+
+void DataTree::set(const std::string &key, const bool &val)
+{
+  if (strict_mode)
+    ASSERT(isValid(key, "B"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
+  boolMap[key] = val;
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** Create or update a (key, INT) couple in the data tree.
  *
  *  \param key The key.
@@ -643,10 +640,10 @@ void DataTree::set(const std::string &key)
 
 void DataTree::set(const std::string &key, INT val)
 {
-  if (doubleMap.find(key) != doubleMap.end()) // set as double if doubleMap key already exists
-    doubleMap[key] = double(val);
-  else
-    intMap[key] = val;
+  if (strict_mode)
+    ASSERT(isValid(key, "I"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
+  intMap[key] = val;
 }
 
 //==============================================================================
@@ -661,7 +658,9 @@ void DataTree::set(const std::string &key, INT val)
 
 void DataTree::set(const std::string &key, double val)
 {
-  intMap.erase(key);
+  if (strict_mode)
+    ASSERT(isValid(key, "D"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   doubleMap[key] = val;
 }
 
@@ -677,6 +676,9 @@ void DataTree::set(const std::string &key, double val)
 
 void DataTree::set(const std::string &key, const arma::vec &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "V"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   vecMap[key] = val;
 }
 
@@ -692,6 +694,9 @@ void DataTree::set(const std::string &key, const arma::vec &val)
 
 void DataTree::set(const std::string &key, const arma::mat &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "M"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   matMap[key] = val;
 }
 
@@ -707,6 +712,9 @@ void DataTree::set(const std::string &key, const arma::mat &val)
 
 void DataTree::set(const std::string &key, const arma::cube &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "C"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   cubeMap[key] = val;
 }
 
@@ -722,6 +730,9 @@ void DataTree::set(const std::string &key, const arma::cube &val)
 
 void DataTree::set(const std::string &key, const IVEC &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "IV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   ivecMap[key] = val;
 }
 
@@ -737,6 +748,9 @@ void DataTree::set(const std::string &key, const IVEC &val)
 
 void DataTree::set(const std::string &key, const IMAT &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "IM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   imatMap[key] = val;
 }
 
@@ -752,6 +766,9 @@ void DataTree::set(const std::string &key, const IMAT &val)
 
 void DataTree::set(const std::string &key, const ICUBE &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "IC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   icubeMap[key] = val;
 }
 
@@ -767,6 +784,9 @@ void DataTree::set(const std::string &key, const ICUBE &val)
 
 void DataTree::set(const std::string &key, const Multi<IVEC> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MIV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiIVecMap[key] = val;
 }
 
@@ -782,6 +802,9 @@ void DataTree::set(const std::string &key, const Multi<IVEC> &val)
 
 void DataTree::set(const std::string &key, const Multi<IMAT> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MIM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiIMatMap[key] = val;
 }
 
@@ -797,6 +820,9 @@ void DataTree::set(const std::string &key, const Multi<IMAT> &val)
 
 void DataTree::set(const std::string &key, const Multi<ICUBE> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MIC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiICubeMap[key] = val;
 }
 
@@ -812,6 +838,9 @@ void DataTree::set(const std::string &key, const Multi<ICUBE> &val)
 
 void DataTree::set(const std::string &key, const UVEC &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "UV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   uvecMap[key] = val;
 }
 
@@ -827,6 +856,9 @@ void DataTree::set(const std::string &key, const UVEC &val)
 
 void DataTree::set(const std::string &key, const UMAT &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "UM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   umatMap[key] = val;
 }
 
@@ -842,6 +874,9 @@ void DataTree::set(const std::string &key, const UMAT &val)
 
 void DataTree::set(const std::string &key, const UCUBE &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "UC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   ucubeMap[key] = val;
 }
 
@@ -857,6 +892,9 @@ void DataTree::set(const std::string &key, const UCUBE &val)
 
 void DataTree::set(const std::string &key, const Multi<UVEC> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MUV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiUVecMap[key] = val;
 }
 
@@ -872,6 +910,9 @@ void DataTree::set(const std::string &key, const Multi<UVEC> &val)
 
 void DataTree::set(const std::string &key, const Multi<UMAT> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MUM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiUMatMap[key] = val;
 }
 
@@ -887,6 +928,9 @@ void DataTree::set(const std::string &key, const Multi<UMAT> &val)
 
 void DataTree::set(const std::string &key, const Multi<UCUBE> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MUC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiUCubeMap[key] = val;
 }
 
@@ -902,6 +946,9 @@ void DataTree::set(const std::string &key, const Multi<UCUBE> &val)
 
 void DataTree::set(const std::string &key, const Multi<arma::vec> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiVecMap[key] = val;
 }
 
@@ -917,6 +964,9 @@ void DataTree::set(const std::string &key, const Multi<arma::vec> &val)
 
 void DataTree::set(const std::string &key, const Multi<arma::mat> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiMatMap[key] = val;
 }
 
@@ -932,6 +982,9 @@ void DataTree::set(const std::string &key, const Multi<arma::mat> &val)
 
 void DataTree::set(const std::string &key, const Multi<arma::cube> &val)
 {
+  if (strict_mode)
+    ASSERT(isValid(key, "MC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   multiCubeMap[key] = val;
 }
 
@@ -951,7 +1004,8 @@ bool DataTree::get(INT &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  // ASSERT(isValid(key, "I"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode)
+    ASSERT(isValid(key, "I"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (intMap.count(key) == 0)
   {
@@ -983,12 +1037,21 @@ bool DataTree::get(bool &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  bool foundInDataTree = false;
-  bool result = DataTree::getB(key, ignore, &foundInDataTree);
+  if (strict_mode)
+    ASSERT(isValid(key, "B"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
-  if (foundInDataTree) target = result;
+  if (boolMap.count(key) == 0)
+  {
+    if (!ignore)
+    {
+      ERROR("no bool key '" + key + "'");
+    }
 
-  DBG_RETURN(foundInDataTree);
+    DBG_RETURN(false);
+  }
+
+  target = boolMap.find(key)->second;
+  DBG_RETURN(true);
 }
 
 //==============================================================================
@@ -1007,24 +1070,17 @@ bool DataTree::get(double &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "D"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (doubleMap.count(key) == 0)
   {
-    INT fromInt;
-
-    if (get(fromInt, key, ignore))
+    if (!ignore)
     {
-      target = (double)fromInt;
-      DBG_RETURN(true);
+      ERROR("no double key '" + key + "'");
     }
-    else
-    {
-      if (!ignore)
-      {
-        ERROR("no double or int key '" + key + "'");
-      }
 
-      DBG_RETURN(false);
-    }
+    DBG_RETURN(false);
   }
 
   target = doubleMap.find(key)->second;
@@ -1046,6 +1102,10 @@ bool DataTree::get(double &target, const std::string &key, bool ignore) const
 bool DataTree::get(std::string &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "S"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
 
   if (stringMap.count(key) == 0)
   {
@@ -1077,6 +1137,10 @@ bool DataTree::get(arma::vec &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "V"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
+
   if (vecMap.count(key) == 0)
   {
     if (!ignore)
@@ -1106,6 +1170,10 @@ bool DataTree::get(arma::vec &target, const std::string &key, bool ignore) const
 bool DataTree::get(arma::mat &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "M"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
 
   if (matMap.count(key) == 0)
   {
@@ -1137,6 +1205,9 @@ bool DataTree::get(arma::cube &target, const std::string &key, bool ignore) cons
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "C"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (cubeMap.count(key) == 0)
   {
     if (!ignore)
@@ -1166,6 +1237,9 @@ bool DataTree::get(arma::cube &target, const std::string &key, bool ignore) cons
 bool DataTree::get(UVEC &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "UV"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (uvecMap.count(key) == 0)
   {
@@ -1197,6 +1271,9 @@ bool DataTree::get(UMAT &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "UM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (umatMap.count(key) == 0)
   {
     if (!ignore)
@@ -1226,6 +1303,9 @@ bool DataTree::get(UMAT &target, const std::string &key, bool ignore) const
 bool DataTree::get(UCUBE &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "UC"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (ucubeMap.count(key) == 0)
   {
@@ -1257,6 +1337,9 @@ bool DataTree::get(Multi<UVEC > &target, const std::string &key, bool ignore) co
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "MUV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (multiUVecMap.count(key) == 0)
   {
     if (!ignore)
@@ -1286,6 +1369,9 @@ bool DataTree::get(Multi<UVEC > &target, const std::string &key, bool ignore) co
 bool DataTree::get(Multi<UMAT > &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "MUM"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (multiUMatMap.count(key) == 0)
   {
@@ -1317,6 +1403,9 @@ bool DataTree::get(Multi<UCUBE > &target, const std::string &key, bool ignore) c
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "MUC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (multiUCubeMap.count(key) == 0)
   {
     if (!ignore)
@@ -1346,6 +1435,9 @@ bool DataTree::get(Multi<UCUBE > &target, const std::string &key, bool ignore) c
 bool DataTree::get(IVEC &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "IV"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (ivecMap.count(key) == 0)
   {
@@ -1377,6 +1469,9 @@ bool DataTree::get(IMAT &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "IM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (imatMap.count(key) == 0)
   {
     if (!ignore)
@@ -1406,6 +1501,9 @@ bool DataTree::get(IMAT &target, const std::string &key, bool ignore) const
 bool DataTree::get(ICUBE &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "IC"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (icubeMap.count(key) == 0)
   {
@@ -1437,6 +1535,9 @@ bool DataTree::get(Multi<IVEC > &target, const std::string &key, bool ignore) co
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "MIV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (multiIVecMap.count(key) == 0)
   {
     if (!ignore)
@@ -1466,6 +1567,9 @@ bool DataTree::get(Multi<IVEC > &target, const std::string &key, bool ignore) co
 bool DataTree::get(Multi<IMAT > &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "MIM"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (multiIMatMap.count(key) == 0)
   {
@@ -1497,6 +1601,9 @@ bool DataTree::get(Multi<ICUBE > &target, const std::string &key, bool ignore) c
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "MIC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (multiICubeMap.count(key) == 0)
   {
     if (!ignore)
@@ -1526,6 +1633,9 @@ bool DataTree::get(Multi<ICUBE > &target, const std::string &key, bool ignore) c
 bool DataTree::get(Multi<arma::vec> &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "MV"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
   if (multiVecMap.count(key) == 0)
   {
@@ -1557,6 +1667,9 @@ bool DataTree::get(Multi<arma::mat> &target, const std::string &key, bool ignore
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "MM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (multiMatMap.count(key) == 0)
   {
     if (!ignore)
@@ -1587,6 +1700,9 @@ bool DataTree::get(Multi<arma::cube > &target, const std::string &key, bool igno
 {
   DBG_ENTER;
 
+  if (strict_mode)
+    ASSERT(isValid(key, "MC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
   if (multiCubeMap.count(key) == 0)
   {
     if (!ignore)
@@ -1605,7 +1721,7 @@ bool DataTree::get(Multi<arma::cube > &target, const std::string &key, bool igno
 //==============================================================================
 //==============================================================================
 
-/** Get an bool from the data tree.
+/** Get a bool from the data tree.
  *
  *  \param key The key.
  *  \param ignore If true, print a warning if the key does not exist.
@@ -1613,30 +1729,14 @@ bool DataTree::get(Multi<arma::cube > &target, const std::string &key, bool igno
 
 bool DataTree::getB(const std::string &key, bool ignore, bool *isFound) const
 {
-  if (isFound != NULL) *isFound = true;
+  if (strict_mode)
+    ASSERT(isValid(key, "B"), "Invalid DataTree: wrong type for key: '" + key + "'");
 
-  INT resultI = 0;
-  if (get(resultI, key, true))
-  {
-    if (resultI == 1) return true;
-    if (resultI == 0) return false;
-    if (!ignore) Tools::warning("key " + key + ": value " + PF("%d", resultI) + " can not be interpreted as a boolean (should be one of {0, 1})");
-  }
-
-  std::string resultS = "";
-  if (get(resultS, key, true))
-  {
-    if (resultS == "True" || resultS == "true" || resultS == "T") return true;
-    if (resultS == "False" || resultS == "false" || resultS == "F") return false;
-    if (!ignore) Tools::warning("key " + key + ": value '" + resultS + "' can not be interpreted as a boolean (should be one of {'True', 'true', 'T', 'False', 'false', 'F'})");
-  }
-
-  if (!ignore) Tools::warning("no int or std::string key '" + key + "'");
-
-  if (isFound != NULL) *isFound = false;
-
-  // dangerous
-  return false;
+  bool result = false;
+  bool found = false;
+  found = get(result, key, ignore);
+  if (isFound != NULL) *isFound = found;
+  return result;
 }
 
 //==============================================================================
@@ -2377,6 +2477,7 @@ DataTree DataTree::operator+(const DataTree &other) const
 
 void DataTree::merge(const DataTree &other)
 {
+  for (auto &key : other.boolMap        ) set(key.first, key.second);
   for (auto &key : other.intMap         ) set(key.first, key.second);
   for (auto &key : other.doubleMap      ) set(key.first, key.second);
   for (auto &key : other.stringMap      ) set(key.first, key.second);
@@ -2411,10 +2512,10 @@ void DataTree::merge(const DataTree &other)
 
 void DataTree::validate(void) const
 {
-
   // Look for duplicates
 
   std::set<std::string> keys;
+  for (auto &key : boolMap      ) { if (!(keys.insert(key.first).second)) ERROR("Invalid DataTree: duplicate key found: '" + key.first + "'"); };
   for (auto &key : intMap       ) { if (!(keys.insert(key.first).second)) ERROR("Invalid DataTree: duplicate key found: '" + key.first + "'"); };
   for (auto &key : doubleMap    ) { if (!(keys.insert(key.first).second)) ERROR("Invalid DataTree: duplicate key found: '" + key.first + "'"); };
   for (auto &key : uvecMap      ) { if (!(keys.insert(key.first).second)) ERROR("Invalid DataTree: duplicate key found: '" + key.first + "'"); };
@@ -2438,7 +2539,7 @@ void DataTree::validate(void) const
   for (auto &key : stringMap    ) { if (!(keys.insert(key.first).second)) ERROR("Invalid DataTree: duplicate key found: '" + key.first + "'"); };
 
   // Ckeck key types
-
+  for (auto &key : boolMap      ) { if (!(isValid(key.first, "B"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
   for (auto &key : intMap       ) { if (!(isValid(key.first, "I"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
   for (auto &key : doubleMap    ) { if (!(isValid(key.first, "D"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
   for (auto &key : uvecMap      ) { if (!(isValid(key.first, "UV" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
@@ -2506,7 +2607,7 @@ bool DataTree::contains(const std::string &key, const std::string &type) const
 
 bool DataTree::containsPattern(const std::string &pattern) const
 {
-
+  for (auto &key : boolMap      ) if (key.first.find(pattern) != std::string::npos) return true;
   for (auto &key : intMap       ) if (key.first.find(pattern) != std::string::npos) return true;
   for (auto &key : doubleMap    ) if (key.first.find(pattern) != std::string::npos) return true;
   for (auto &key : stringMap    ) if (key.first.find(pattern) != std::string::npos) return true;
@@ -2536,31 +2637,40 @@ bool DataTree::containsPattern(const std::string &pattern) const
 //==============================================================================
 //==============================================================================
 
-/** Test if a key is valid.
+/** Return the type of a key.
+ */
+
+const std::string DataTree::getType(const std::string &key) const
+{
+  for (auto &o : general.globalValidKeys)
+  {
+    if (o.key != key ) continue;
+
+    return o.type;
+  }
+
+  return "";
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Test if a couple (key, type) is valid.
  */
 
 bool DataTree::isValid(const std::string &key, const std::string &type) const
 {
-  // Get valid keys from some classes
-
-  for (auto &o : listOfKeys)
+  for (auto &o : general.globalValidKeys)
   {
-    if (o.key != key) continue;
+    if (o.key != key ) continue;
+    if ((type != "") && (o.type != type)) continue;
 
-    if (o.type == "N")
-    {
-      double toto;
-      if (get(toto, key, true)) return true;
-    }
-
-    if (o.type == "B")
-    {
-      bool toto;
-      if (get(toto, key, true)) return true;
-    }
-
-    if ((key == o.key)&&(type == o.type)) return true;
+    return true;
   }
+
+  DEBUG("%ld keys", general.globalValidKeys.size());
+  INFO("invalid key: " + key + " type: " + type);
 
   return false;
 }
@@ -2569,7 +2679,7 @@ bool DataTree::isValid(const std::string &key, const std::string &type) const
 //==============================================================================
 //==============================================================================
 
-/** Get a DataTree instance filled with default values.
+/** Get a DataTree instance filled with default values for valid keys.
   */
 
 DataTree DataTree::getDefault(void)
@@ -2593,10 +2703,10 @@ void DataTree::setDefault(void)
 {
   DBG_ENTER;
 
-  for (auto &key: listOfKeys)
+  for (auto &o : general.globalValidKeys)
   {
-    if (!key.defaultValue.empty())
-      IOhfb3::updateDataTree(*this, key.key, key.defaultValue, "");
+    if (!o.defaultValue.empty())
+      IOhfb3::updateDataTree(*this, o.key, o.defaultValue, o.type);
   }
 
   DBG_LEAVE;

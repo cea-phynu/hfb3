@@ -43,6 +43,7 @@ std::list<KeyStruct > State::validKeys =
     { "state/converged"                  , "Converged state ?"              , "False", "B"  },
     { "state/nbIter"                     , "Number of iterations"           , "0"    , "I"  },
     { "state/calculationLength"          , "Length of the calculation [s]"  , "0.0"  , "D"  },
+    { "basis/useStateBasis"              , "If possible, use the basis of the starting state", "True" , "B"  },
   };
 
 //==============================================================================
@@ -104,8 +105,8 @@ State::State(const DataTree &dataTree) :
   // Try to construct rho and kappa from the dataTree instance
   Multi<arma::mat> multiRho;
   Multi<arma::mat> multiKappa;
-  dataTree.get(multiRho,               "state/rho", true);
-  dataTree.get(multiKappa,             "state/kappa", true);
+  dataTree.get(multiRho  , "state/rho"  , true);
+  dataTree.get(multiKappa, "state/kappa", true);
 
   if ((multiRho.size() > 2) && (multiKappa.size() > 2))
   {
@@ -205,7 +206,7 @@ State::State(const DataTree &dataTree) :
 //==============================================================================
 //==============================================================================
 
-/** Update a DataTree instance.
+/** Save the state in a DataTree instance.
  */
 
 DataTree State::getDataTree(void)

@@ -132,7 +132,7 @@ INT main(INT argc, char **argv)
     // Tools::mesg("_main_", solverAlternator.info());
 
     solverAlternator.init();
-    while(solverAlternator.nextIter() == Solver::ITERATING);
+    while(solverAlternator.nextIter());
     solverAlternator.finalize();
   }
   else if (actionStr == "info")

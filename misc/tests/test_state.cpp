@@ -125,6 +125,7 @@ TEST(State, State__)
   {
     // Construction of the datatree
     DataTree d;
+    d.strict_mode = false;
 
     Multi<arma::mat> U;
     arma::mat u0 = arma::randu(3,3);
@@ -330,6 +331,8 @@ TEST(State, getDataTree)
 
   DataTree result;
   result.merge(basis.getDataTree("state/"));
+
+
   result.set("system/nProt", 90);
   result.set("system/nNeut", 140);
   result.set("state/rho", Multi<arma::mat>());

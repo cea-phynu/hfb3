@@ -37,7 +37,7 @@ std::list<KeyStruct > Solver::validKeys =
 
 std::vector<std::string> Solver::statusStr =
   {
-    "Starting", "Iterating", "Converged", "Diverged", "Maxiter"
+    "Iterating", "Starting", "Converged", "Diverged", "Maxiter", "End of scheme"
   };
 
 //==============================================================================
@@ -106,10 +106,10 @@ void Solver::init(void)
 /** Calculate the next iteration.
  */
 
-INT Solver::nextIter(void)
+bool Solver::nextIter(void)
 {
   DBG_ENTER;
 
-  DBG_RETURN(ITERATING);
+  DBG_RETURN(true);
 }
 

@@ -155,7 +155,7 @@ void SolverBasis::init()
  * Calculate the next iteration.
  */
 
-INT SolverBasis::nextIter()
+bool SolverBasis::nextIter()
 {
   DBG_ENTER;
 
@@ -172,7 +172,7 @@ INT SolverBasis::nextIter()
 
     finalize();
 
-    DBG_RETURN(status);
+    DBG_RETURN(false);
   }
 
   bool valid;
@@ -191,6 +191,7 @@ INT SolverBasis::nextIter()
     status = Solver::MAXITER;
 
     finalize();
+    DBG_RETURN(false);
   }
 
   double convergence = minimizer.getConvergence();
@@ -202,9 +203,10 @@ INT SolverBasis::nextIter()
     status = Solver::CONVERGED;
 
     finalize();
+    DBG_RETURN(false);
   }
 
-  DBG_RETURN(status);
+  DBG_RETURN(true);
 }
 
 //==============================================================================
@@ -288,7 +290,7 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
 
   SolverAlternator solverAlternator(customDataTree, state);
   solverAlternator.init();
-  while (solverAlternator.nextIter() == Solver::ITERATING);
+  while (solverAlternator.nextIter());
   state = solverAlternator.state;
 
   value = state.converged ? state.totalEnergy: 1e99;
@@ -409,7 +411,7 @@ const std::string SolverBasis::info(bool isShort) const
     {
       {"state.", state.info(true)},
       {"basis ", state.basis.info(true)},
-      {"dim.  ", Tools::infoStr(dim)},
+      {"maxIt.", Tools::infoStr(maxIter)},
       {"status", Solver::statusStr[status]},
     }, true);
   }
