@@ -186,7 +186,7 @@ void CliParser::printKeys(void)
     {"MC", "Multi Cube" },
   };
 
-  for (auto &o : general.validKeys)
+  for (auto &o : general.globalValidKeys)
   {
     table +=
       TABLE_NORM  + o.key                + TABLE_TD
