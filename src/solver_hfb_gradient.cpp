@@ -75,7 +75,7 @@ SolverHFBGradient::SolverHFBGradient(const DataTree &dataTree) : SolverHFBGradie
 
 SolverHFBGradient::SolverHFBGradient(const DataTree &dataTree, State _state) : Solver(dataTree, _state),
   interaction(dataTree, &state),
-  discrete(&state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0,  101, 1, 151)),
+  discrete(state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0,  101, 1, 151)),
   multipoleOperators(state)
 {
   DBG_ENTER;

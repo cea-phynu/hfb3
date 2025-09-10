@@ -204,7 +204,7 @@ const std::string Field::info(bool isShort) const
 
     result += ")";
 
-    DBG_RETURN(result)
+    DBG_RETURN(result);
   }
 
 

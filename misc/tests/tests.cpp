@@ -23,6 +23,7 @@ int main(int argc, char **argv)
 {
   // only print error messages to std::cout
   msgToOut = {MSG_ERROR};
+  exitOnError = false;
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

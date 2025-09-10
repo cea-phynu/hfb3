@@ -352,7 +352,7 @@ public:
   std::set<std::string> emptyKeys;
 
   /// Enforce valid keys only.
-  bool strict_mode = false;
+  bool strict_mode = true;
 };
 
 

@@ -76,9 +76,6 @@ std::list<KeyStruct > Interaction::validKeys =
     { "interaction/rearrangementFR/m" , "Finite-range rearrangement field: m parameter"                        , ""   , "V" },
     { "interaction/spinOrbit"         , "Include a zero-range spin-orbit field"                                , ""   , "B" },
     { "interaction/spinOrbit/wso"     , "Zero-range spin-orbit field: wso parameter"                           , ""   , "V" },
-    { "interaction/spinOrbitFR/p"     , "Finite-range spin-orbit field: p parameter"                           , ""   , "V" },
-    { "interaction/spinOrbitFR/w"     , "Finite-range spin-orbit field: w parameter"                           , ""   , "V" },
-    { "interaction/spinOrbitFR/h"     , "Finite-range spin-orbit field: h parameter"                           , ""   , "V" },
     { "interaction/woodsSaxon"        , "Include a Woods-Saxon field"                                          , ""   , "B" },
   };
 
@@ -412,6 +409,8 @@ const arma::mat Interaction::getHamiltonianContributions(INT iso, INT type)
     ASSERT(!f->field(iso, type).empty(), "Empty field: " + f->name);
 
     result += f->field(iso, type);
+
+    // Tools::info(f->name + " " + Tools::strIsospin(iso) + PF(" %d", type), f->field(iso, type));
   }
 
   DBG_RETURN(result);
@@ -556,8 +555,6 @@ kinetic             False
 rearrangement       False
 rearrangementFR     False
 spinOrbit           False
-spinOrbitFR         False
-tensorFR            False
 woodsSaxon          False
 )toto");
 
@@ -776,43 +773,6 @@ spinOrbit/wso       (130.000)
   //============================================================================
   //============================================================================
 
-  if (interactionName == "DG") DBG_RETURN(noInteractionDataTree + DataTree::fromContent(
-R"toto(#!HFB3!#
-
-[interaction]
-name                DG
-cdm2                True
-central             True
-coulombSlater       True
-densityFR           True
-kinetic             True
-rearrangementFR     True
-spinOrbitFR         True
-tensorFR            True
-central/p           (    0.800,     1.24)
-central/w           (-1190.016,  109.179)
-central/b           (  800.000, -191.226)
-central/h           ( -877.422,  133.441)
-central/m           ( 1198.923, -277.509)
-densityFR/p         (    0.600)
-densityFR/w         ( 1836.200)
-densityFR/b         (  581.600)
-densityFR/h         (  377.600)
-densityFR/m         ( -633.220)
-densityFR/a         (    0.33333333333333333)
-rearrangementFR/p   (    0.600)
-rearrangementFR/w   ( 1836.200)
-rearrangementFR/b   (  581.600)
-rearrangementFR/h   (  377.600)
-rearrangementFR/m   ( -633.220)
-rearrangementFR/a   (    0.33333333333333333)
-spinOrbitFR/p       (    0.200)
-spinOrbitFR/w       (  145.483)
-spinOrbitFR/h       (   29.634)
-tensorFR/p          (    1.100)
-tensorFR/w          ( -392.544)
-tensorFR/h          ( -196.481)
-)toto"));
 
   //============================================================================
   //============================================================================
@@ -896,14 +856,6 @@ coulombExact        True
   //============================================================================
   //============================================================================
 
-  if (interactionName == "DGX") DBG_RETURN(getInteractionDataTree("DG") + DataTree::fromContent(
-R"toto(#!HFB3!#
-
-[interaction]
-name                DGX
-coulombSlater       False
-coulombExact        True
-)toto"));
 
   //============================================================================
   //============================================================================

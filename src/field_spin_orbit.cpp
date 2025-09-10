@@ -1290,7 +1290,7 @@ void FieldSpinOrbit::calcLegacy(void)
   double startTime = Tools::clock();
 
   // Please replace me by the new method !
-  Discrete discrete2(&basis);
+  Discrete discrete2(basis);
   discrete2.calcDensit(rho(NEUTRON), rho(PROTON ), nGLA, nGHE);
   arma::mat sodens1n = discrete2.BSODensit1(0);
   arma::mat sodens1p = discrete2.BSODensit1(1);
@@ -1303,7 +1303,7 @@ void FieldSpinOrbit::calcLegacy(void)
   double fact = 2.0 / (basis.b_r * basis.b_r * basis.b_z);
   specialMesh.ax.p  = basis.b_r * arma::sqrt(specialMesh.ax.p);
   specialMesh.az.p *= basis.b_z;
-  Discrete discrete3(&basis, specialMesh);
+  Discrete discrete3(basis, specialMesh);
 
   discrete3.isNegative = false;
   arma::mat densn  = discrete3.getLocalXZ(rho(NEUTRON), true) * facx * facx * facz * facz * fact;
@@ -1359,7 +1359,7 @@ void FieldSpinOrbit::calcLegacy(void)
 #endif
 
 
-  Discrete discrete(&basis, Mesh::gaussLaguerreHermite(nGLA, nGHE));
+  Discrete discrete(basis, Mesh::gaussLaguerreHermite(nGLA, nGHE));
   INT Mmax = basis.mMax;
   arma::vec eta = discrete.mesh.ax.p; // radial coordinate
   arma::vec zeta = discrete.mesh.az.p; // axial coordinate

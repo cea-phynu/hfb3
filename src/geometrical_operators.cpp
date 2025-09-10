@@ -55,7 +55,7 @@ GeometricalOperators::GeometricalOperators(State _state) : state(_state), multip
   Basis &basis = state.basis;
   basis.calcWDN();
 
-  Discrete discrete(&state.basis, Mesh::regular(0, 0, -20, 20, 0, 20, 201, 1, 401));
+  Discrete discrete(state.basis, Mesh::regular(0, 0, -20, 20, 0, 20, 201, 1, 401));
   arma::mat densn = discrete.getLocalXZ(state.rho(NEUTRON), true);
   arma::mat densp = discrete.getLocalXZ(state.rho(PROTON ), true);
   arma::mat denst = densn + densp;

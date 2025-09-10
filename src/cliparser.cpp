@@ -76,7 +76,7 @@ CliParser::CliParser(INT argc, char **argv)
       else if (arg == "-v1")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO};
       else if (arg == "-v2")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING}; // default value
       else if (arg == "-v3")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIME};
-      else if (arg == "-v4")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIME, MSG_DEBUG};
+      else if (arg == "-v4")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIMELINE, MSG_DEBUG};
       else if (arg == "-v5")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIME, MSG_DEBUG, MSG_TIMELINE};
       else if (arg == "-v")         msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIME, MSG_DEBUG, MSG_TIMELINE};
 
@@ -95,7 +95,7 @@ CliParser::CliParser(INT argc, char **argv)
 void CliParser::version(void)
 {
   Tools::mesg("Version", Tools::version());
-  Tools::mesg("Authors", CFG_AUTHORS);
+  Tools::mesg("Authors", Tools::authors());
   Tools::mesg("Compil.", std::string(SKILL));
   Tools::end(0);
 }
@@ -135,8 +135,8 @@ void CliParser::help(void)
   std::cout << "  {key1:val1, key2:val2, ...}" << std::endl;
   std::cout << std::endl;
   std::cout << "Examples:" << std::endl;
-  std::cout << "  * launch an HFB calculation using the file 'examples/16O_groundstate.hfb3' with a constraint on <Q20> (30fm) and 50 HFB iterations max.:" << std::endl;
-  std::cout << "  bin/hfb3 examples/16O_groundstate.hfb3 '{constraints/q20t:30.0,solver/alternator/maxIter:50}'" << std::endl;
+  std::cout << "  * launch an HFB calculation using the file 'examples/16O_groundstate.hfb3' with a constraint on <Q20> (30fm) and 500 HFB iterations max.:" << std::endl;
+  std::cout << "  bin/hfb3 examples/16O_groundstate.hfb3 '{constraints/q20t:30.0,solver/alternator/maxIter:500}'" << std::endl;
   Tools::end(0);
 }
 
@@ -186,7 +186,7 @@ void CliParser::printKeys(void)
     {"MC", "Multi Cube" },
   };
 
-  for (auto &o : general.validKeys)
+  for (auto &o : general.globalValidKeys)
   {
     table +=
       TABLE_NORM  + o.key                + TABLE_TD

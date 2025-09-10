@@ -39,8 +39,7 @@ class Discrete : public Generic
 {
 public :
 
-  Discrete(void);                                                      // #TEST#
-  explicit Discrete(Basis *_basis, const Mesh &_mesh = Mesh());        // #TEST#
+  explicit Discrete(Basis _basis = Basis(), Mesh _mesh = Mesh());      // #TEST#
 
   void calcWaveFunctions(void);                                        // #TEST#
 
@@ -88,8 +87,8 @@ public :
   //============================================================================
   //============================================================================
 
-  /// A pointer to a Basis instance.
-  Basis *basis;
+  /// A Basis instance.
+  Basis basis;
 
   /// Values of the \f$z\f$-part of the wave functions on the mesh.
   Multi<arma::vec> zVals;

@@ -53,7 +53,7 @@ FieldDensityFR::FieldDensityFR(Field::Parameters fp, State *_state) :
   }
 
   //Builds Discrete instances.
-  Discrete _discrete (&_state->basis);
+  Discrete _discrete (_state->basis);
   discrete = _discrete;
   discrete.mesh = Mesh::gaussLaguerreHermite(nGLA, nGHE);
   discrete0 = discrete;

@@ -28,27 +28,13 @@
 //==============================================================================
 //==============================================================================
 
-/** Dummy constructor.
- */
-
-Discrete::Discrete()
-{
-  DBG_ENTER;
-
-  DBG_LEAVE;
-}
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** Construct a Discrete object from a Basis object.
  *
  *  \param _basis A pointer to a Basis object.
  *  \param _mesh A Mesh object.
  */
 
-Discrete::Discrete(Basis *_basis, const Mesh &_mesh) :  mesh(_mesh), basis(_basis)
+Discrete::Discrete(Basis _basis, Mesh _mesh) :  mesh(_mesh), basis(_basis)
 {
   DBG_ENTER;
 
@@ -68,29 +54,29 @@ void Discrete::calcWaveFunctions(void)
 
   if (!zVals.empty()) DBG_LEAVE;
 
-  for (INT n_z = 0; n_z < basis->n_zGlobalMax; n_z++)
+  for (INT n_z = 0; n_z < basis.n_zGlobalMax; n_z++)
   {
-    for (INT d = 0; d < basis->dMax; d++)
+    for (INT d = 0; d < basis.dMax; d++)
     {
-      zVals(n_z, d) = basis->zPart(mesh.az.p, n_z, d);
+      zVals(n_z, d) = basis.zPart(mesh.az.p, n_z, d);
     }
   }
 
-  INT DMax = (basis->dMax - 1) * 3 + 1;
+  INT DMax = (basis.dMax - 1) * 3 + 1;
 
   for (INT z = 0 ; z < mesh.az.nb ; z++)
   {
     arma::cube &wavecube = waveZ(z);
-    wavecube = arma::zeros(basis->n_zGlobalMax, basis->n_zGlobalMax, DMax);
+    wavecube = arma::zeros(basis.n_zGlobalMax, basis.n_zGlobalMax, DMax);
 
-    for (INT d = 0; d < basis->dMax ; d++)
+    for (INT d = 0; d < basis.dMax ; d++)
     {
-      for (INT dp = 0; dp < basis->dMax ; dp++)
+      for (INT dp = 0; dp < basis.dMax ; dp++)
       {
-        for (INT n_z = 0; n_z < basis->n_zGlobalMax ; n_z++)
+        for (INT n_z = 0; n_z < basis.n_zGlobalMax ; n_z++)
         {
 
-          for (INT n_zp = 0; n_zp < basis->n_zGlobalMax ; n_zp++)
+          for (INT n_zp = 0; n_zp < basis.n_zGlobalMax ; n_zp++)
           {
             wavecube(n_z, n_zp, d + 2 * dp) = zVals(n_z, d)(z) * zVals(n_zp, dp)(z);
           }
@@ -99,21 +85,21 @@ void Discrete::calcWaveFunctions(void)
     }
   }
 
-  INT M = basis->mMax - 1;
-  INT N = basis->nGlobalMax - 1;
+  INT M = basis.mMax - 1;
+  INT N = basis.nGlobalMax - 1;
   INT P = N + (M + 1) / 2;
 
-  for (INT m = 0; m < basis->mMax; m++)
+  for (INT m = 0; m < basis.mMax; m++)
   {
     for (INT n = 0; n < 2 * P + 2 * M + 1; n++)
     {
-      rVals(m, n) = basis->rPart(mesh.ax.p, m, n);
+      rVals(m, n) = basis.rPart(mesh.ax.p, m, n);
     }
   }
 
-  for (INT m = 0; m < basis->mMax; m++)
+  for (INT m = 0; m < basis.mMax; m++)
   {
-    for (INT n = 0; n < basis->nMax(m); n++)
+    for (INT n = 0; n < basis.nMax(m); n++)
     {
       rpVals(m, n) = arma::zeros(mesh.ax.nb, mesh.ay.nb);
 
@@ -123,7 +109,7 @@ void Discrete::calcWaveFunctions(void)
         {
           double x = mesh.ax.p(ix);
           double y = mesh.ay.p(iy);
-          rpVals(m, n)(ix, iy) = basis->rPartScalar(sqrt(x * x + y * y), m, n);
+          rpVals(m, n)(ix, iy) = basis.rPartScalar(sqrt(x * x + y * y), m, n);
         }
       }
     }
@@ -149,10 +135,10 @@ arma::mat Discrete::getWaveFunctionXZ(UINT id)
 
   arma::mat result(mesh.ax.nb, mesh.az.nb);
 
-  INT m = basis->HOqn(0, id);
-  INT n = basis->HOqn(1, id);
-  INT nz = basis->HOqn(2, id);
-  INT d = basis->HOqn(3, id);
+  INT m = basis.HOqn(0, id);
+  INT n = basis.HOqn(1, id);
+  INT nz = basis.HOqn(2, id);
+  INT d = basis.HOqn(3, id);
   //    INT s = QN(id, 4);
   result = rVals(m, n) * zVals(nz, d).t();
 
@@ -176,10 +162,10 @@ arma::cube Discrete::getWaveFunctionXYZ(UINT id)
 
   arma::cube result(mesh.ax.nb, mesh.ay.nb, mesh.az.nb);
 
-  INT m = basis->HOqn(0, id);
-  INT n = basis->HOqn(1, id);
-  INT nz = basis->HOqn(2, id);
-  INT d = basis->HOqn(3, id);
+  INT m = basis.HOqn(0, id);
+  INT n = basis.HOqn(1, id);
+  INT nz = basis.HOqn(2, id);
+  INT d = basis.HOqn(3, id);
   //    INT s = QN(id, 4);
   result = Tools::matTimesVec(rpVals(m, n), zVals(nz, d));
 
@@ -209,17 +195,17 @@ arma::mat Discrete::getLocalXZ(const arma::mat &rho, bool ensurePositive)
 
   //Builds rho Multi with explicit quantum numbers.
   Multi<arma::cube> Rho; //Rho (m,n_0,n_1)(n_z0,n_z1,d_0+2*d_1)
-  INT DMax = (basis->dMax - 1) * 3 + 1;
-  Qnumbers &HOqn = basis->HOqn;
-  UINT nbBlocks =  basis->HOqn.calcBlocks({0, 1, 3, 4});
+  INT DMax = (basis.dMax - 1) * 3 + 1;
+  Qnumbers &HOqn = basis.HOqn;
+  UINT nbBlocks =  basis.HOqn.calcBlocks({0, 1, 3, 4});
 
-  for (INT m = 0; m < basis->mMax; m++)
+  for (INT m = 0; m < basis.mMax; m++)
   {
-    for (INT n = 0; n < basis->nMax(m); n++)
+    for (INT n = 0; n < basis.nMax(m); n++)
     {
-      for (INT np = 0; np < basis->nMax(m); np++)
+      for (INT np = 0; np < basis.nMax(m); np++)
       {
-        Rho(m, n, np) = arma::zeros(basis->n_zMax(m, n), basis->n_zMax(m, np), DMax);
+        Rho(m, n, np) = arma::zeros(basis.n_zMax(m, n), basis.n_zMax(m, np), DMax);
       }//np
     }//n
   }//m
@@ -258,9 +244,9 @@ arma::mat Discrete::getLocalXZ(const arma::mat &rho, bool ensurePositive)
   arma::vec zVec;
   arma::vec rVec;
 
-  for (INT m = 0 ; m < basis->mMax ; m++)
+  for (INT m = 0 ; m < basis.mMax ; m++)
   {
-    for (INT n = 0 ; n < basis->nMax(m) ; n++)
+    for (INT n = 0 ; n < basis.nMax(m) ; n++)
     {
       for (INT np = 0 ; np < n + 1 ; np++) //Symmetry
       {
@@ -269,7 +255,7 @@ arma::mat Discrete::getLocalXZ(const arma::mat &rho, bool ensurePositive)
 
         for (INT z = 0 ; z < mesh.az.nb ; z++)
         {
-          zVec(z) = arma::accu(waveZ(z).subcube(0, 0, 0, basis->n_zMax(m, n) - 1, basis->n_zMax(m, np) - 1, DMax - 1) % Rho(m, n, np));
+          zVec(z) = arma::accu(waveZ(z).subcube(0, 0, 0, basis.n_zMax(m, n) - 1, basis.n_zMax(m, np) - 1, DMax - 1) % Rho(m, n, np));
         }//z
 
         localRho += rVec * zVec.t();
@@ -319,37 +305,37 @@ arma::cube Discrete::getLocalXYZ(const arma::mat &rho)
 
   double vrho = 0.0;
 
-  for (INT m = 0; m < basis->mMax; m++)
+  for (INT m = 0; m < basis.mMax; m++)
   {
-    for (INT n = 0; n < basis->nMax(m); n++)
+    for (INT n = 0; n < basis.nMax(m); n++)
     {
-      for (INT n_z = 0; n_z < basis->n_zMax(m, n); n_z++)
+      for (INT n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
       {
-        for (INT d = 0; d < basis->dMax; d++)
+        for (INT d = 0; d < basis.dMax; d++)
         {
           temp0 = Tools::matTimesVec(rpVals(m, n), zVals(n_z, d)); // cube  = mat * col
 
-          for (INT np = n; np < basis->nMax(m); np++)
+          for (INT np = n; np < basis.nMax(m); np++)
           {
             bool n_equal_np = (n == np);
             temp1 = Tools::cubeTimesMat(temp0, rpVals(m, np));           // cube = cube * mat
 
-            for (INT n_zp = 0; n_zp < basis->n_zMax(m, np); n_zp++)
+            for (INT n_zp = 0; n_zp < basis.n_zMax(m, np); n_zp++)
             {
               bool n_z_equal_n_zp = (n_z == n_zp);
 
               if ((n_equal_np) && (n_zp < n_z)) continue;                          // skip lower triangular part
 
-              for (INT dp = 0; dp < basis->dMax; dp++)
+              for (INT dp = 0; dp < basis.dMax; dp++)
               {
                 if ((n_equal_np) && (n_z_equal_n_zp) && (dp < d)) continue;        // skip lower triangular part
 
-                INT a0 = basis->HOqn.find({m, n, n_z, d, 0});
-                INT b0 = basis->HOqn.find({m, np, n_zp, dp, 0});
+                INT a0 = basis.HOqn.find({m, n, n_z, d, 0});
+                INT b0 = basis.HOqn.find({m, np, n_zp, dp, 0});
                 vrho = rho(a0, b0) * 4;                     // factor 4 for the lower triangular part and the negative time-reversal states
 
-                INT a1 = basis->HOqn.find({m, n, n_z, d, 1});
-                INT b1 = basis->HOqn.find({m, np, n_zp, dp, 1});
+                INT a1 = basis.HOqn.find({m, n, n_z, d, 1});
+                INT b1 = basis.HOqn.find({m, np, n_zp, dp, 1});
 
                 if ((a1 >= 0) && (b1 >= 0))
                 {
@@ -403,12 +389,12 @@ arma::cube Discrete::getHFmXZ(const arma::mat &matD, UINT id)
 
   arma::cube dens = arma::cube(0, 0, 0);
 
-  dens = arma::zeros(mesh.ax.nb, mesh.az.nb, basis->mMax * 2);
+  dens = arma::zeros(mesh.ax.nb, mesh.az.nb, basis.mMax * 2);
 
-  for (UINT a = 0; a < basis->HOqn.nb; a++)
+  for (UINT a = 0; a < basis.HOqn.nb; a++)
   {
-    INT m = basis->HOqn(0, a);
-    INT s = basis->HOqn(4, a);
+    INT m = basis.HOqn(0, a);
+    INT s = basis.HOqn(4, a);
     dens.slice(m * 2 + s) += getWaveFunctionXZ(a) * matD(id, a);
   }
 
@@ -430,15 +416,15 @@ void Discrete::calcDensit(const arma::mat &rhonOrig, const arma::mat &rhopOrig, 
   const arma::mat &rhop = rhopOrig;
 
   Mesh mesh = Mesh::gaussLaguerreHermite(ngla, nghe);
-  INT Mmax = basis->mMax;
+  INT Mmax = basis.mMax;
   arma::vec eta = mesh.ax.p; // radial coordinate
   arma::vec zeta = mesh.az.p; // axial coordinate
 
-  arma::mat zetashift = arma::zeros(mesh.az.nb, basis->dMax);
+  arma::mat zetashift = arma::zeros(mesh.az.nb, basis.dMax);
 
-  for (INT dd = 0; dd < basis->dMax; dd++)
+  for (INT dd = 0; dd < basis.dMax; dd++)
   {
-    zetashift.col(dd) = zeta - (0.5 - double(dd)) * basis->d_0 / basis->b_z;
+    zetashift.col(dd) = zeta - (0.5 - double(dd)) * basis.d_0 / basis.b_z;
   }
 
   for (INT iiso = 0; iiso < 2; iiso ++)
@@ -450,90 +436,7 @@ void Discrete::calcDensit(const arma::mat &rhonOrig, const arma::mat &rhopOrig, 
     BSODensit1(iiso) = arma::zeros(ngla, nghe);
   }
 
-  double fac2 = 2.*2. / (pow(basis->b_r, 3) * pow(basis->b_z, 2));
-
-#ifndef NEW_DENSIT
-  //--------------- Calculation of Densit + SODensit compo 00 -------------------
-  double facnorm = pow(basis->b_r, 2) * basis->b_z / 2.;
-
-  arma::mat DensSO_00n = arma::zeros(ngla, nghe);
-  arma::mat DensSO_00p = arma::zeros(ngla, nghe);
-
-  for (INT ma = 0; ma < Mmax; ma++ )
-  {
-    INT mc = ma;
-    INT Nmax = basis->nMax(ma);
-
-    for (INT na = 0; na < Nmax; na++ )
-    {
-      arma::vec Ra = basis->rPartNorm(eta, ma, na);
-
-      for (INT nc = 0; nc < Nmax; nc++ )
-      {
-        arma::vec Rc = basis->rPartNorm(eta, mc, nc);
-
-        arma::vec Rac = Ra % Rc;
-        arma::vec Racm = ma * Rac;
-        INT NZmaxa = basis->n_zMax(ma, na);
-        INT NZmaxc = basis->n_zMax(mc, nc);
-
-        for (INT da = 0; da < basis->dMax; da++ )
-        {
-          arma::vec zda = zetashift.col(da);
-
-          for (INT dc = 0; dc < basis->dMax; dc++ )
-          {
-            arma::vec zdc = zetashift.col(dc);
-
-            for (INT n_za = 0; n_za < NZmaxa; n_za++ )
-            {
-              UINT ia = basis->HOqn.find({ma, na, n_za, da, 0}); // spin up
-              arma::vec Za = basis->zPartNorm(zda, n_za);
-
-              arma::vec Zc;
-              arma::vec Zac;
-              UINT ic;
-
-              for (INT n_zc = 0; n_zc < NZmaxc; n_zc ++ )
-              {
-                ic = basis->HOqn.find({mc, nc, n_zc, dc, 0}); // spin up
-
-                if (ic < ia) continue;
-
-                Zac = Za % basis->zPartNorm(zdc, n_zc);
-
-                if (ic != ia) Zac *= 2.0;
-
-                BDensit(0) += ( Rac  * Zac.t() ) * (rhon(ia, ic) + rhon(ia + 1, ic + 1));
-                BDensit(1) += ( Rac  * Zac.t() ) * (rhop(ia, ic) + rhop(ia + 1, ic + 1));
-                DensSO_00n += ( Racm * Zac.t() ) * (rhon(ia, ic) - rhon(ia + 1, ic + 1));
-                DensSO_00p += ( Racm * Zac.t() ) * (rhop(ia, ic) - rhop(ia + 1, ic + 1));
-
-                arma::mat toto = Racm * Zac.t();
-              } // n_zc
-            } // n_za
-          } // dc
-        } // da
-      } // nc
-    } // na
-  } // ma
-
-
-  for (INT iiso = 0; iiso < 2; iiso ++)
-  {
-    BDensit(iiso) = 2.0 * BDensit(iiso) / facnorm;
-
-    if (BDensit(iiso).min() < 0.0)
-    {
-      Tools::debug("Negative local density calculated in Discrete::calcDensit()   ! val: " + std::to_string(BDensit(iiso).min()));
-      isNegative = true;
-      BDensit(iiso) = arma::abs(BDensit(iiso));
-    }
-  }
-
-  BSODensit(0) = 2.*DensSO_00n / 2. / facnorm;
-  BSODensit(1) = 2.*DensSO_00p / 2. / facnorm;
-#endif
+  double fac2 = 2.*2. / (pow(basis.b_r, 3) * pow(basis.b_z, 2));
 
   //------------------ Calculation of SODensit compo -+ ------------------------
   arma::mat DensSO_mpn = arma::zeros(ngla, nghe);
@@ -542,46 +445,46 @@ void Discrete::calcDensit(const arma::mat &rhonOrig, const arma::mat &rhopOrig, 
   for (INT ma = 1; ma < Mmax; ma++ )
   {
     INT mc = ma - 1;
-    UINT Nmaxa = basis->nMax(ma);
-    UINT Nmaxc = basis->nMax(mc);
+    UINT Nmaxa = basis.nMax(ma);
+    UINT Nmaxc = basis.nMax(mc);
 
     for (INT na = 0; na < Nmaxa; na++)
     {
-      arma::vec Ra = basis->rPartNorm(eta, ma, na);
-      arma::vec L0a = basis->rPartL0(eta, ma, na);
-      arma::vec Lavecma = basis->rPartLavecm(eta, ma, na);
+      arma::vec Ra = basis.rPartNorm(eta, ma, na);
+      arma::vec L0a = basis.rPartL0(eta, ma, na);
+      arma::vec Lavecma = basis.rPartLavecm(eta, ma, na);
 
       for (INT nc = 0; nc < Nmaxc; nc++ )
       {
-        arma::vec Rc = basis->rPartNorm(eta, mc, nc);
-        arma::vec L0c = basis->rPartL0(eta, mc, nc);
-        arma::vec Lavecmc = basis->rPartLavecm(eta, mc, nc);
+        arma::vec Rc = basis.rPartNorm(eta, mc, nc);
+        arma::vec L0c = basis.rPartL0(eta, mc, nc);
+        arma::vec Lavecmc = basis.rPartLavecm(eta, mc, nc);
         arma::vec A_r1 = L0a % Rc;
         arma::vec A_r2 = Ra % L0c;
         arma::vec S_r1 = Lavecma % Rc;
         arma::vec S_r2 = Ra % Lavecmc;
-        UINT NZmaxa = basis->n_zMax(ma, na);
-        UINT NZmaxc = basis->n_zMax(mc, nc);
+        UINT NZmaxa = basis.n_zMax(ma, na);
+        UINT NZmaxc = basis.n_zMax(mc, nc);
 
-        for (INT da = 0; da < basis->dMax; da++ )
+        for (INT da = 0; da < basis.dMax; da++ )
         {
           arma::vec zda = zetashift.col(da);
 
-          for (INT dc = 0; dc < basis->dMax; dc++ )
+          for (INT dc = 0; dc < basis.dMax; dc++ )
           {
             arma::vec zdc = zetashift.col(dc);
 
             for (INT n_za = 0; n_za < NZmaxa; n_za++ )
             {
-              UINT ia = basis->HOqn.find({ma, na, n_za, da, 1});
-              arma::vec Za = basis->zPartNorm(zda, n_za);
-              arma::vec dZa = basis->zPartNormd(zda, n_za);
+              UINT ia = basis.HOqn.find({ma, na, n_za, da, 1});
+              arma::vec Za = basis.zPartNorm(zda, n_za);
+              arma::vec dZa = basis.zPartNormd(zda, n_za);
 
               for (INT n_zc = 0; n_zc < NZmaxc; n_zc ++ )
               {
-                UINT ic = basis->HOqn.find({mc, nc, n_zc, dc, 0}); // spin up
-                arma::vec Zc = basis->zPartNorm(zdc, n_zc);
-                arma::vec dZc = basis->zPartNormd(zdc, n_zc);
+                UINT ic = basis.HOqn.find({mc, nc, n_zc, dc, 0}); // spin up
+                arma::vec Zc = basis.zPartNorm(zdc, n_zc);
+                arma::vec dZc = basis.zPartNormd(zdc, n_zc);
                 arma::mat Aac = A_r1 * (Za % dZc).t() - A_r2 * (dZa % Zc).t();
                 arma::mat Sac = S_r1 * (Za % dZc).t() + S_r2 * (dZa % Zc).t();
                 DensSO_mpn += (Sac + Aac) * rhon(ia, ic);
@@ -641,7 +544,7 @@ const std::string Discrete::info(bool isShort) const
   {
     {"Discrete", ""},
     {"mesh  ", mesh.info(true)},
-    {"basis ", basis->info(true)},
+    {"basis ", basis.info(true)},
   }, isShort);
 
   DBG_RETURN(result);
@@ -666,41 +569,41 @@ arma::vec Discrete::getLocalDensity(State &state, double x, double y, double z)
 
   double rp = sqrt(x * x + y * y);
 
-  Basis *basis = &(state.basis);
+  Basis &basis = state.basis;
 
-  for (INT m = 0; m < basis->mMax; m++)
+  for (INT m = 0; m < basis.mMax; m++)
   {
-    for (INT n = 0; n < basis->nMax(m); n++)
+    for (INT n = 0; n < basis.nMax(m); n++)
     {
-      for (INT n_z = 0; n_z < basis->n_zMax(m, n); n_z++)
+      for (INT n_z = 0; n_z < basis.n_zMax(m, n); n_z++)
       {
-        for (INT d = 0; d < basis->dMax; d++)
+        for (INT d = 0; d < basis.dMax; d++)
         {
-          a0 = basis->HOqn.find({m, n, n_z, d, 0});
+          a0 = basis.HOqn.find({m, n, n_z, d, 0});
 
-          temp0 = basis->rPartScalar(rp, m, n) * basis->zPartScalar(z, n_z, d);
+          temp0 = basis.rPartScalar(rp, m, n) * basis.zPartScalar(z, n_z, d);
 
-          for (INT np = n; np < basis->nMax(m); np++)
+          for (INT np = n; np < basis.nMax(m); np++)
           {
             bool n_equal_np = (n == np);
-            temp1 = temp0 * basis->rPartScalar(rp, m, np);
+            temp1 = temp0 * basis.rPartScalar(rp, m, np);
 
-            for (INT n_zp = 0; n_zp < basis->n_zMax(m, np); n_zp++)
+            for (INT n_zp = 0; n_zp < basis.n_zMax(m, np); n_zp++)
             {
               bool n_z_equal_n_zp = (n_z == n_zp);
 
               if ((n_equal_np) && (n_zp < n_z)) continue;                          // skip lower triangular part
 
-              for (INT dp = 0; dp < basis->dMax; dp++)
+              for (INT dp = 0; dp < basis.dMax; dp++)
               {
                 if ((n_equal_np) && (n_z_equal_n_zp) && (dp < d)) continue;        // skip lower triangular part
 
-                b0 = basis->HOqn.find({m, np, n_zp, dp, 0});
+                b0 = basis.HOqn.find({m, np, n_zp, dp, 0});
 
                 vrho = arma::vec({state.rho(NEUTRON)(a0, b0), state.rho(PROTON)(a0, b0)}) * 4.0;  // factor 4 for the lower triangular part and the negative time-reversal states
 
-                INT a1 = basis->HOqn.find({m, n, n_z, d, 1});
-                INT b1 = basis->HOqn.find({m, np, n_zp, dp, 1});
+                INT a1 = basis.HOqn.find({m, n, n_z, d, 1});
+                INT b1 = basis.HOqn.find({m, np, n_zp, dp, 1});
 
                 if ((a1 >= 0) && (b1 >= 0))
                 {
@@ -712,7 +615,7 @@ arma::vec Discrete::getLocalDensity(State &state, double x, double y, double z)
                   vrho /= 2;
                 }
 
-                temp2 = temp1 * basis->zPartScalar(z, n_zp, dp);
+                temp2 = temp1 * basis.zPartScalar(z, n_zp, dp);
                 result += temp2 * vrho;
               }
             }

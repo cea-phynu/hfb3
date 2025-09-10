@@ -322,7 +322,7 @@ TEST(Basis, rPart)
 
   double precision = 1e-15;
 
-  double r = -2.238;
+  double r = -2.238; // TODO: use a positive value !
 
   ASSERT_NEAR(b.rPartScalar(r,  0,  2), BASIS_RPART_TARGET00, precision);
   ASSERT_NEAR(b.rPartScalar(r,  1,  1), BASIS_RPART_TARGET01, precision);
@@ -355,7 +355,7 @@ TEST(Basis, rPart_big)
 
   double precision = 1e-15;
 
-  double r = -2.238;
+  double r = -2.238; // TODO: use a positive value !
 
   ASSERT_NEAR(b.rPartScalar(r,  0,  2), BASIS_RPART_BIG_TARGET00, precision);
   ASSERT_NEAR(b.rPartScalar(r,  1,  1), BASIS_RPART_BIG_TARGET01, precision);
@@ -600,7 +600,7 @@ TEST(Basis, getOverlapMatrixHOZ)
 
   // Let's test everything !!!
 
-  Discrete d(&b1, Mesh::gaussLaguerreHermite(200, 200));
+  Discrete d(b1, Mesh::gaussLaguerreHermite(200, 200));
 
   for (INT n_z1 = 0; n_z1 < b1.n_zGlobalMax; n_z1++)
   {
@@ -652,7 +652,7 @@ TEST(Basis, getOverlapMatrixHOR)
 
   // Let's test everything !!!
 
-  Discrete d(&b1, Mesh::gaussLaguerreHermite(200, 200));
+  Discrete d(b1, Mesh::gaussLaguerreHermite(200, 200));
 
   for (INT m1 = 0; m1 < b1.mMax; m1++)
   {
@@ -715,7 +715,7 @@ TEST(Basis, tabzd)
 
     basis.calcTab();
     // Exact quadrature
-    Discrete d(&basis, Mesh::gaussLaguerreHermite(20, 30));
+    Discrete d(basis, Mesh::gaussLaguerreHermite(20, 30));
 
     for (UINT ia = 0; ia < basis.HOqn.nb; ia++)
     {
@@ -755,7 +755,7 @@ TEST(Basis, tabzd)
     basis.calcTab();
     basis.calcTalmanz();
     // Exact quadrature
-    Discrete d(&basis, Mesh::gaussLaguerreHermite(20, 30));
+    Discrete d(basis, Mesh::gaussLaguerreHermite(20, 30));
 
     for (UINT ia = 0; ia < basis.HOqn.nb; ia++)
     {

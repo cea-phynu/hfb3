@@ -77,7 +77,7 @@ SolverHFBBroyden::SolverHFBBroyden(const DataTree &dataTree) : SolverHFBBroyden(
 SolverHFBBroyden::SolverHFBBroyden(const DataTree &dataTree, State _state) : Solver(dataTree, _state),
   mixing(dataTree),
   interaction(dataTree, &state),
-  discrete(&state.basis,  Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 101, 1, 151)),
+  discrete(state.basis,  Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 101, 1, 151)),
   multipoleOperators(state)
 {
   DBG_ENTER;
@@ -635,12 +635,9 @@ bool SolverHFBBroyden::singleHFBiter(void)
         hHFB.submat(0, dimOR, dimOR - 1, 2 * dimOR - 1) = -delta_omega;
         hHFB.submat(dimOR, 0, 2 * dimOR - 1, dimOR - 1) = -delta_omega;
 
-
         //== HFB Hamiltonian diagonalization.
         if (!Tools::checkSymmetry(hHFB, "hHFB in " + std::string(__PRETTY_FUNCTION__)))
           hHFB = arma::symmatu(hHFB);
-
-        // Tools::info("hHFB", hHFB);
 
         // check for invalid values
         if (hHFB.has_nan() || hHFB.has_inf())

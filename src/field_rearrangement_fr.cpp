@@ -54,7 +54,7 @@ FieldRearrangementFR::FieldRearrangementFR(Field::Parameters fp, State *_state) 
     nGHE = 38;
   }
 
-  Discrete _discrete (&_state->basis);
+  Discrete _discrete (_state->basis);
   discrete = _discrete;
   discrete.mesh = Mesh::gaussLaguerreHermite(nGLA, nGHE);
 

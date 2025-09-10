@@ -16,6 +16,9 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ##==============================================================================
 
+ROOT=.
+VERSION=$(shell cat $(ROOT)/VERSION)
+
 include Makefile.in
 
 PWD="./"
@@ -123,7 +126,8 @@ endif
 	@echo -e $(GREEN)  "PLATFORM  "$(YELLOW)"?|"$(NORM) $(shell uname)
 	@echo -e $(GREEN)  "ARCH      "$(YELLOW)"?|"$(NORM) $(shell uname -p)
 	@echo -e $(GREEN)  "CXX       "$(YELLOW)"?|"$(NORM) $(CXX) $(shell $(CXX) -dumpfullversion)
-	@echo -e $(GREEN)  "VERSION   "$(YELLOW)"?|"$(NORM) $(GIT_VERSION_FLAG)
+	@echo -e $(GREEN)  "VERSION   "$(YELLOW)"?|"$(NORM) $(VERSION) $(GIT_VERSION)
+	@echo -e $(GREEN)  "VFLAGS    "$(YELLOW)"?|"$(NORM) $(VERSION_FLAG) $(GIT_VERSION_FLAG)
 	@echo -e $(GREEN)  "THREADS   "$(BLUE)":|"$(NORM) $(shell getconf _NPROCESSORS_ONLN)
 	@echo -e $(GREEN)  "SKILL     "$(BLUE)":|"$(NORM) $(SKILLOPTS)
 	@echo -e $(GREEN)  "REQFLAGS  "$(RED)"!|"$(NORM) $(REQFLAGS)

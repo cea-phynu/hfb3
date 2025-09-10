@@ -18,6 +18,7 @@
 
 ROOT = ../..
 
+VERSION=$(shell cat $(ROOT)/VERSION)
 include $(ROOT)/Makefile.in
 
 TEST_TARGET = $(ROOT)/bin/tests

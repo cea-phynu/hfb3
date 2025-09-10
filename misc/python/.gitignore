@@ -4,3 +4,4 @@ hfb3_wrap.cpp
 hfb3_wrap.h
 __pycache__/
 hfb3.egg-info/
+.tox/

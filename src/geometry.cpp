@@ -58,7 +58,7 @@ Geometry::Geometry(State &state) :
     DBG_LEAVE;
   }
 
-  Discrete discrete(&state.basis, mesh);
+  Discrete discrete(state.basis, mesh);
   dens = discrete.getLocalXZ(state.rho(NEUTRON) + state.rho(PROTON ), true);
 
   (*this) = Geometry(mesh, dens, state.sys);
@@ -123,6 +123,8 @@ Geometry::Geometry(Mesh _mesh, arma::mat _dens, System _system, INT _izNeck) : s
 void Geometry::calc_neck_abcissa(void)
 {
   DBG_ENTER;
+
+#ifndef NO_DBG_STACK
   INT ixZero = -1;
 
   for (INT ix = 0; ix < mesh.ax.nb; ix++)
@@ -135,6 +137,7 @@ void Geometry::calc_neck_abcissa(void)
   }
 
   ASSERT(ixZero != -1, "Mesh does no contain z = 0.0");
+#endif
 
   // Compute the density integrated over x
   arma::mat z = Tools::matFromRow(mesh.az.p.t(), mesh.ax.nb);

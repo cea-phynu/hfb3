@@ -97,8 +97,13 @@ typedef arma::Cube<INT> ICUBE;
 #define HBARC 1.9732698045930246e+02
 
 /// Default version string (should be set at compile time).
+#ifndef CFG_VERSION
+#define CFG_VERSION "undefined"
+#endif
+
+/// Default Git version string (should be set at compile time).
 #ifndef CFG_GIT_VERSION
-#define CFG_GIT_VERSION "undefined"
+#define CFG_GIT_VERSION ""
 #endif
 
 /// \f$\alpha\f$ numerical constant (fine-structure constant).

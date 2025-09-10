@@ -83,23 +83,38 @@ void WSPot::calcDirectPot(void)
   arma::mat cost4 = cost1 % cost3;
   arma::mat cost5 = cost1 % cost4;
   arma::mat cost6 = cost1 % cost5;
-  arma::mat r = arma::sqrt(x % x + z % z);
+  arma::mat x2 = arma::pow(x, 2);
+  arma::mat z2 = arma::pow(z, 2);
+  arma::mat r2 = x2 + z2;
+  arma::mat r = arma::sqrt(r2);
+  //arma::mat r = arma::sqrt(x % x + z % z); // doest not give the same results with -O1 and -O2
+
   arma::mat deformedRadius = arma::ones(mesh.ax.nb, mesh.az.nb);
 
   // Radial part of spherical harmonics Y_{lm} for l >= 1
   for (auto &key : def.getKeys())
   {
-    if (key.front() == 0) deformedRadius += def(key);
-    if (key.front() == 1) deformedRadius += def(key) * 1.0 /  2.0 * std::sqrt( 3. / PI) * cost1;
-    if (key.front() == 2) deformedRadius += def(key) * 1.0 /  4.0 * std::sqrt( 5. / PI) * (  3.0 * cost2 -   1.0);
-    if (key.front() == 3) deformedRadius += def(key) * 1.0 /  4.0 * std::sqrt( 7. / PI) * (  5.0 * cost3 -   3.0 * cost1);
-    if (key.front() == 4) deformedRadius += def(key) * 0.3 / 16.0 * std::sqrt( 1. / PI) * ( 35.0 * cost4 -  30.0 * cost2 + 3.0);
-    if (key.front() == 5) deformedRadius += def(key) * 1.0 / 16.0 * std::sqrt(11. / PI) * ( 63.0 * cost5 -  70.0 * cost3 +  15.0 * cost1);
-    if (key.front() == 6) deformedRadius += def(key) * 1.0 / 32.0 * std::sqrt(13. / PI) * (231.0 * cost6 - 315.0 * cost4 + 105.0 * cost2 - 5.0);
+    arma::mat delta;
+
+    if (key.front() == 0) delta = def(key);
+    if (key.front() == 1) delta = def(key) * 1.0 /  2.0 * std::sqrt( 3. / PI) * cost1;
+    if (key.front() == 2) delta = def(key) * 1.0 /  4.0 * std::sqrt( 5. / PI) * ((  3.0 * cost2).eval() -   1.0);
+    if (key.front() == 3) delta = def(key) * 1.0 /  4.0 * std::sqrt( 7. / PI) * ((  5.0 * cost3).eval() - (  3.0 * cost1).eval());
+    if (key.front() == 4) delta = def(key) * 0.3 / 16.0 * std::sqrt( 1. / PI) * (( 35.0 * cost4).eval() - ( 30.0 * cost2).eval() +   3.0);
+    if (key.front() == 5) delta = def(key) * 1.0 / 16.0 * std::sqrt(11. / PI) * (( 63.0 * cost5).eval() - ( 70.0 * cost3).eval() + ( 15.0 * cost1).eval());
+    if (key.front() == 6) delta = def(key) * 1.0 / 32.0 * std::sqrt(13. / PI) * ((231.0 * cost6).eval() - (315.0 * cost4).eval() + (105.0 * cost2).eval() - 5.0);
+
+    deformedRadius += delta;
   }
 
   arma::mat surfNeut = R(NEUTRON) * deformedRadius;
   arma::mat surfProt = R(PROTON ) * deformedRadius;
+
+  arma::mat temp0n = (r - surfNeut) / a(NEUTRON);
+  arma::mat temp1n = arma::exp(temp0n);
+  arma::mat temp2n = 1.0 + temp1n;
+  arma::mat temp3n = V_0(NEUTRON) / temp2n;
+
   directPotentialNeut = V_0(NEUTRON) / ( 1.0 + arma::exp((r - surfNeut) / a(NEUTRON)));
   directPotentialProt = V_0(PROTON ) / ( 1.0 + arma::exp((r - surfProt) / a(PROTON )));
 

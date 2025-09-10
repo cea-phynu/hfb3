@@ -54,7 +54,12 @@ std::list<KeyStruct > General::validKeys =
 
 General::General()
 {
-  version = CFG_GIT_VERSION;
+#ifndef CFG_GIT_VERSION
+    version = CFG_VERSION;
+#else
+    version = CFG_VERSION + std::string("(") + CFG_GIT_VERSION + std::string(")") ;
+#endif
+
   skill = SKILL;
 }
 

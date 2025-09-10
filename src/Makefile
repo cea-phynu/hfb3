@@ -19,6 +19,7 @@
 ROOT = ..
 PWD = "src/"
 
+VERSION=$(shell cat $(ROOT)/VERSION)
 include $(ROOT)/Makefile.in
 
 LIB_TARGET=$(ROOT)/lib/libhfb3.a
@@ -29,7 +30,7 @@ OBJ_DIR=.objs
 MAIN_OBJECT=$(OBJ_DIR)/main.o
 
 LIB_OBJECTS=$(OBJ_DIR)/action.o                       \
-            $(OBJ_DIR)/solver_alternator.o                   \
+            $(OBJ_DIR)/solver_alternator.o            \
             $(OBJ_DIR)/axis.o                         \
             $(OBJ_DIR)/base64.o                       \
             $(OBJ_DIR)/basis.o                        \
@@ -88,7 +89,7 @@ DEP = $(LIB_OBJECTS:%.o=%.d) $(MAIN_OBJECT:%.o=%.d)
 
 COMMON_OPTS = $(GLOBAL_CXXFLAGS) ${ARMADILLO_CFLAGS} -I$(ROOT)/$(MSGPACK_INCDIR)
 
-COPTS = $(SKILLOPTS) $(COMMON_OPTS) -D$(SKILL) $(GIT_VERSION_FLAG)
+COPTS = $(SKILLOPTS) $(COMMON_OPTS) -D$(SKILL) $(GIT_VERSION_FLAG) $(VERSION_FLAG)
 
 LDFLAGS = ${ARMADILLO_LDFLAGS} $(GLOBAL_LDFLAGS) ${BLIS_LDFLAGS}
 AR=ar

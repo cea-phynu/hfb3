@@ -535,14 +535,21 @@ import numpy as np
 def dictToDataTree(ldict):
 
   result = DataTree()
+  result.strict_mode = False
+
   for v in ldict.items():
+
     if type(v[1]) is int:
       result.setI(v[0], v[1])
+
     elif type(v[1]) is float:
       result.setD(v[0], v[1])
+
     elif type(v[1]) is str:
       result.setS(v[0], v[1])
+
     elif type(v[1]) is np.ndarray:
+
       if v[1].dtype == np.float64:
         if v[1].ndim == 1:
           result.setV(v[0], v[1])
@@ -550,6 +557,7 @@ def dictToDataTree(ldict):
           result.setM(v[0], v[1])
         if v[1].ndim == 3:
           result.setC(v[0], v[1])
+
       if v[1].dtype == np.int32:
         if v[1].ndim == 1:
           result.setIV(v[0], v[1])
@@ -557,6 +565,7 @@ def dictToDataTree(ldict):
           result.setIM(v[0], v[1])
         if v[1].ndim == 3:
           result.setIC(v[0], v[1])
+
       if v[1].dtype == np.uint64:
         if v[1].ndim == 1:
           result.setUV(v[0], v[1])
@@ -564,8 +573,10 @@ def dictToDataTree(ldict):
           result.setUM(v[0], v[1])
         if v[1].ndim == 3:
           result.setUC(v[0], v[1])
+
     elif v[1] is None:
       result.setE(v[0])
+
   return result
 %}
 

@@ -78,7 +78,7 @@ SolverWS::SolverWS(const DataTree &_dataTree, State _state) : Solver(_dataTree, 
   DBG_ENTER;
 
   multipoleOperators = MultipoleOperators(state);
-  discrete = Discrete(&state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 51, 1, 51));
+  discrete = Discrete(state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 51, 1, 51));
 
   dataTree.get(beta20tInit, "solver/ws/beta20tInit" , true);
   dataTree.get(q30tInit   , "solver/ws/q30tInit"    , true);

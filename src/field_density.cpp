@@ -35,10 +35,10 @@
  */
 
 FieldDensity::FieldDensity(Field::Parameters fp, State *_state) : Field(fp, _state),
-  discrete(&basis),
-  discrete0(&basis),
-  discrete1(&basis),
-  discrete2(&basis)
+  discrete(basis),
+  discrete0(basis),
+  discrete1(basis),
+  discrete2(basis)
 
 {
   DBG_ENTER;

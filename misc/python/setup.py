@@ -20,6 +20,7 @@
 
 import os
 import numpy
+import subprocess
 from setuptools import setup, Extension
 
 #===============================================================================
@@ -63,11 +64,11 @@ def get_skill_opts():
   if (skill == "SKILL0"):
     return ["-O0", "-ggdb3", "-fno-inline-functions", "-D_GLIBCXX_DEBUG", "-DCHECKBOUNDS_FMULTI", "-DCHECK_ACCU"]
   if (skill == "SKILL1"):
-    return ["-O1", "-g", "-march=native", "-DCHECKBOUNDS_FMULTI", "-DCHECK_ACCU"]
+    return ["-O1", "-g", "-DCHECKBOUNDS_FMULTI"]
   if (skill == "SKILL2"):
-    return ["-O2", "-g", "-march=native", "-DCHECKBOUNDS_FMULTI"]
+    return ["-O2", "-g", "-DCHECKBOUNDS_FMULTI"]
   if (skill == "SKILL3"):
-    return ["-O3", "-g", "-march=native", "-DARMA_NO_DEBUG"]
+    return ["-O3", "-g", "-DARMA_NO_DEBUG"]
   if (skill == "SKILL4"):
     return ["-O3", "-g", "-march=native", "-DARMA_NO_DEBUG", "-DNO_DBG_STACK"]
 
@@ -106,9 +107,15 @@ hfb3 = Extension('_hfb3', ['hfb3.i'],
                  swig_opts = ["-Wall", "-c++", "-I../../src", "-I./include/armanpy/", "-I$PYTHON3_ROOT/include"],
                 )
 
+version = 'no version !?'
+with open('../../VERSION', 'r') as fp:
+    version = fp.read()
+    if version[-1] == '\n':
+        version = version[:-1]
+
 setup(
     name = 'hfb3',
-    version = '1.0.0',
+    version = version,
     install_requires= ['numpy', 'msgpack'],
     ext_modules = [ hfb3 ],
     cmdclass = {'build_py' : build_py}, # <= fix for the bug

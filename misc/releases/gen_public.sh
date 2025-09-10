@@ -5,10 +5,10 @@ NOCOPY=(misc/amedee_python misc/berger_python misc/docs misc/releases/gen_privat
 echo "===== Cleaning project ====="
 make clean
 
-VERSION=$(git describe --always --dirty --tags)
-DIR=release-$VERSION
+VERSION=$(cat VERSION)
+DIR=release-public-$VERSION
 
-echo "===== Creating release in $DIR ====="
+echo "===== Creating PUBLIC release in $DIR ====="
 
 shopt -s extglob
 

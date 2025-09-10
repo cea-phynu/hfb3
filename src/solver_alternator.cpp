@@ -100,9 +100,6 @@ void SolverAlternator::init()
 
   startTime = Tools::clock();
 
-  solverHFBBroyden.discrete = Discrete(&state.basis, Mesh::regular(-10.0, 0.0, -25.0, 10.0, 0.0, 25.0, 101, 1, 251));
-  solverHFBGradient.discrete = Discrete(&state.basis, Mesh::regular(-10.0, 0.0, -25.0, 10.0, 0.0, 25.0, 101, 1, 251));
-
   Tools::mesg("SolAlt", info(false));
 
   schemeList = {};

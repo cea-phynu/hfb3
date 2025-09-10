@@ -446,6 +446,9 @@ public:
   /// Return a version string.
   static const std::string version(void);
 
+  /// Return a string containing the authors of the project.
+  static const std::string authors(void);
+
   /// Return a tree representation of strings.
   static const std::string treeStr(const std::vector<std::pair<std::string, std::string> >, bool isShort = false);
 

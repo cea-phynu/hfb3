@@ -1,24 +1,47 @@
 [build-system]
-requires = ["setuptools>=59.6.0", "wheel", "numpy", "swig"]
+requires = ["setuptools>=59.6.0", "wheel", "numpy", "swig", "setuptools_scm[toml]>=6.2"]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+# Empty is fine
 
 [project]
 name = "hfb3"
-version = "1.0.0"
+dynamic = ["version"]
 authors = [
   { name="Dubray N.", email="noel.dubray@cea.fr" },
+  # { name="Ebran J.-P."},
+  # { name="Frosini M."},
+  # { name="Carpentier P."},
+  # { name="Accorto G."},
+  # { name="Newsome J."},
+  # { name="Pillet N."},
+  # { name="Regnier D."},
+  # { name="Verriere M."},
+  # { name="Zdeb A."},
 ]
-description = "Axial 2-center Hartree-Fock-Bogoliubov solver"
+
+maintainers = [
+  { name="Dubray N.", email="noel.dubray@cea.fr" },
+]
+
+description = "Axial HFB solver with Gogny forces using a 2-center HO basis"
 readme = "README.md"
 requires-python = ">=3.8"
+license.text = "GPL-3.0-or-later"
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Programming Language :: C++",
-    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Physics",
 ]
+dependencies = ["numpy"]
 
 [project.urls]
 "Homepage" = "https://github.com/cea-hpc/hfb3"
 "Bug Tracker" = "https://github.com/cea-hpc/hfb3/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.entry-points."setuptools.finalize_distribution_options"]
+setuptools_scm = "setuptools_scm._integration.setuptools:infer_version"

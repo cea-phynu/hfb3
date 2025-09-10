@@ -992,39 +992,6 @@ void DataTree::set(const std::string &key, const Multi<arma::cube> &val)
 //==============================================================================
 //==============================================================================
 
-/** Get an INT value from the data tree.
- *
- *  \param target The target variable.
- *  \param key The key.
- *  \param ignore If true, print a warning if the key does not exist.
- *  \return Returns true if the target variable has been set to the new value.
- */
-
-bool DataTree::get(INT &target, const std::string &key, bool ignore) const
-{
-  DBG_ENTER;
-
-  if (strict_mode)
-    ASSERT(isValid(key, "I"), "Invalid DataTree: wrong type for key: '" + key + "'");
-
-  if (intMap.count(key) == 0)
-  {
-    if (!ignore)
-    {
-      ERROR("no int key '" + key + "'");
-    }
-
-    DBG_RETURN(false);
-  }
-
-  target = intMap.find(key)->second;
-  DBG_RETURN(true);
-}
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** Get a bool value from the data tree.
  *
  *  \param target The target variable.
@@ -1051,6 +1018,39 @@ bool DataTree::get(bool &target, const std::string &key, bool ignore) const
   }
 
   target = boolMap.find(key)->second;
+  DBG_RETURN(true);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Get an INT value from the data tree.
+ *
+ *  \param target The target variable.
+ *  \param key The key.
+ *  \param ignore If true, print a warning if the key does not exist.
+ *  \return Returns true if the target variable has been set to the new value.
+ */
+
+bool DataTree::get(INT &target, const std::string &key, bool ignore) const
+{
+  DBG_ENTER;
+
+  if (strict_mode)
+    ASSERT(isValid(key, "I"), "Invalid DataTree: wrong type for key: '" + key + "'");
+
+  if (intMap.count(key) == 0)
+  {
+    if (!ignore)
+    {
+      ERROR("no int key '" + key + "'");
+    }
+
+    DBG_RETURN(false);
+  }
+
+  target = intMap.find(key)->second;
   DBG_RETURN(true);
 }
 
@@ -2113,6 +2113,7 @@ const std::string DataTree::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
+      {"bool      ", Tools::infoStr((INT)boolMap.size())},
       {"int       ", Tools::infoStr((INT)intMap.size())},
       {"double    ", Tools::infoStr((INT)doubleMap.size())},
       {"string    ", Tools::infoStr((INT)stringMap.size())},
@@ -2142,6 +2143,7 @@ const std::string DataTree::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"DataTree", ""},
+      {"bool      ", mapToStr("bool  ", boolMap)},
       {"int       ", mapToStr("INT   ", intMap)},
       {"double    ", mapToStr("double", doubleMap)},
       {"string    ", mapToStr("string", stringMap)},
@@ -2181,11 +2183,19 @@ std::string DataTree::abstract(void) const
 {
   std::stringstream result;
 
+  if (boolMap.size() != 0)
+  {
+    result << Tools::color("red") << "=== integer ===" << Tools::color() << std::endl;
+
+    for (auto it = boolMap.begin(); it != boolMap.end(); ++it)
+      result << Tools::color("blue") << it->first << ": " << Tools::color() << it->second << std::endl;
+  }
+
   if (intMap.size() != 0)
   {
     result << Tools::color("red") << "=== integer ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, INT>::const_iterator it = intMap.begin(); it != intMap.end(); ++it)
+    for (auto it = intMap.begin(); it != intMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << it->second << std::endl;
   }
 
@@ -2193,7 +2203,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== double ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, double>::const_iterator it = doubleMap.begin(); it != doubleMap.end(); ++it)
+    for (auto it = doubleMap.begin(); it != doubleMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << it->second << std::endl;
   }
 
@@ -2201,7 +2211,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== string ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, std::string>::const_iterator it = stringMap.begin(); it != stringMap.end(); ++it)
+    for (auto it = stringMap.begin(); it != stringMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << it->second << std::endl;
   }
 
@@ -2209,7 +2219,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== arma::vec ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, arma::vec>::const_iterator it = vecMap.begin(); it != vecMap.end(); ++it)
+    for (auto it = vecMap.begin(); it != vecMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << ")" << std::endl;
   }
 
@@ -2217,7 +2227,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== arma::mat ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, arma::mat>::const_iterator it = matMap.begin(); it != matMap.end(); ++it)
+    for (auto it = matMap.begin(); it != matMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << "x" << it->second.n_cols << ")" << std::endl;
   }
 
@@ -2225,7 +2235,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== arma::cube ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, arma::cube>::const_iterator it = cubeMap.begin(); it != cubeMap.end(); ++it)
+    for (auto it = cubeMap.begin(); it != cubeMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << "x" << it->second.n_cols << "x" << it->second.n_slices << ")" << std::endl;
   }
 
@@ -2233,7 +2243,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== UVEC ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, UVEC >::const_iterator it = uvecMap.begin(); it != uvecMap.end(); ++it)
+    for (auto it = uvecMap.begin(); it != uvecMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << ")" << std::endl;
   }
 
@@ -2241,7 +2251,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== UMAT ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, UMAT >::const_iterator it = umatMap.begin(); it != umatMap.end(); ++it)
+    for (auto it = umatMap.begin(); it != umatMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << "x" << it->second.n_cols << ")" << std::endl;
   }
 
@@ -2249,7 +2259,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== UCUBE ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, UCUBE >::const_iterator it = ucubeMap.begin(); it != ucubeMap.end(); ++it)
+    for (auto it = ucubeMap.begin(); it != ucubeMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << "x" << it->second.n_cols << "x" << it->second.n_slices << ")" << std::endl;
   }
 
@@ -2257,7 +2267,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<UVEC > ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<UVEC > >::const_iterator it = multiUVecMap.begin(); it != multiUVecMap.end(); ++it)
+    for (auto it = multiUVecMap.begin(); it != multiUVecMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2272,7 +2282,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<UMAT > ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<UMAT > >::const_iterator it = multiUMatMap.begin(); it != multiUMatMap.end(); ++it)
+    for (auto it = multiUMatMap.begin(); it != multiUMatMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2287,7 +2297,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<UCUBE> ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<UCUBE > >::const_iterator it = multiUCubeMap.begin(); it != multiUCubeMap.end(); ++it)
+    for (auto it = multiUCubeMap.begin(); it != multiUCubeMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2302,7 +2312,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== IVEC ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, IVEC >::const_iterator it = ivecMap.begin(); it != ivecMap.end(); ++it)
+    for (auto it = ivecMap.begin(); it != ivecMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << ")" << std::endl;
   }
 
@@ -2310,7 +2320,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== IMAT ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, IMAT >::const_iterator it = imatMap.begin(); it != imatMap.end(); ++it)
+    for (auto it = imatMap.begin(); it != imatMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << "x" << it->second.n_cols << ")" << std::endl;
   }
 
@@ -2318,7 +2328,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== ICUBE ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, ICUBE >::const_iterator it = icubeMap.begin(); it != icubeMap.end(); ++it)
+    for (auto it = icubeMap.begin(); it != icubeMap.end(); ++it)
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << "x" << it->second.n_cols << "x" << it->second.n_slices << ")" << std::endl;
   }
 
@@ -2326,7 +2336,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<IVEC > ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<IVEC > >::const_iterator it = multiIVecMap.begin(); it != multiIVecMap.end(); ++it)
+    for (auto it = multiIVecMap.begin(); it != multiIVecMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2341,7 +2351,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<IMAT > ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<IMAT > >::const_iterator it = multiIMatMap.begin(); it != multiIMatMap.end(); ++it)
+    for (auto it = multiIMatMap.begin(); it != multiIMatMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2356,7 +2366,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<ICUBE> ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<ICUBE > >::const_iterator it = multiICubeMap.begin(); it != multiICubeMap.end(); ++it)
+    for (auto it = multiICubeMap.begin(); it != multiICubeMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2371,7 +2381,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<arma::vec> ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<arma::vec> >::const_iterator it = multiVecMap.begin(); it != multiVecMap.end(); ++it)
+    for (auto it = multiVecMap.begin(); it != multiVecMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2386,7 +2396,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<arma::mat> ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<arma::mat> >::const_iterator it = multiMatMap.begin(); it != multiMatMap.end(); ++it)
+    for (auto it = multiMatMap.begin(); it != multiMatMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2401,7 +2411,7 @@ std::string DataTree::abstract(void) const
   {
     result << Tools::color("red") << "=== Multi<arma::cube> ===" << Tools::color() << std::endl;
 
-    for (std::map<std::string, Multi<arma::cube> >::const_iterator it = multiCubeMap.begin(); it != multiCubeMap.end(); ++it)
+    for (auto it = multiCubeMap.begin(); it != multiCubeMap.end(); ++it)
     {
       result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
 
@@ -2431,6 +2441,7 @@ std::set<std::string> DataTree::getKeys(const std::string &pattern) const
   std::set<std::string> result;
 
 
+  FIND_AND_INSERT(key, boolMap      );
   FIND_AND_INSERT(key, intMap       );
   FIND_AND_INSERT(key, doubleMap    );
   FIND_AND_INSERT(key, stringMap    );
@@ -2573,6 +2584,7 @@ void DataTree::validate(void) const
 bool DataTree::contains(const std::string &key, const std::string &type) const
 {
 
+  if ((type == "bool"  ) || (type == "")) for (auto &k : boolMap       ) if (k.first == key) return true;
   if ((type == "int"   ) || (type == "")) for (auto &k : intMap        ) if (k.first == key) return true;
   if ((type == "double") || (type == "")) for (auto &k : doubleMap     ) if (k.first == key) return true;
   if ((type == "string") || (type == "")) for (auto &k : stringMap     ) if (k.first == key) return true;
@@ -2669,7 +2681,6 @@ bool DataTree::isValid(const std::string &key, const std::string &type) const
     return true;
   }
 
-  DEBUG("%ld keys", general.globalValidKeys.size());
   INFO("invalid key: " + key + " type: " + type);
 
   return false;
@@ -2721,7 +2732,8 @@ void DataTree::setDefault(void)
 
 bool DataTree::operator==(const DataTree &other) const
 {
-  if (intMap != other.intMap) return false;
+  if (boolMap   != other.boolMap) return false;
+  if (intMap    != other.intMap) return false;
   if (doubleMap != other.doubleMap) return false;
   if (stringMap != other.stringMap) return false;
   if (!mapStringArmaEquals(uvecMap, other.uvecMap )) return false;
@@ -2819,10 +2831,7 @@ void DataTree::setE(const std::string &key)
 
 void DataTree::setI(const std::string &key, INT val)
 {
-  if (doubleMap.find(key) != doubleMap.end()) // set as double if doubleMap key already exists
-    doubleMap[key] = double(val);
-  else
-    intMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2837,8 +2846,7 @@ void DataTree::setI(const std::string &key, INT val)
 
 void DataTree::setD(const std::string &key, double val)
 {
-  intMap.erase(key);
-  doubleMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2853,7 +2861,7 @@ void DataTree::setD(const std::string &key, double val)
 
 void DataTree::setV(const std::string &key, const arma::vec &val)
 {
-  vecMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2868,7 +2876,7 @@ void DataTree::setV(const std::string &key, const arma::vec &val)
 
 void DataTree::setM(const std::string &key, const arma::mat &val)
 {
-  matMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2883,7 +2891,7 @@ void DataTree::setM(const std::string &key, const arma::mat &val)
 
 void DataTree::setC(const std::string &key, const arma::cube &val)
 {
-  cubeMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2898,7 +2906,7 @@ void DataTree::setC(const std::string &key, const arma::cube &val)
 
 void DataTree::setIV(const std::string &key, const IVEC &val)
 {
-  ivecMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2913,7 +2921,7 @@ void DataTree::setIV(const std::string &key, const IVEC &val)
 
 void DataTree::setIM(const std::string &key, const IMAT &val)
 {
-  imatMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2928,7 +2936,7 @@ void DataTree::setIM(const std::string &key, const IMAT &val)
 
 void DataTree::setIC(const std::string &key, const ICUBE &val)
 {
-  icubeMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2943,7 +2951,7 @@ void DataTree::setIC(const std::string &key, const ICUBE &val)
 
 void DataTree::setMIV(const std::string &key, const Multi<IVEC> &val)
 {
-  multiIVecMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2958,7 +2966,7 @@ void DataTree::setMIV(const std::string &key, const Multi<IVEC> &val)
 
 void DataTree::setMIM(const std::string &key, const Multi<IMAT> &val)
 {
-  multiIMatMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2973,7 +2981,7 @@ void DataTree::setMIM(const std::string &key, const Multi<IMAT> &val)
 
 void DataTree::setMIC(const std::string &key, const Multi<ICUBE> &val)
 {
-  multiICubeMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -2988,7 +2996,7 @@ void DataTree::setMIC(const std::string &key, const Multi<ICUBE> &val)
 
 void DataTree::setUV(const std::string &key, const UVEC &val)
 {
-  uvecMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3003,7 +3011,7 @@ void DataTree::setUV(const std::string &key, const UVEC &val)
 
 void DataTree::setUM(const std::string &key, const UMAT &val)
 {
-  umatMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3018,7 +3026,7 @@ void DataTree::setUM(const std::string &key, const UMAT &val)
 
 void DataTree::setUC(const std::string &key, const UCUBE &val)
 {
-  ucubeMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3033,7 +3041,7 @@ void DataTree::setUC(const std::string &key, const UCUBE &val)
 
 void DataTree::setMUV(const std::string &key, const Multi<UVEC> &val)
 {
-  multiUVecMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3048,7 +3056,7 @@ void DataTree::setMUV(const std::string &key, const Multi<UVEC> &val)
 
 void DataTree::setMUM(const std::string &key, const Multi<UMAT> &val)
 {
-  multiUMatMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3063,7 +3071,7 @@ void DataTree::setMUM(const std::string &key, const Multi<UMAT> &val)
 
 void DataTree::setMUC(const std::string &key, const Multi<UCUBE> &val)
 {
-  multiUCubeMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3078,7 +3086,7 @@ void DataTree::setMUC(const std::string &key, const Multi<UCUBE> &val)
 
 void DataTree::setMV(const std::string &key, const Multi<arma::vec> &val)
 {
-  multiVecMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3093,7 +3101,7 @@ void DataTree::setMV(const std::string &key, const Multi<arma::vec> &val)
 
 void DataTree::setMM(const std::string &key, const Multi<arma::mat> &val)
 {
-  multiMatMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3108,7 +3116,7 @@ void DataTree::setMM(const std::string &key, const Multi<arma::mat> &val)
 
 void DataTree::setMC(const std::string &key, const Multi<arma::cube> &val)
 {
-  multiCubeMap[key] = val;
+  set(key, val);
 }
 
 //==============================================================================
@@ -3125,132 +3133,135 @@ DataTree DataTree::getSection(const std::string &sectionName) const
   DBG_ENTER;
 
   DataTree result;
+  result.strict_mode = false;
 
   if (intMap.size() != 0)
   {
-    for (std::map<std::string, INT>::const_iterator it = intMap.begin(); it != intMap.end(); ++it)
+    for (auto it = intMap.begin(); it != intMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (doubleMap.size() != 0)
   {
-    for (std::map<std::string, double>::const_iterator it = doubleMap.begin(); it != doubleMap.end(); ++it)
+    for (auto it = doubleMap.begin(); it != doubleMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (stringMap.size() != 0)
   {
-    for (std::map<std::string, std::string>::const_iterator it = stringMap.begin(); it != stringMap.end(); ++it)
+    for (auto it = stringMap.begin(); it != stringMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (vecMap.size() != 0)
   {
-    for (std::map<std::string, arma::vec>::const_iterator it = vecMap.begin(); it != vecMap.end(); ++it)
+    for (auto it = vecMap.begin(); it != vecMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (matMap.size() != 0)
   {
-    for (std::map<std::string, arma::mat>::const_iterator it = matMap.begin(); it != matMap.end(); ++it)
+    for (auto it = matMap.begin(); it != matMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (cubeMap.size() != 0)
   {
-    for (std::map<std::string, arma::cube>::const_iterator it = cubeMap.begin(); it != cubeMap.end(); ++it)
+    for (auto it = cubeMap.begin(); it != cubeMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (uvecMap.size() != 0)
   {
-    for (std::map<std::string, UVEC >::const_iterator it = uvecMap.begin(); it != uvecMap.end(); ++it)
+    for (auto it = uvecMap.begin(); it != uvecMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (umatMap.size() != 0)
   {
-    for (std::map<std::string, UMAT >::const_iterator it = umatMap.begin(); it != umatMap.end(); ++it)
+    for (auto it = umatMap.begin(); it != umatMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (ucubeMap.size() != 0)
   {
-    for (std::map<std::string, UCUBE >::const_iterator it = ucubeMap.begin(); it != ucubeMap.end(); ++it)
+    for (auto it = ucubeMap.begin(); it != ucubeMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiUVecMap.size() != 0)
   {
-    for (std::map<std::string, Multi<UVEC > >::const_iterator it = multiUVecMap.begin(); it != multiUVecMap.end(); ++it)
+    for (auto it = multiUVecMap.begin(); it != multiUVecMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiUMatMap.size() != 0)
   {
-    for (std::map<std::string, Multi<UMAT > >::const_iterator it = multiUMatMap.begin(); it != multiUMatMap.end(); ++it)
+    for (auto it = multiUMatMap.begin(); it != multiUMatMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiUCubeMap.size() != 0)
   {
-    for (std::map<std::string, Multi<UCUBE > >::const_iterator it = multiUCubeMap.begin(); it != multiUCubeMap.end(); ++it)
+    for (auto it = multiUCubeMap.begin(); it != multiUCubeMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (ivecMap.size() != 0)
   {
-    for (std::map<std::string, IVEC >::const_iterator it = ivecMap.begin(); it != ivecMap.end(); ++it)
+    for (auto it = ivecMap.begin(); it != ivecMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (imatMap.size() != 0)
   {
-    for (std::map<std::string, IMAT >::const_iterator it = imatMap.begin(); it != imatMap.end(); ++it)
+    for (auto it = imatMap.begin(); it != imatMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (icubeMap.size() != 0)
   {
-    for (std::map<std::string, ICUBE >::const_iterator it = icubeMap.begin(); it != icubeMap.end(); ++it)
+    for (auto it = icubeMap.begin(); it != icubeMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiIVecMap.size() != 0)
   {
-    for (std::map<std::string, Multi<IVEC > >::const_iterator it = multiIVecMap.begin(); it != multiIVecMap.end(); ++it)
+    for (auto it = multiIVecMap.begin(); it != multiIVecMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiIMatMap.size() != 0)
   {
-    for (std::map<std::string, Multi<IMAT > >::const_iterator it = multiIMatMap.begin(); it != multiIMatMap.end(); ++it)
+    for (auto it = multiIMatMap.begin(); it != multiIMatMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiICubeMap.size() != 0)
   {
-    for (std::map<std::string, Multi<ICUBE > >::const_iterator it = multiICubeMap.begin(); it != multiICubeMap.end(); ++it)
+    for (auto it = multiICubeMap.begin(); it != multiICubeMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiVecMap.size() != 0)
   {
-    for (std::map<std::string, Multi<arma::vec> >::const_iterator it = multiVecMap.begin(); it != multiVecMap.end(); ++it)
+    for (auto it = multiVecMap.begin(); it != multiVecMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiMatMap.size() != 0)
   {
-    for (std::map<std::string, Multi<arma::mat> >::const_iterator it = multiMatMap.begin(); it != multiMatMap.end(); ++it)
+    for (auto it = multiMatMap.begin(); it != multiMatMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 
   if (multiCubeMap.size() != 0)
   {
-    for (std::map<std::string, Multi<arma::cube> >::const_iterator it = multiCubeMap.begin(); it != multiCubeMap.end(); ++it)
+    for (auto it = multiCubeMap.begin(); it != multiCubeMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
+
+  result.strict_mode = true;
 
   DBG_RETURN(result);
 }

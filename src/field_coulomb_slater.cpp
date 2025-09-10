@@ -38,8 +38,8 @@
 
 FieldCoulombSlater::FieldCoulombSlater(Field::Parameters fp, State *_state) :
   Field(fp, _state),
-  discrete(&(state.basis)),
-  discrete0(&(state.basis))
+  discrete(state.basis),
+  discrete0(state.basis)
 {
   DBG_ENTER;
 
@@ -50,8 +50,8 @@ FieldCoulombSlater::FieldCoulombSlater(Field::Parameters fp, State *_state) :
   nGLA      = 40;
   nGHE      = 150;
 
-  discrete.mesh = Mesh::gaussLaguerreHermite(nGLA, nGHE);
-  discrete0 = discrete;
+  discrete.mesh  = Mesh::gaussLaguerreHermite(nGLA, nGHE);
+  discrete0.mesh = Mesh::gaussLaguerreHermite(nGLA, nGHE);
   discrete0.mesh.ax.p = arma::sqrt(discrete.mesh.ax.p);
 
   DBG_LEAVE;

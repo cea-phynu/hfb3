@@ -45,7 +45,7 @@ Fragments::Fragments(State &state)
 
   if (!state.rho(NEUTRON).empty())
   {
-    Discrete discrete(&state.basis, Mesh::regular(0, 0, -20, 20, 0, 20, 401, 1, 401));
+    Discrete discrete(state.basis, Mesh::regular(0, 0, -20, 20, 0, 20, 401, 1, 401));
     arma::mat densn = discrete.getLocalXZ(state.rho(NEUTRON), true);
     arma::mat densp = discrete.getLocalXZ(state.rho(PROTON ), true);
     arma::mat denst = densn + densp;

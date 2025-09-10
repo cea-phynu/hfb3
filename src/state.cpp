@@ -600,8 +600,8 @@ double State::getDensityDistance(State &otherState, bool pairing)
 {
   DBG_ENTER;
 
-  Discrete d1(&basis);
-  Discrete d2(&otherState.basis);
+  Discrete d1(basis);
+  Discrete d2(otherState.basis);
 
   arma::mat v1;
   arma::mat v2;

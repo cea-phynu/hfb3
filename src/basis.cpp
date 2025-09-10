@@ -501,8 +501,11 @@ const std::string Basis::info(bool isShort) const
 
 arma::vec Basis::zPartNormReduced(const arma::vec &zeta, INT n_z)
 {
+  arma::vec result;
   double fac = 1.0 / sqrt(pow(2, n_z) * fact[n_z] * sqrt(PI));
-  return fac * hermite(n_z, zeta);
+  result = fac * hermite(n_z, zeta);
+
+  return result;
 }
 
 //==============================================================================
@@ -2385,7 +2388,7 @@ arma::vec Basis::hermite(INT n_z, const arma::vec &zeta)
 #ifdef USE_POLY_CACHING
   static std::map<std::pair<int, std::size_t>, arma::vec>    hermiteBuffer;
   std::pair<int, std::size_t>                                tempPair(n_z, Tools::vec2hash(zeta));
-  std::map<std::pair<int, std::size_t>, arma::vec>::iterator it = hermiteBuffer.find(tempPair);
+  auto it = hermiteBuffer.find(tempPair);
 
   if (it != hermiteBuffer.end())
   {
@@ -2393,7 +2396,12 @@ arma::vec Basis::hermite(INT n_z, const arma::vec &zeta)
   }
 
 #endif
-  arma::vec val = 2 * zeta % hermite(n_z - 1, zeta) - 2 * double(n_z - 1) * hermite(n_z - 2, zeta);
+
+  arma::vec herm1 = 2 * zeta % hermite(n_z - 1, zeta);
+  arma::vec herm2 = 2 * double(n_z - 1) * hermite(n_z - 2, zeta);
+  arma::vec val = herm1 - herm2;
+  // arma::vec val = 2 * zeta % hermite(n_z - 1, zeta) - 2 * double(n_z - 1) * hermite(n_z - 2, zeta);
+
 #ifdef USE_POLY_CACHING
   const std::pair<std::pair<int, std::size_t>, arma::vec> tempPairPair(tempPair, val);
   hermiteBuffer.insert(tempPairPair);
@@ -2431,7 +2439,7 @@ arma::vec Basis::laguerre(INT m, INT n, const arma::vec &eta)
   static std::map<std::pair<std::pair<int, int>, std::size_t>, arma::vec> laguerreBuffer;
   std::pair<int, int>                                                     tempPair(m, n);
   std::pair<std::pair<int, int>, std::size_t> tempPairPair(tempPair, Tools::vec2hash(eta));
-  std::map<std::pair<std::pair<int, int>, std::size_t>, arma::vec>::iterator it =
+  auto it =
     laguerreBuffer.find(tempPairPair);
 
   if (it != laguerreBuffer.end())
@@ -2440,8 +2448,11 @@ arma::vec Basis::laguerre(INT m, INT n, const arma::vec &eta)
   }
 
 #endif
-  arma::vec val = (2 + (double(m - 1) - eta) / (double)n) % laguerre(m, n - 1, eta) -
-                  (1 + double(m - 1) / (double)n) * laguerre(m, n - 2, eta);
+
+  arma::vec lag1 = (2 + (double(m - 1) - eta) / (double)n) % laguerre(m, n - 1, eta);
+  arma::vec lag2 = (1 + double(m - 1) / (double)n) * laguerre(m, n - 2, eta);
+  arma::vec val = lag1 - lag2;
+
 #ifdef USE_POLY_CACHING
   const std::pair<std::pair<std::pair<int, int>, std::size_t>, arma::vec> tempPairPairPair(
     tempPairPair, val);
@@ -2476,7 +2487,7 @@ arma::vec Basis::legendre(INT l, const arma::vec &x)
 #ifdef USE_POLY_CACHING
   static std::map<std::pair<int, std::size_t>, arma::vec>    legendreBuffer;
   std::pair<int, std::size_t>                                tempPair(l, Tools::vec2hash(x));
-  std::map<std::pair<int, std::size_t>, arma::vec>::iterator it = legendreBuffer.find(tempPair);
+  auto it = legendreBuffer.find(tempPair);
 
   if (it != legendreBuffer.end())
   {
@@ -2519,7 +2530,7 @@ double Basis::hermite(INT n_z, double zeta)
 #ifdef USE_POLY_CACHING
   static std::map<std::pair<int, double>, double>    hermiteBuffer2;
   std::pair<int, double>                             tempPair(n_z, zeta);
-  std::map<std::pair<int, double>, double>::iterator it =
+  auto it =
     hermiteBuffer2.find(tempPair);     // already calculated ?
 
   if (it != hermiteBuffer2.end()) return it->second;     // yes !
@@ -2568,7 +2579,7 @@ double Basis::laguerre(INT m, INT n, double eta)
   static std::map<std::pair<std::pair<int, int>, double>, double>    laguerreBuffer2;
   std::pair<int, int>                                                tempPair(m, n);
   std::pair<std::pair<int, int>, double>                             tempPairPair(tempPair, eta);
-  std::map<std::pair<std::pair<int, int>, double>, double>::iterator it =
+  auto it =
     laguerreBuffer2.find(tempPairPair);
 
   if (it != laguerreBuffer2.end())
@@ -2614,7 +2625,7 @@ double Basis::legendre(INT l, double x)
 #ifdef USE_POLY_CACHING
   static std::map<std::pair<int, double>, double>    legendreBuffer2;
   std::pair<int, double>                             tempPair(l, x);
-  std::map<std::pair<int, double>, double>::iterator it =
+  auto it =
     legendreBuffer2.find(tempPair);     // already calculated ?
 
   if (it != legendreBuffer2.end()) return it->second;     // yes !

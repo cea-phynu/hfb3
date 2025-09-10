@@ -58,7 +58,7 @@ void FieldWS::calcField(void)
 
   calculatingLength = -1.0;
   double startTime = Tools::clock();
-  Discrete discrete(&basis, Mesh::gaussLaguerreHermite(nGLA, nGHE));
+  Discrete discrete(basis, Mesh::gaussLaguerreHermite(nGLA, nGHE));
   arma::mat localRhon;
   arma::mat localRhop;
   INT da = 0, dc = 0;
@@ -70,8 +70,6 @@ void FieldWS::calcField(void)
   arma::mat RRwZZw;
   field(NEUTRON, DIRECT) = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
   field(PROTON , DIRECT) = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
-
-  wspot = WSPot(state.sys.nNeut, state.sys.nProt, def, mesh);
 
   // precalculation
   arma::mat zValsO = arma::zeros(discrete.mesh.az.nb, basis.n_zGlobalMax);
@@ -85,6 +83,9 @@ void FieldWS::calcField(void)
     zValsO.col(n_z) = basis.zPartNormReduced(discrete.mesh.az.p, n_z);
     zValsM.col(n_z) = basis.zPartNormReduced(zPointsShiftedM, n_z);
     zValsP.col(n_z) = basis.zPartNormReduced(zPointsShiftedP, n_z);
+
+    arma::vec toto = basis.zPartNormReduced(discrete.mesh.az.p, n_z);
+
   }
 
   arma::mat zValsShiftedM;
@@ -172,6 +173,9 @@ void FieldWS::calcField(void)
               if (ic < ia) continue;
 
               RRwZZw = RRw * (Zw % zValsShiftedP.col(n_zc).t());
+
+              // Tools::info("RRwZZw", RRwZZw);
+
               totn = arma::accu(RRwZZw % wspot.directPotentialNeut);
               totp = arma::accu(RRwZZw % wspot.directPotentialProt);
               field(NEUTRON, DIRECT)(ia, ic) = totn;
@@ -194,17 +198,6 @@ void FieldWS::calcField(void)
   calculatingLength = Tools::clock() - startTime;
 
   DBG_LEAVE;
-}
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-WSPot FieldWS::getWSPot(void)
-{
-  DBG_ENTER;
-
-  DBG_RETURN(wspot);
 }
 
 //==============================================================================

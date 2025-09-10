@@ -28,6 +28,8 @@
 TEST(DataTree, DataTree)
 {
   DataTree d;
+  d.strict_mode = false;
+
   std::string result;
   // Example std::strings
   d.set("songs/first", std::string("La fille du Bédouin..."));
@@ -200,6 +202,8 @@ TEST(DataTree, DataTree)
 TEST(DataTree, isEmpty)
 {
   DataTree d;
+  d.strict_mode = false;
+
   ASSERT_TRUE(d.isEmpty());
 
   arma::vec testVec = arma::vec();
@@ -213,6 +217,8 @@ TEST(DataTree, isEmpty)
 TEST(DataTree, size)
 {
   DataTree d;
+  d.strict_mode = false;
+
   ASSERT_EQ(d.size(), 0);
 
   arma::vec testVec = arma::randu(12);
@@ -240,6 +246,8 @@ TEST(DataTree, size)
 TEST(DataTree, clear)
 {
   DataTree d;
+  d.strict_mode = false;
+
   arma::vec testVec = arma::randu(12);
   d.set("testVec", testVec);
   ASSERT_FALSE(d.isEmpty());
@@ -254,6 +262,8 @@ TEST(DataTree, clear)
 TEST(DataTree, clean)
 {
   DataTree d1;
+  d1.strict_mode = false;
+
   arma::vec testVec = arma::randu(12);
   arma::vec testVec2 = arma::randu(12);
   d1.set("vec1", testVec);
@@ -279,15 +289,21 @@ TEST(DataTree, merge)
 
   // DataTree 1
   DataTree d1;
+  d1.strict_mode = false;
+
   d1.set("v1", v1);
   d1.set("myString", s);
 
   // DataTree 2
   DataTree d2;
+  d2.strict_mode = false;
+
   d2.set("v2", v2);
 
   // DataTree Result
   DataTree resu;
+  resu.strict_mode = false;
+
   resu.set("v1", v1);
   resu.set("v2", v2);
   resu.set("myString", s);
@@ -298,6 +314,8 @@ TEST(DataTree, merge)
 
   // overwritting test (same key, different value)
   DataTree d22;
+  d22.strict_mode = false;
+
   d22.set("v2", v1);
   d2.merge(d22);
   ASSERT_EQ(d2, d22);
@@ -309,6 +327,8 @@ TEST(DataTree, merge)
 TEST(DataTree, operatorEquals)
 {
   DataTree d;
+  d.strict_mode = false;
+
   d.set("INT", 9);
   d.set("double", 9.8);
   d.set("string", "test");
@@ -353,6 +373,8 @@ TEST(DataTree, operatorEquals)
   ASSERT_EQ(d, copy);
 
   DataTree d2;
+  d2.strict_mode = false;
+
   d2.set("multiVec"  , multiV );
   d2.set("multiIVec" , multiIV);
   d2.set("multiMat"  , multiM );
@@ -361,6 +383,8 @@ TEST(DataTree, operatorEquals)
   d2.set("multiICube", multiIC);
 
   DataTree d2Copy;
+  d2Copy.strict_mode = false;
+
   Multi<arma::vec> multiV2;
   multiV2(8,9,3) = multiV(8,9,3);
   multiV2(3,8,9) = multiV(3,8,9);
@@ -382,6 +406,8 @@ TEST(DataTree, operatorEquals)
   ASSERT_NE(d2, d2Copy);
 
   DataTree d3;
+  d3.strict_mode = false;
+
   arma::vec v1 = arma::randu(7);
   arma::vec v2 = arma::randu(76);
   arma::vec v3 = arma::randu(8);
@@ -390,6 +416,8 @@ TEST(DataTree, operatorEquals)
   d3.set("v3", v3);
 
   DataTree d3Copy;
+  d3Copy.strict_mode = false;
+
   d3Copy.set("v3", v3);
   d3Copy.set("v1", v1);
   d3Copy.set("v2", v2);
@@ -402,6 +430,8 @@ TEST(DataTree, operatorEquals)
 TEST(DataTree, getSection)
 {
   DataTree dt;
+  dt.strict_mode = false;
+
   dt.set("test0/val0", 5);
   dt.set("test0/val1", "plop");
   dt.set("test0/val2/b", 6);
@@ -410,9 +440,13 @@ TEST(DataTree, getSection)
   dt.set("test0/val4", arma::mat());
 
   DataTree dt2 = dt.getSection("test0/");
+  dt2.strict_mode = false;
+
   ASSERT_EQ(dt2.getS("val1"), "plop");
 
   DataTree dt3 = dt.getSection("test0/val2/");
+  dt3.strict_mode = false;
+
   ASSERT_EQ(dt3.getI("a"), 7);
 }
 

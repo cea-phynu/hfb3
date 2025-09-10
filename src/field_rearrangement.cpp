@@ -35,8 +35,8 @@
 
 FieldRearrangement::FieldRearrangement(Field::Parameters fp, State *_state) :
   Field(fp, _state),
-  discrete(&basis),
-  discrete0(&basis)
+  discrete(basis),
+  discrete0(basis)
 {
   DBG_ENTER;
 
@@ -87,11 +87,24 @@ void FieldRearrangement::calcField(void)
   arma::mat Rmat; //(r,z)
 
   localRho(NEUTRON) = discrete0.getLocalXZ(rho(NEUTRON), true);
+
   localRho(PROTON ) = discrete0.getLocalXZ(rho(PROTON ), true);
+
   localRho(TOTAL  ) = localRho(NEUTRON) + localRho(PROTON);
   localRho(3)       = arma::pow(localRho(TOTAL), a - 1);
   localRho(4)       = arma::pow(localRho(TOTAL), 2);
-  localRho(5)       = arma::pow(localRho(NEUTRON), 2) + arma::pow(localRho(PROTON), 2);
+
+  arma::mat toton = arma::pow(localRho(NEUTRON), 2);
+  arma::mat totop = arma::pow(localRho(PROTON ), 2);
+
+  // localRho(5)       = arma::pow(localRho(NEUTRON), 2) + arma::pow(localRho(PROTON), 2); // evaluated differently in -O1 and -O2 !?
+  localRho(5)       = toton + totop;
+
+  // Tools::info("localRho5", localRho(5));
+
+  // arma::mat totos = toton + totop;
+  // Tools::info("totos", totos);
+
   Rmat = 0.25 * a * t * ((1.0 + x / 2.0) * localRho(4) - (x + 0.5) * localRho(5)) % localRho(3);
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////Merges with zPart.

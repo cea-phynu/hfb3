@@ -40,7 +40,7 @@ TEST(Discrete, getLocalXZ)
   {
     // 1ct state
     State state("examples/42Ca_deformed_1x11.msg.gz");
-    Discrete d(&state.basis);
+    Discrete d(state.basis);
     arma::mat densn = d.getLocalXZ(state.rho(NEUTRON), true);
     arma::mat densp = d.getLocalXZ(state.rho(PROTON ), true);
 
@@ -61,7 +61,7 @@ TEST(Discrete, getLocalXZ)
   {
     // 2ct state
     State state("examples/42Ca_deformed_2x9.msg.gz");
-    Discrete d(&state.basis);
+    Discrete d(state.basis);
     arma::mat densn = d.getLocalXZ(state.rho(NEUTRON), true);
     arma::mat densp = d.getLocalXZ(state.rho(PROTON ), true);
 

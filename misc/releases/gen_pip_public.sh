@@ -2,10 +2,9 @@
 
 if [ -z "$1" ]
 then
-  echo "Usage: $0 PYTHON_VERSION [MODULE_VERSION]"
+  echo "Usage: $0 PYTHON_VERSION"
   exit 0
 fi
-
 
 NOCOPY=(misc/amedee_python misc/berger_python misc/docs misc/releases src/drop.cpp src/drop.h src/link.cpp src/link.h src/field_spin_orbit_fr.cpp src/field_spin_orbit_fr.h src/field_tensor_fr.cpp src/field_tensor_fr.h)
 
@@ -13,22 +12,17 @@ echo "===== Cleaning project ====="
 make clean
 
 PYTHON_VERSION=$1
+VERSION=$(cat VERSION)
 
-if [ -z "$2" ]
-then
-VERSION=$(git describe --always --dirty --tags)
-else
-VERSION=$2
-fi
+DIR=release-pip-public-$VERSION-$PYTHON_VERSION
 
-DIR=release-pip-$VERSION-$PYTHON_VERSION
-
-echo "===== Creating PIP release in $DIR ====="
+echo "===== Creating PUBLIC PIP release in $DIR ====="
 
 shopt -s extglob
 
 rm -rf $DIR
 mkdir $DIR
+cp VERSION $DIR/
 cp -r misc/pip/* $DIR/
 cp -r misc/python/hfb3.i $DIR/
 cp -r src $DIR/

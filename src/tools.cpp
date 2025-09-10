@@ -1762,15 +1762,15 @@ void Tools::_error(const std::string &mesg)
   std::string finalMesg = mesg + "\n";
   finalMesg += getStack();
 
+  std::vector<std::string> lines = stringSplit(finalMesg, '\n');
+
+  for (UINT l = 0; l < lines.size(); l++)
+  {
+    if (!lines[l].empty()) printOut(color("red") + "ERROR!: " + color() + lines[l]);
+  }
+
   if (exitOnError)
   {
-    std::vector<std::string> lines = stringSplit(finalMesg, '\n');
-
-    for (UINT l = 0; l < lines.size(); l++)
-    {
-      if (!lines[l].empty()) printOut(color("red") + "ERROR!: " + color() + lines[l]);
-    }
-
     exit(-1);
   }
 
@@ -1964,7 +1964,29 @@ const std::string Tools::version(void)
 
   std::string result = "";
 
-  result += Tools::color("green") + "HFB3 (" + std::string(CFG_GIT_VERSION) + ")" + Tools::color();
+  if (std::string(CFG_GIT_VERSION).empty())
+  {
+    result += Tools::color("green") + std::string(CFG_VERSION) + Tools::color();
+  }
+  else
+  {
+    result += Tools::color("green") + std::string(CFG_VERSION) + Tools::color() + " (" + std::string(CFG_GIT_VERSION) + ")";
+  }
+
+  DBG_RETURN(result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+const std::string Tools::authors(void)
+{
+  DBG_ENTER;
+
+  std::string result = "";
+
+  result += std::string(CFG_AUTHORS);
 
   DBG_RETURN(result);
 }

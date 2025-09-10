@@ -32,7 +32,7 @@ TEST(Geometry, Geometry)
   {
     // 1ct state
     State s("examples/42Ca_deformed_1x11.msg.gz");
-    Discrete discrete(&s.basis, Mesh::regular(0, 0, -15, 15, 0, 15, 101, 1, 301));
+    Discrete discrete(s.basis, Mesh::regular(0, 0, -15, 15, 0, 15, 101, 1, 301));
     arma::mat rhot = s.rho(NEUTRON) + s.rho(PROTON );
     arma::mat denst = discrete.getLocalXZ(rhot, true);
     Geometry geomt(discrete.mesh, denst, s.sys);
@@ -46,7 +46,7 @@ TEST(Geometry, Geometry)
   {
     // 2ct state
     State s("examples/42Ca_deformed_2x9.msg.gz");
-    Discrete discrete(&s.basis, Mesh::regular(0, 0, -15, 15, 0, 15, 101, 1, 301));
+    Discrete discrete(s.basis, Mesh::regular(0, 0, -15, 15, 0, 15, 101, 1, 301));
     arma::mat rhot = s.rho(NEUTRON) + s.rho(PROTON );
     arma::mat denst = discrete.getLocalXZ(rhot, true);
     Geometry geomt(discrete.mesh, denst, s.sys);
