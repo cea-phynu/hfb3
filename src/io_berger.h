@@ -53,6 +53,9 @@ public:
   //============================================================================
   //============================================================================
 
+  /// List of keys used by this class.
+  static std::list<KeyStruct > validKeys;
+
 private:
 
   void readBasis(void);

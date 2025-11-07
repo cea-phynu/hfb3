@@ -17,6 +17,7 @@
 //==============================================================================
 
 #include "solver_ws.h"
+#include "field_ws.h"
 #include "interaction.h"
 #include "tools.h"
 #include "plot.h"
@@ -73,12 +74,12 @@ SolverWS::SolverWS(const DataTree &_dataTree) : SolverWS(_dataTree, State(_dataT
  */
 
 SolverWS::SolverWS(const DataTree &_dataTree, State _state) : Solver(_dataTree, _state),
-  wsInteraction(dataTree, &_state)
+  wsInteraction(dataTree, &_state),
+  discrete(state.basis,  Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 101, 1, 151))
 {
   DBG_ENTER;
 
   multipoleOperators = MultipoleOperators(state);
-  discrete = Discrete(state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 51, 1, 51));
 
   dataTree.get(beta20tInit, "solver/ws/beta20tInit" , true);
   dataTree.get(q30tInit   , "solver/ws/q30tInit"    , true);
@@ -422,13 +423,15 @@ void SolverWS::bokehPlot(void)
     arma::mat densp = discrete.getLocalXZ(state.rho(PROTON), true);
     Plot::map("WS local density (prot)", densp, discrete.mesh);
 
-    Plot::slot(4);
-    arma::mat potn = wsInteraction("woodsSaxon")->getWSPot().directPotentialNeut;
-    Plot::map("WS potentian (neut)", potn, wsInteraction("woodsSaxon")->getWSPot().mesh);
-
-    Plot::slot(5);
-    arma::mat potp = wsInteraction("woodsSaxon")->getWSPot().directPotentialProt;
-    Plot::map("WS potentian (prot)", potp, wsInteraction("woodsSaxon")->getWSPot().mesh);
+    // WSPot wsPot = std::dynamic_pointer_cast<FieldWS>(wsInteraction("woodsSaxon"))->getWSPot();
+    //
+    // Plot::slot(4);
+    // arma::mat potn = wsPot.directPotentialNeut;
+    // Plot::map("WS potential (neut)", potn, wsPot.mesh);
+    //
+    // Plot::slot(5);
+    // arma::mat potp = wsPot.directPotentialProt;
+    // Plot::map("WS potential (prot)", potp, wsPot.mesh);
 
   }
 

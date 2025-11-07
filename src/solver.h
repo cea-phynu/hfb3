@@ -89,7 +89,7 @@ public:
   double value = 999.0;
 
   /// Must plot local densities ?
-  bool plotDensities = false;
+  bool plotDensities = true;
 
   /// Protection against empty kappa matrices.
   bool forceNonEmptyKappa = true;

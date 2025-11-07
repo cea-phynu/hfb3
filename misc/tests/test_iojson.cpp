@@ -22,6 +22,7 @@
 
 #include "gtest/gtest.h"
 #include "io_json.h"
+#include "datatree.h"
 
 //==============================================================================
 
@@ -33,8 +34,28 @@ TEST(IOjson, IOjson)
 
 //==============================================================================
 
-/*
 TEST(IOjson, fromContent)
 {
+  std::string content = "{action/basisOptimization:F,action/saveResultFiles:True}";
+  DataTree dt = IOjson().fromContent(content);
+
+  bool value = true;
+  dt.get(value, "action/basisOptimization", true);
+
+  ASSERT_EQ(value, false);
+
+  value = false;
+  dt.get(value, "action/saveResultFiles", true);
+
+  ASSERT_EQ(value, true);
+
+  std::string content2 = "{action/basisOptimization,action/saveResultFiles:True}";
+  DataTree dt2 = IOjson().fromContent(content2);
+
+  dt = dt + dt2;
+
+  value = true;
+  dt.get(value, "action/basisOptimization", true);
+
+  ASSERT_EQ(value, true);
 }
-*/

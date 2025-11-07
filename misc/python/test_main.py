@@ -138,15 +138,17 @@ def test_fragment_properties():
 def test_datatree():
 
     vq20 = 999.0
-    myDict = {'constraints/q20t': vq20}
+    myDict = {'constraints/q20t': vq20, 'testbool': True}
 
     # DataTree merging. The DataTree on the right of the '+' sign may overwrite values
     d = hfb3.DataTree("examples/42Ca_deformed_2x9.msg.gz") + hfb3.dictToDataTree(myDict)
 
     assert not d.contains('tutu')
     assert d.contains('system/nProt')
+    assert d.contains('testbool')
     assert d.getD('constraints/q10t') == 0
     assert d.getD('constraints/q20t') == vq20
+    assert d.getB('testbool')
 
 # ==============================================================================
 # ==============================================================================
@@ -381,6 +383,15 @@ def test_multi():
     multiUC[(2, -6, 87)] = np.zeros((4, 2, 3), dtype=np.uint64, order="F")
     multiUC[(2, -2)] = np.zeros((0, 0, 0), dtype=np.uint64, order="F")
     assert multiUC.size() == 2
+
+    # example of use for State class
+    filename = "examples/42Ca_deformed_2x9.msg.gz"
+    dataTree = hfb3.DataTree(filename)
+    state = hfb3.State(dataTree)
+    assert state.rho(hfb3.NEUTRON).shape == (438, 438)
+
+    state.rho[(hfb3.NEUTRON,)] = np.zeros((4, 3), dtype=np.float64, order="F")
+    assert state.rho(hfb3.NEUTRON).shape == (4, 3)
 
 # ==============================================================================
 # ==============================================================================

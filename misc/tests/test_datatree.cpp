@@ -43,6 +43,9 @@ TEST(DataTree, DataTree)
   d.set("basis0/gq", 1.6);
   d.set("basis0/type", std::string("Cylindrical"));
 
+  d.set("boolean/testvalue1", true);
+  d.set("boolean/testvalue2", false);
+
   // Example triaxial basis
   d.set("basis1/beta", 0.8);
   d.set("basis1/gamma", 112.0 / 180 * PI);
@@ -116,6 +119,14 @@ TEST(DataTree, DataTree)
   d.get(resultDouble, "basis0/gq");
   ASSERT_NEAR(resultDouble, 1.6, 1e-16);
   ASSERT_NEAR(d.getD("basis0/gq"), 1.6, 1e-16);
+
+  bool testBool1 = false;
+  d.get(testBool1, "boolean/testvalue1");
+  ASSERT_EQ(testBool1, true);
+
+  bool testBool2 = true;
+  d.get(testBool2, "boolean/testvalue2");
+  ASSERT_EQ(testBool2, false);
 
   arma::vec testVec2;
   d.get(testVec2, "testVec");

@@ -76,6 +76,51 @@
 //==============================================================================
 //==============================================================================
 
+std::list<KeyStruct > IOberger::validKeys =
+  {
+    { "berger/cvg", "convergence reached", "", "D" },
+    { "berger/iterx", "number of x-iteractions performed", "", "I" },
+    { "berger/itert", "number of t-iteractions performed", "", "I" },
+    { "berger/qsciss", "mean-value of Qneck operator", "", "D" },
+    { "berger/parent", "parent (starting solution)", "", "S" },
+    { "berger/enerNeut_Kinetic"         ,"Energy contribution: Neutron Kinetic"         , "" , "D" },
+    { "berger/enerNeut_Coulomb_Direct"  ,"Energy contribution: Neutron Coulomb_Direct"  , "" , "D" },
+    { "berger/enerNeut_Central_Direct"  ,"Energy contribution: Neutron Central_Direct"  , "" , "D" },
+    { "berger/enerNeut_Central_Exchange","Energy contribution: Neutron Central_Exchange", "" , "D" },
+    { "berger/enerNeut_Spin-orbit"      ,"Energy contribution: Neutron Spin-orbit"      , "" , "D" },
+    { "berger/enerNeut_Density"         ,"Energy contribution: Neutron Density"         , "" , "D" },
+    { "berger/enerNeut_Density_D2"      ,"Energy contribution: Neutron Density D2"      , "" , "D" },
+    { "berger/enerNeut_2-Body_COM_Cor." ,"Energy contribution: Neutron 2-Body_COM_Cor." , "" , "D" },
+    { "berger/enerNeut_Coulomb_Exchange","Energy contribution: Neutron Coulomb_Exchange", "" , "D" },
+    { "berger/enerNeut_Pairing_Central" ,"Energy contribution: Neutron Pairing_Central" , "" , "D" },
+    { "berger/enerNeut_Rearrangement"   ,"Energy contribution: Neutron Rearrangement"   , "" , "D" },
+    { "berger/enerNeut_Rearrangement_D2","Energy contribution: Neutron Rearrangement D2", "" , "D" },
+
+    { "berger/enerProt_Kinetic"         ,"Energy contribution: Proton Kinetic"         , "" , "D" },
+    { "berger/enerProt_Coulomb_Direct"  ,"Energy contribution: Proton Coulomb_Direct"  , "" , "D" },
+    { "berger/enerProt_Central_Direct"  ,"Energy contribution: Proton Central_Direct"  , "" , "D" },
+    { "berger/enerProt_Central_Exchange","Energy contribution: Proton Central_Exchange", "" , "D" },
+    { "berger/enerProt_Spin-orbit"      ,"Energy contribution: Proton Spin-orbit"      , "" , "D" },
+    { "berger/enerProt_Density"         ,"Energy contribution: Proton Density"         , "" , "D" },
+    { "berger/enerProt_Density_D2"      ,"Energy contribution: Proton Density D2"      , "" , "D" },
+    { "berger/enerProt_2-Body_COM_Cor." ,"Energy contribution: Proton 2-Body_COM_Cor." , "" , "D" },
+    { "berger/enerProt_Coulomb_Exchange","Energy contribution: Proton Coulomb_Exchange", "" , "D" },
+    { "berger/enerProt_Pairing_Central" ,"Energy contribution: Proton Pairing_Central" , "" , "D" },
+    { "berger/enerProt_Rearrangement"   ,"Energy contribution: Proton Rearrangement"   , "" , "D" },
+    { "berger/enerProt_Rearrangement_D2","Energy contribution: Proton Rearrangement D2", "" , "D" },
+
+    { "berger/enerCorrections", "Energy corrections", "", "V" },
+    { "berger/inertia0"  , "inertia tensor 0", "", "V" },
+    { "berger/inertia23" , "inertia tensor 2*3", "", "V" },
+    { "berger/inertia24" , "inertia tensor 2*4", "", "V" },
+    { "berger/inertia34" , "inertia tensor 3*4", "", "V" },
+    { "berger/inertia234", "inertia tensor 2*3*4", "", "V" },
+  };
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** The constructor.
  *
  *  Open a rhl.dat file, build the corresponding DataTree.
@@ -1281,34 +1326,34 @@ DataTree IOberger::fromContent(const std::string &_content)
   readMisc();
   readRhoKappa();
 
-  result.merge(basis.getDataTree("initial/")); // keep a copy of the initial basis parameters in case of a basis conversion
+  result.merge(basis.getDataTree("state/")); // keep a copy of the initial basis parameters in case of a basis conversion
   result.merge(basis.getDataTree(""));
-  result.set("HFB/rho", rho);
-  result.set("HFB/kappa", kappa);
-  result.set("HFB/N", (INT)(nNumber));
-  result.set("HFB/Z", (INT)(zNumber));
-  result.set("HFB/HOtoHFNeut", matDn);
-  result.set("HFB/HOtoHFProt", matDp);
-  result.set("HFB/indivOccupNeut", vecVn);
-  result.set("HFB/indivOccupProt", vecVp);
-  result.set("HFB/indivEnerNeut", eneQPn);
-  result.set("HFB/indivEnerProt", eneQPp);
-  result.set("HFB/chemPot", chemPot);
+  result.set("state/rho", rho);
+  result.set("state/kappa", kappa);
+  // result.set("state/N", (INT)(nNumber));
+  // result.set("state/Z", (INT)(zNumber));
+  // result.set("state/HOtoHFNeut", matDn);
+  // result.set("state/HOtoHFProt", matDp);
+  // result.set("state/indivOccupNeut", vecVn);
+  // result.set("state/indivOccupProt", vecVp);
+  // result.set("state/indivEnerNeut", eneQPn);
+  // result.set("state/indivEnerProt", eneQPp);
+  result.set("state/chemicalPotential", chemPot);
 
-  result.set("HFB/eneTot", eneTot);
+  result.set("state/totalEnergy", eneTot);
 
   IMAT oaiHFn = arma::zeros<IMAT >(vecOmegan.n_rows, 2);
   IMAT oaiHFp = arma::zeros<IMAT >(vecOmegap.n_rows, 2);
   oaiHFn.col(0) = vecOmegan;
   oaiHFp.col(0) = vecOmegap;
-  result.set("HFB/indivOmegaNeut", oaiHFn);
-  result.set("HFB/indivOmegaProt", oaiHFp);
-  result.set("berger/cvg", convergence);
-  result.set("berger/iterx", niterx);
-  result.set("berger/itert", nitert);
-  result.set("berger/qsciss", qsciss);
-  result.set("berger/parent", parent);
-  result.set("misc/jobname", jobname);
+  // result.set("state/indivOmegaNeut", oaiHFn);
+  // result.set("state/indivOmegaProt", oaiHFp);
+  // result.set("berger/cvg", convergence);
+  // result.set("berger/iterx", niterx);
+  // result.set("berger/itert", nitert);
+  // result.set("berger/qsciss", qsciss);
+  // result.set("berger/parent", parent);
+  result.set("action/jobName", jobname);
 
   for (INT i = 0; i < nbcon; i++)
   {
@@ -1320,12 +1365,12 @@ DataTree IOberger::fromContent(const std::string &_content)
     else if (constraint_type[i] == "q60") result.set("constraints/q60t", constraint_val[i]);
     else    ERROR("Unknown constraint type: '" + constraint_type[i] + "'");
 
-    if      (constraint_type[i] == "Q10") result.set("constraints_lambda/q10t", constraint_lambda[i]);
-    else if (constraint_type[i] == "q20") result.set("constraints_lambda/q20t", constraint_lambda[i]);
-    else if (constraint_type[i] == "q30") result.set("constraints_lambda/q30t", constraint_lambda[i]);
-    else if (constraint_type[i] == "q40") result.set("constraints_lambda/q40t", constraint_lambda[i]);
-    else if (constraint_type[i] == "q50") result.set("constraints_lambda/q50t", constraint_lambda[i]);
-    else if (constraint_type[i] == "q60") result.set("constraints_lambda/q60t", constraint_lambda[i]);
+    if      (constraint_type[i] == "Q10") result.set("state/constraints/lambda_q10t", constraint_lambda[i]);
+    else if (constraint_type[i] == "q20") result.set("state/constraints/lambda_q20t", constraint_lambda[i]);
+    else if (constraint_type[i] == "q30") result.set("state/constraints/lambda_q30t", constraint_lambda[i]);
+    else if (constraint_type[i] == "q40") result.set("state/constraints/lambda_q40t", constraint_lambda[i]);
+    else if (constraint_type[i] == "q50") result.set("state/constraints/lambda_q50t", constraint_lambda[i]);
+    else if (constraint_type[i] == "q60") result.set("state/constraints/lambda_q60t", constraint_lambda[i]);
     else    ERROR("Unknown constraint type: '" + constraint_type[i] + "'");
   }
 

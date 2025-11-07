@@ -20,8 +20,8 @@
 
 std::list<KeyStruct > System::validKeys =
   {
-    { "system/nNeut", "Neutron number", "94"   , "I"  },
-    { "system/nProt", "Proton number" , "146"  , "I"  }
+    { "system/nNeut", "Neutron number", "146"   , "I"  },
+    { "system/nProt", "Proton number" , "94"  , "I"  }
   };
 
 //==============================================================================

@@ -539,6 +539,9 @@ def dictToDataTree(ldict):
 
   for v in ldict.items():
 
+    if type(v[1]) is bool:
+      result.setB(v[0], v[1])
+
     if type(v[1]) is int:
       result.setI(v[0], v[1])
 

@@ -143,7 +143,7 @@ void FieldWS::calcField(void)
     }
 
     arma::vec Rw;
-    WSPot wspot(state.sys.nNeut, state.sys.nProt, def, mesh);
+    wsPot = WSPot(state.sys.nNeut, state.sys.nProt, def, mesh);
 
     // TODO
     // the next loop takes ~0.5s and is the bottleneck for the WS optimizations.
@@ -176,8 +176,8 @@ void FieldWS::calcField(void)
 
               // Tools::info("RRwZZw", RRwZZw);
 
-              totn = arma::accu(RRwZZw % wspot.directPotentialNeut);
-              totp = arma::accu(RRwZZw % wspot.directPotentialProt);
+              totn = arma::accu(RRwZZw % wsPot.directPotentialNeut);
+              totp = arma::accu(RRwZZw % wsPot.directPotentialProt);
               field(NEUTRON, DIRECT)(ia, ic) = totn;
               field(PROTON , DIRECT)(ia, ic) = totp;
 
@@ -215,4 +215,18 @@ void FieldWS::setDef(const Multi<double> &_def)
 
   DBG_LEAVE;
 }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Get the Woods-Saxon potential (used by FieldWoodsSaxon class).
+ */
+
+WSPot FieldWS::getWSPot(void)
+{
+  DBG_ENTER;
+  DBG_RETURN(wsPot);
+}
+
 

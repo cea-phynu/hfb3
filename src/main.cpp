@@ -66,6 +66,9 @@ INT main(INT argc, char **argv)
 
   // ===== Initial DataTree =====
   auto dataTree = DataTree::getDefault();
+  // auto dataTree = DataTree();
+
+  bool stateOnly = false;
 
   for (auto &file : cliParser.fileToLoad)
   {
@@ -74,7 +77,14 @@ INT main(INT argc, char **argv)
       std::string content;
 
       if (file == "-")
+      {
         content = Tools::readCin();
+      }
+      else if (file == "--state-only")
+      {
+        stateOnly = true;
+        continue;
+      }
       else
       {
         if (file[0] == '{') content = file;
@@ -82,6 +92,14 @@ INT main(INT argc, char **argv)
       }
 
       DataTree newDataTree = DataTree().fromContent(content);
+
+      if (stateOnly)
+      {
+        stateOnly = false;
+        newDataTree = newDataTree.getFiltered("state/");
+        Tools::mesg("Main  ", "Filtering the given dataTree (keeping only 'state/*' keys)");
+      }
+
       dataTree.merge(newDataTree);
     }
     catch (const std::string &msg)
@@ -126,14 +144,15 @@ INT main(INT argc, char **argv)
   }
   else if (actionStr == "test")
   {
+    // =========================================================================
+    // =========================================================================
+    // =========================================================================
+
     // insert some testing code here, get it executed with 'hfb3 "{action:test}"'
-    auto solverAlternator = SolverAlternator(dataTree);
 
-    // Tools::mesg("_main_", solverAlternator.info());
-
-    solverAlternator.init();
-    while(solverAlternator.nextIter());
-    solverAlternator.finalize();
+    // =========================================================================
+    // =========================================================================
+    // =========================================================================
   }
   else if (actionStr == "info")
   {

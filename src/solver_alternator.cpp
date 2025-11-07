@@ -36,6 +36,7 @@ std::list<KeyStruct> SolverAlternator::validKeys =
   {
     { "solver/alternator/maxIter", "Maximum number of iterations when alternating solvers",  "200", "I" },
     { "solver/alternator/scheme" , "Scheme for the alternating solvers"                   , "[GB]", "S" },
+    { "solver/alternator/snapshotInterval" , "Interval between snapshots"                 , "-1"  , "I" },
   };
 
 //==============================================================================
@@ -83,6 +84,7 @@ SolverAlternator::SolverAlternator(const DataTree &_dataTree, State _state) :
 
   dataTree.get(scheme               , "solver/alternator/scheme"               , true);
   dataTree.get(maxIter              , "solver/alternator/maxIter"              , true);
+  dataTree.get(snapshotInterval     , "solver/alternator/snapshotInterval"     , true);
 
   DBG_LEAVE;
 }
@@ -206,14 +208,6 @@ bool SolverAlternator::nextIter()
     {
       if (solverInit)
       {
-        if (!state.empty())
-        {
-          Tools::mesg("SolAlt", "skipping the Gradient HFB solver, since an initial state is given");
-          solverInit = true;
-          schemeId++;
-          break;
-        }
-
         Tools::mesg("SolAlt", "Starting the Gradient HFB solver");
 
         solverHFBGradient.state = state;
@@ -277,6 +271,11 @@ bool SolverAlternator::nextIter()
   }
 
   // INFO(PF("%d/%d ", nbIter, maxIter) + Solver::statusStr[status]);
+
+  if ((snapshotInterval > 0) && (nbIter % snapshotInterval == 0))
+  {
+    state.getDataTree().save(PF("snapshot_%02d_%06d.msg.gz", basisIter, nbIter));
+  }
 
   DBG_RETURN(true);
 }

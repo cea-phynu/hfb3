@@ -65,7 +65,6 @@ public :
   /// Possible types of constraints.
   static const std::vector<std::string> types;
 
-
   /// Type of constraint: multipole moment, geometrical, ...
   static const IVEC genderValue;
 

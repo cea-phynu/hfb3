@@ -22,6 +22,7 @@
 
 #include "gtest/gtest.h"
 #include "io_hfb3.h"
+#include "datatree.h"
 
 //==============================================================================
 
@@ -33,10 +34,27 @@ TEST(IOhfb3, IOhfb3)
 
 //==============================================================================
 
-/*
 TEST(IOhfb3, fromContent)
 {
+  std::string content =
+R"toto(#!HFB3!#
+
+[action]
+basisOptimization F
+saveResultFiles   True
+)toto";
+
+  DataTree dt = IOhfb3().fromContent(content);
+
+  bool value = true;
+  dt.get(value, "action/basisOptimization", true);
+
+  ASSERT_EQ(value, false);
+
+  value = false;
+  dt.get(value, "action/saveResultFiles", true);
+
+  ASSERT_EQ(value, true);
 }
-*/
 
 

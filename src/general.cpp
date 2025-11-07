@@ -28,6 +28,7 @@
 #include "solver_hfb_broyden.h"
 #include "solver_hfb_gradient.h"
 #include "solver_ws.h"
+#include "io_berger.h"
 #include "state.h"
 
 /** \file
@@ -123,6 +124,7 @@ void General::setGlobalValidKeys(void)
     ADDLIST(globalValidKeys,             State::validKeys);
     ADDLIST(globalValidKeys,            System::validKeys);
     ADDLIST(globalValidKeys,           General::validKeys);
+    ADDLIST(globalValidKeys,          IOberger::validKeys);
   }
 }
 

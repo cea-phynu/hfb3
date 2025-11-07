@@ -75,6 +75,11 @@ $ make doc
 
 Then open `doc/html/index.html` with a browser.
 
+# Cite as
+
+If You want to mention `HFB3` in a publication, please refer to the official release publication:
+[N. Dubray *et al.*, Eur. Phys. J. A. **61** (2025)](https://epja.epj.org/articles/epja/abs/2025/10/10050_2025_Article_1697/10050_2025_Article_1697.html).
+
 # Python bindings
 
 The simplest way yo use the Python bindings is to install a pre-compiled version of HFB3 with `pip`:

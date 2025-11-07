@@ -290,6 +290,7 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
 
   SolverAlternator solverAlternator(customDataTree, state);
   solverAlternator.init();
+  solverAlternator.basisIter = nbIter;
   while (solverAlternator.nextIter());
   state = solverAlternator.state;
 

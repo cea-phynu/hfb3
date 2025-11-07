@@ -39,7 +39,7 @@ class Basis : public Generic
 public :
 
   // Constructors
-  Basis(void);
+  Basis(void);                                                         // #TEST#
   explicit Basis(const std::string &filename);                         // #TEST#
   explicit Basis(const DataTree &dataTree,                             // #TEST#
                  const std::string &prefix = "");
@@ -299,7 +299,7 @@ public :
   /// The transformation from basis HO to basis OR.
   arma::mat HOtoOR;
 
-  /// The indices of the omega blocks in the OR basis (Cylindrical basis only).
+  /// The indices of the omega blocks in the OR basis.
   Multi<UVEC> omegaIndexOR;
 
   /// The incomplete z-overlaps as defined in Eq. (E-16), p. E-2, PhD J.-F. Berger.

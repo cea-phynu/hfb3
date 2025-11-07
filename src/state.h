@@ -59,7 +59,7 @@ public :
   void calcCanonical(void);                                            // #TEST#
   const arma::vec getCanonicalV2(const arma::mat &_rho);
   void calcRhoKappaFromUV(void);                                       // #TEST#
-  void calcUVFromRhoKappa(const DataTree &dataTree);                   // #TEST#
+  void calcUVFromRhoKappa(void);                                       // #TEST#
   const std::string getOmegaContributionsInfo(void) const;             // #TEST#
   void printCanonicalStatesInfo(const arma::mat &_rho, INT iso);       // #TEST#
 

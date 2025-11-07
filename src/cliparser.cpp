@@ -49,7 +49,7 @@ CliParser::CliParser(INT argc, char **argv)
       readSaveTo = false;
       saveTo = arg;
     }
-    else if ((arg[0] != '-') or (arg.size() == 1))
+    else if ((arg[0] != '-') or (arg == "--state-only") or (arg.size() == 1))
     {
       // '-' for std::cin
       fileToLoad.push_back(arg);
@@ -79,7 +79,7 @@ CliParser::CliParser(INT argc, char **argv)
       else if (arg == "-v4")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIMELINE, MSG_DEBUG};
       else if (arg == "-v5")        msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIME, MSG_DEBUG, MSG_TIMELINE};
       else if (arg == "-v")         msgToOut = {MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING, MSG_TIME, MSG_DEBUG, MSG_TIMELINE};
-
+      else if (arg == "--state-only") {}
       else ERROR("unknown option: '" + arg + "'");
     }
   }

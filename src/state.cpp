@@ -165,12 +165,12 @@ State::State(const DataTree &dataTree) :
         basis = stateBasis;
         basis.calcWDN();
 
-        Tools::debug("The basis specified in 'state/basis/' will be used.");
-        Tools::debug("To use the basis specified in 'basis/', set `basis/useStateBasis` to False.");
+        Tools::mesg("State ", "The basis specified in 'state/basis/' will be used.");
+        Tools::mesg("State", "To use the basis specified in 'basis/', set `basis/useStateBasis` to False.");
       }
       else
       {
-        Tools::info("Converting the state from the basis in `state/basis/` to the basis in `basis/`.");
+        Tools::mesg("State", "Converting the state from the basis in `state/basis/` to the basis in `basis/`.");
 
         // Convert the state FROM the stateBasis to the current basis
         convertFrom(stateBasis);
@@ -178,19 +178,19 @@ State::State(const DataTree &dataTree) :
     }
   }
 
-  // If missing rho and kappa, try to recover them from U and V
+  // If missing rho and kappa and U and V present, reconstruct from U and V
   if (rho(NEUTRON).empty() || rho(PROTON).empty() ||
       kappa(NEUTRON).empty() || kappa(PROTON).empty())
   {
     calcRhoKappaFromUV();
   }
 
-  // // If missing U and V, try to recover them from rho and kappa
-  // if (U(NEUTRON).empty() || U(PROTON).empty() ||
-  //     V(NEUTRON).empty() || V(PROTON).empty())
-  // {
-  //   calcUVFromRhoKappa(dataTree);
-  // }
+  // If missing U and V and rho and kappa present, reconstruct from rho and kappa
+  if (U(NEUTRON).empty() || U(PROTON).empty() ||
+      V(NEUTRON).empty() || V(PROTON).empty())
+  {
+    calcUVFromRhoKappa();
+  }
 
   // Tools::mesg("BogCnv", getOmegaContributionsInfo());
 
@@ -443,112 +443,80 @@ const arma::vec State::getOverlap(State &otherState)
 /** Calculate U and V matrices from rho and kappa matrices IF NEEDED.
  */
 
-void State::calcUVFromRhoKappa(const DataTree &dataTree)
+void State::calcUVFromRhoKappa(void)
 {
   DBG_ENTER;
 
-#if true
-  // without messages
   if (rho(NEUTRON  ).empty()) { DBG_LEAVE; };
   if (rho(PROTON   ).empty()) { DBG_LEAVE; };
   if (kappa(NEUTRON).empty()) { DBG_LEAVE; };
   if (kappa(PROTON ).empty()) { DBG_LEAVE; };
-  if (!U(NEUTRON).empty()   ) { DBG_LEAVE; };
-  if (!U(PROTON ).empty()   ) { DBG_LEAVE; };
-  if (!V(NEUTRON).empty()   ) { DBG_LEAVE; };
-  if (!V(PROTON ).empty()   ) { DBG_LEAVE; };
-#else
-  // with messages
-  if (rho(NEUTRON  ).empty()) { Tools::mesg("State.", std::string("rho(NEUTRON)"  ) + " is empty... no U and V calculation"); DBG_LEAVE; };
-  if (rho(PROTON   ).empty()) { Tools::mesg("State.", std::string("rho(PROTON)"   ) + " is empty... no U and V calculation"); DBG_LEAVE; };
-  if (kappa(NEUTRON).empty()) { Tools::mesg("State.", std::string("kappa(NEUTRON)") + " is empty... no U and V calculation"); DBG_LEAVE; };
-  if (kappa(PROTON ).empty()) { Tools::mesg("State.", std::string("kappa(PROTON)" ) + " is empty... no U and V calculation"); DBG_LEAVE; };
-  if (!U(NEUTRON).empty()   ) { Tools::mesg("State.", std::string("U(NEUTRON)") + " is not empty... no U and V calculation"); DBG_LEAVE; };
-  if (!U(PROTON ).empty()   ) { Tools::mesg("State.", std::string("U(PROTON)" ) + " is not empty... no U and V calculation"); DBG_LEAVE; };
-  if (!V(NEUTRON).empty()   ) { Tools::mesg("State.", std::string("V(NEUTRON)") + " is not empty... no U and V calculation"); DBG_LEAVE; };
-  if (!V(PROTON ).empty()   ) { Tools::mesg("State.", std::string("V(PROTON)" ) + " is not empty... no U and V calculation"); DBG_LEAVE; };
-#endif
 
   Tools::mesg("State.", "Updating U and V matrices from rho and kappa matrices");
-
-  // perform a single SolverHFBBroyden iteration to generate U and V matrices
-  SolverHFBBroyden solverHFBBroyden(dataTree, *this);
-  solverHFBBroyden.nextIter();
-
-  U = solverHFBBroyden.state.U;
-  V = solverHFBBroyden.state.V;
+  // Tools::mesg("State.", info());
 
   //============================================================================
   //============================================================================
   //============================================================================
 
-  // TODO: Other way to do the same thing using Cholesky decomposition ?
+  // basis orthonormalization
+  basis.calcWDN();
 
-  // // J.-P. Ebran's derivations, p. 8, Eq. (II-B.18).
-  // arma::mat Mtot = state.basis.HOtoOR.t();
-  //
-  // Multi<arma::mat> rho;
-  // rho(NEUTRON) = state.rho(NEUTRON);
-  // rho(PROTON ) = state.rho(PROTON );
-  //
-  // Multi<arma::mat> kappa;
-  // kappa(NEUTRON) = state.kappa(NEUTRON);
-  // kappa(PROTON ) = state.kappa(PROTON );
-  //
-  // Multi<arma::mat> Utot;
-  // Multi<arma::mat> Vtot;
-  //
-  // Utot(PROTON ) = arma::zeros(state.basis.ORqn.nb, state.basis.ORqn.nb);
-  // Utot(NEUTRON) = arma::zeros(state.basis.ORqn.nb, state.basis.ORqn.nb);
-  // Vtot(NEUTRON) = arma::zeros(state.basis.ORqn.nb, state.basis.ORqn.nb);
-  // Vtot(PROTON ) = arma::zeros(state.basis.ORqn.nb, state.basis.ORqn.nb);
-  //
-  // for (INT iso: {NEUTRON, PROTON})
-  // {
-  //   for (INT omega = 0; omega < state.basis.mMax; omega++)
-  //   {
-  //     arma::mat M = Mtot.submat(state.basis.omegaIndexHO(omega), state.basis.omegaIndexOR(omega));
-  //
-  //     arma::mat rhoHO   = rho(  iso).submat(state.basis.omegaIndexHO(omega), state.basis.omegaIndexHO(omega));
-  //     arma::mat kappaHO = kappa(iso).submat(state.basis.omegaIndexHO(omega), state.basis.omegaIndexHO(omega));
-  //
-  //     arma::mat rhoOR   = M.t() * rhoHO   * M;
-  //     arma::mat kappaOR = M.t() * kappaHO * M;
-  //
-  //     UINT ORsize_omega = state.basis.omegaIndexOR(omega).n_rows;
-  //     arma::mat RmatOR = arma::zeros(ORsize_omega * 2, ORsize_omega * 2);
-  //
-  //     // J.-P. Ebran's derivations, p. 8, Eq. (II-C.14).
-  //     RmatOR.submat(           0,            0,     ORsize_omega - 1,     ORsize_omega - 1) =  rhoOR;
-  //     RmatOR.submat(ORsize_omega, ORsize_omega, 2 * ORsize_omega - 1, 2 * ORsize_omega - 1) = arma::eye(ORsize_omega, ORsize_omega) - rhoOR;
-  //     RmatOR.submat(           0, ORsize_omega,     ORsize_omega - 1, 2 * ORsize_omega - 1) = -kappaOR;
-  //     RmatOR.submat(ORsize_omega,            0, 2 * ORsize_omega - 1,     ORsize_omega - 1) = -kappaOR.t();
-  //
-  //     arma::vec E;
-  //     arma::mat B;
-  //
-  //     if (!Tools::checkSymmetry(RmatOR, "RmatOR in " + std::string(__PRETTY_FUNCTION__)))
-  //       RmatOR = arma::symmatu(RmatOR);
-  //
-  //     Tools::eig_sym(E, B, RmatOR);
-  //
-  //     // Extraction of U and V matrices from B.
-  //     // J.-P. Ebran's derivations, p. 8, Eq. (II-C.4).
-  //     arma::mat U = B.submat(0, 0, ORsize_omega - 1, ORsize_omega - 1);
-  //     arma::mat V = B.submat(0, ORsize_omega, ORsize_omega - 1, 2 * ORsize_omega - 1);
-  //
-  //     Utot(iso).submat(state.basis.omegaIndexOR(omega), state.basis.omegaIndexOR(omega)) = U;
-  //     Vtot(iso).submat(state.basis.omegaIndexOR(omega), state.basis.omegaIndexOR(omega)) = V;
-  //   }
-  // }
-  //
-  // arma::mat M = state.basis.HOtoOR.t();
-  //
-  // // in HO*OR representation
-  // state.U(NEUTRON) = M * Utot(NEUTRON);
-  // state.U(PROTON ) = M * Utot(PROTON );
-  // state.V(NEUTRON) = M * Vtot(NEUTRON);
-  // state.V(PROTON ) = M * Vtot(PROTON );
+  arma::mat M = basis.HOtoOR.t();
+  arma::mat Mi = basis.ORtoHO.t();
+
+  for (INT iso: {NEUTRON, PROTON})
+  {
+    U(iso) = arma::zeros(basis.HOqn.nb, basis.ORqn.nb);
+    V(iso) = arma::zeros(basis.HOqn.nb, basis.ORqn.nb);
+
+    for (INT omega = 0; omega < basis.mMax; omega++)
+    {
+      arma::mat M_omega  = M.submat(basis.omegaIndexHO(omega), basis.omegaIndexOR(omega));
+      arma::mat Mi_omega  = Mi.submat(basis.omegaIndexOR(omega), basis.omegaIndexHO(omega));
+
+      UINT dimOR = M_omega.n_cols;
+
+      // rho matrix in OR representation
+      arma::mat rhoOR   = Mi_omega * rho(iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega)) * Mi_omega.t();
+
+      // kappa matrix in OR representation
+      arma::mat kappaOR = Mi_omega * kappa(iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega)) * Mi_omega.t();
+
+      // construct R matrix in 2*OR representation
+      arma::mat R = arma::zeros(dimOR * 2, dimOR * 2);
+      R.submat(0, 0, dimOR - 1, dimOR - 1) = rhoOR;
+      R.submat(dimOR, dimOR, 2 * dimOR - 1, 2 * dimOR - 1) = arma::eye(dimOR, dimOR) - rhoOR;
+      R.submat(0, dimOR, dimOR - 1, 2 * dimOR - 1) = kappaOR;
+      R.submat(dimOR, 0, 2 * dimOR - 1, dimOR - 1) = kappaOR;
+
+      // diagonalize
+      arma::vec eige;
+      arma::mat eigv;
+      Tools::eig_sym(eige, eigv, R);
+
+      // sort by decreasing eigenvalues.
+      UVEC Eind = arma::sort_index(eige, "descend");
+      eigv = eigv.cols(Eind);
+      eige = eige.elem(Eind);
+
+      // Tools::info("eige", eige, true);
+
+      // extraction of U and V matrices
+      arma::mat U_omega = eigv.submat(dimOR, 0, 2 * dimOR - 1, dimOR - 1);
+      arma::mat V_omega = eigv.submat(0, 0, dimOR - 1, dimOR - 1);
+
+      // back to HO representation
+      arma::mat Uho = M_omega * U_omega;
+      arma::mat Vho = M_omega * V_omega;
+
+      U(iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexOR(omega)) = Uho;
+      V(iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexOR(omega)) = Vho;
+    }
+  }
+
+  // Tools::mesg("State.", "Updating U and V matrices from rho and kappa matrices - after:");
+  // Tools::mesg("State.", info());
 
   //============================================================================
   //============================================================================
@@ -574,17 +542,20 @@ void State::calcRhoKappaFromUV(void)
   if (V(PROTON ).empty()) DBG_LEAVE;
 
   Tools::mesg("State.", "Updating rho and kappa matrices from U and V matrices");
+  // Tools::mesg("State.", info());
 
   rho(NEUTRON)   = V(NEUTRON) * V(NEUTRON).t();
   rho(PROTON )   = V(PROTON ) * V(PROTON ).t();
   kappa(NEUTRON) = V(NEUTRON) * U(NEUTRON).t();
   kappa(PROTON ) = V(PROTON ) * U(PROTON ).t();
 
-  rho(NEUTRON)   = arma::symmatu(rho(NEUTRON));
-  rho(PROTON )   = arma::symmatu(rho(PROTON ));
-  kappa(NEUTRON) = arma::symmatu(kappa(NEUTRON));
-  kappa(PROTON ) = arma::symmatu(kappa(PROTON ));
+  // rho(NEUTRON)   = arma::symmatu(rho(NEUTRON));
+  // rho(PROTON )   = arma::symmatu(rho(PROTON ));
+  // kappa(NEUTRON) = arma::symmatu(kappa(NEUTRON));
+  // kappa(PROTON ) = arma::symmatu(kappa(PROTON ));
 
+  // Tools::mesg("State.", "Updating rho and kappa matrices from U and V matrices - after:");
+  // Tools::mesg("State.", info());
 
   DBG_LEAVE;
 }
@@ -831,7 +802,6 @@ void State::calcInertia(const IVEC &_collectiveCoordinates)
       }
       // Tools::info(PF("M(%s, %d)", Tools::strIsospin(iso).c_str(), k), M(iso, k), true);
     }
-
   }
 
   // for (INT k = 0; k < 4; k++)

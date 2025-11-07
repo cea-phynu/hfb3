@@ -22,15 +22,19 @@
 
 #include "gtest/gtest.h"
 #include "axis.h"
-#include "tools.h"
 
 //==============================================================================
 
 TEST(Axis, Axis)
 {
+  // test default values
+  Axis ax;
+  ASSERT_EQ(ax, Axis(Axis::REGULAR, 10, -1.0, 1.0));
+
+
   Axis a(Axis::REGULAR, 20, -1.0, 1.0);
-  ASSERT_TRUE(a.nb == 20);
-  ASSERT_TRUE(a.p.n_rows == 20);
+  ASSERT_EQ(a.nb, 20);
+  ASSERT_EQ(a.p.n_rows, 20);
   a = Axis(Axis::GAUSS_LEGENDRE, 10, -1.0, 1.0);
 
   ASSERT_NEAR(a.p(3), -4.3339539412924719E-001, 1e-15);
@@ -86,25 +90,24 @@ TEST(Axis, operator_equality)
 {
   Axis a(Axis::REGULAR, 20, -1.0, 1.0);
   Axis b(Axis::REGULAR, 20, -1.0, 1.0);
-  ASSERT_TRUE(a == b);
   ASSERT_EQ(a, b);
 
   Axis c(Axis::REGULAR, 20, -2.0, 1.0);
-  ASSERT_FALSE(a == c);
+  ASSERT_NE(a, c);
 
   Axis d(Axis::GAUSS_LEGENDRE, 30);
   Axis e(Axis::GAUSS_LEGENDRE, 30);
-  ASSERT_TRUE(d == e);
+  ASSERT_EQ(d, e);
 
   e.w[3] = 1.7;
-  ASSERT_FALSE(d == e);
+  ASSERT_NE(d, e);
 
   e = Axis(Axis::GAUSS_LEGENDRE, 30);
   e.we[3] = 1.7;
-  ASSERT_FALSE(d == e);
+  ASSERT_NE(d, e);
 
   Axis f(Axis::GAUSS_LEGENDRE, 40);
-  ASSERT_FALSE(d == f);
+  ASSERT_NE(d, f);
 }
 
 //==============================================================================
@@ -113,23 +116,22 @@ TEST(Axis, operator_inequality)
 {
   Axis a(Axis::REGULAR, 20, -1.0, 1.0);
   Axis b(Axis::REGULAR, 20, -1.0, 1.0);
-  ASSERT_FALSE(a != b);
+  ASSERT_EQ(a, b);
 
   Axis c(Axis::REGULAR, 20, -2.0, 1.0);
-  ASSERT_TRUE(a != c);
+  ASSERT_NE(a, c);
 
   Axis d(Axis::GAUSS_LEGENDRE, 30);
   Axis e(Axis::GAUSS_LEGENDRE, 30);
-  ASSERT_FALSE(d != e);
+  ASSERT_EQ(d, e);
 
   e.w[3] = 1.7;
-  ASSERT_TRUE(d != e);
+  ASSERT_NE(d, e);
 
   e = Axis(Axis::GAUSS_LEGENDRE, 30);
   e.we[3] = 1.7;
-  ASSERT_TRUE(d != e);
-
+  ASSERT_NE(d, e);
 
   Axis f(Axis::GAUSS_LEGENDRE, 40);
-  ASSERT_TRUE(d != f);
+  ASSERT_NE(d, f);
 }

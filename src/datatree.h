@@ -120,7 +120,7 @@ public:
   bool get(Multi<arma::cube> &, const std::string &key, bool ignore = false) const;
 
   DataTree getSection(const std::string &sectionName) const;
-
+  DataTree getFiltered(const std::string &sectionName) const;
 
   // For python
   bool         getB( const std::string &key, bool ignore = false, bool *isFound = NULL) const;
@@ -181,7 +181,7 @@ public:
   INT del(const std::string &key);
 
   void validate(void) const;
-  bool isValid(const std::string &key, const std::string &type = "") const;
+  void checkKeyAndType(const std::string &key, const std::string &type) const;
   const std::string getType(const std::string &key) const;
 
   void save(const std::string &filename, bool verbose = true) const;

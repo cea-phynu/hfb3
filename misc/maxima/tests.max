@@ -265,7 +265,7 @@ kill(z)$
 print("TEST(Basis, rPart)")$
 [br: 1.3, bz: 1.2, d0:12.3]$ /* Basis parameters */
 
-r:-2.238$
+r:2.238$
 
 printf(datafile, "#define BASIS_RPART_TARGET00 ~24,16,3e~%", bfloat(rpart(r,  0,  2, br)))$
 printf(datafile, "#define BASIS_RPART_TARGET01 ~24,16,3e~%", bfloat(rpart(r,  1,  1, br)))$
@@ -296,7 +296,7 @@ kill(r)$
 print("TEST(Basis, rPart_big)")$
 [br: 5.3, bz: 1.2, d0:12.3]$ /* Basis parameters */
 
-r:-2.238$
+r:2.238$
 
 printf(datafile, "#define BASIS_RPART_BIG_TARGET00 ~24,16,3e~%", bfloat(rpart(r,  0,  2, br)))$
 printf(datafile, "#define BASIS_RPART_BIG_TARGET01 ~24,16,3e~%", bfloat(rpart(r,  1,  1, br)))$
@@ -535,81 +535,84 @@ printf(datafile, "#define FIELDCENTRALDIRECT_CALCGAUSSIANINTEGRALZ_TARGET81 ~24,
 
 /******************************************************************************/
 
-print("TEST(Moments, calcQl0Matrices)")$
+print("TEST(MultipoleOperators, calcQl0Matrices)")$
 
 [br: 2.4144410198519912, bz: 3.1170299534289376, d0:0.0]$ /* test_1ct.rhl.dat.gz */
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET00 ~24,16,3e~%", float(z1recouv(8,9,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET01 ~24,16,3e~%", float(z1recouv(8,0,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET02 ~24,16,3e~%", float(z1recouv(1,1,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET03 ~24,16,3e~%", float(z2recouv(1,2,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET04 ~24,16,3e~%", float(z2recouv(1,2,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET05 ~24,16,3e~%", float(z2recouv(1,3,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET06 ~24,16,3e~%", float(z3recouv(2,5,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET07 ~24,16,3e~%", float(z3recouv(2,6,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET08 ~24,16,3e~%", float(z3recouv(3,4,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET09 ~24,16,3e~%", float(z4recouv(3,5,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET10 ~24,16,3e~%", float(z4recouv(7,2,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET11 ~24,16,3e~%", float(z4recouv(7,3,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET12 ~24,16,3e~%", float(z5recouv(1,2,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET13 ~24,16,3e~%", float(z5recouv(1,3,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET14 ~24,16,3e~%", float(z5recouv(0,3,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET15 ~24,16,3e~%", float(z6recouv(0,0,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET16 ~24,16,3e~%", float(z6recouv(0,1,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET00 ~24,16,3e~%", float(z1recouv(8,9,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET01 ~24,16,3e~%", float(z1recouv(8,0,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET02 ~24,16,3e~%", float(z1recouv(1,1,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET03 ~24,16,3e~%", float(z2recouv(1,2,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET04 ~24,16,3e~%", float(z2recouv(1,2,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET05 ~24,16,3e~%", float(z2recouv(1,3,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET06 ~24,16,3e~%", float(z3recouv(2,5,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET07 ~24,16,3e~%", float(z3recouv(2,6,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET08 ~24,16,3e~%", float(z3recouv(3,4,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET09 ~24,16,3e~%", float(z4recouv(3,5,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET10 ~24,16,3e~%", float(z4recouv(7,2,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET11 ~24,16,3e~%", float(z4recouv(7,3,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET12 ~24,16,3e~%", float(z5recouv(1,2,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET13 ~24,16,3e~%", float(z5recouv(1,3,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET14 ~24,16,3e~%", float(z5recouv(0,3,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET15 ~24,16,3e~%", float(z6recouv(0,0,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET16 ~24,16,3e~%", float(z6recouv(0,1,0,0)))$
 
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET17 ~24,16,3e~%", float(r2recouv( 0,1,1)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET18 ~24,16,3e~%", float(r2recouv( 0,1,2)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET19 ~24,16,3e~%", float(r2recouv( 8,0,1)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET20 ~24,16,3e~%", float(r2recouv(10,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET21 ~24,16,3e~%", float(r4recouv( 0,1,1)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET22 ~24,16,3e~%", float(r4recouv( 0,1,2)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET23 ~24,16,3e~%", float(r4recouv( 8,0,1)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET24 ~24,16,3e~%", float(r4recouv(10,0,0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET25 ~24,16,3e~%", float(r6recouv( 0,1,1)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET26 ~24,16,3e~%", float(r6recouv( 0,1,2)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET27 ~24,16,3e~%", float(r6recouv( 8,0,1)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET28 ~24,16,3e~%", float(r6recouv(10,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET17 ~24,16,3e~%", float(r2recouv( 0,1,1)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET18 ~24,16,3e~%", float(r2recouv( 0,1,2)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET19 ~24,16,3e~%", float(r2recouv( 8,0,1)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET20 ~24,16,3e~%", float(r2recouv(10,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET21 ~24,16,3e~%", float(r4recouv( 0,1,1)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET22 ~24,16,3e~%", float(r4recouv( 0,1,2)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET23 ~24,16,3e~%", float(r4recouv( 8,0,1)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET24 ~24,16,3e~%", float(r4recouv(10,0,0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET25 ~24,16,3e~%", float(r6recouv( 0,1,1)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET26 ~24,16,3e~%", float(r6recouv( 0,1,2)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET27 ~24,16,3e~%", float(r6recouv( 8,0,1)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET28 ~24,16,3e~%", float(r6recouv(10,0,0)))$
 
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET29 ~24,16,3e~%", float(q20(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET30 ~24,16,3e~%", float(q20(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET31 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET32 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET33 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET34 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET35 ~24,16,3e~%", float(q20(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET36 ~24,16,3e~%", float(q20(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET29 ~24,16,3e~%", float(q20(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET30 ~24,16,3e~%", float(q20(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET31 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET32 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET33 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET34 ~24,16,3e~%", float(q20(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET35 ~24,16,3e~%", float(q20(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET36 ~24,16,3e~%", float(q20(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
 
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET37 ~24,16,3e~%", float(q30(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET38 ~24,16,3e~%", float(q30(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET39 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET40 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET41 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET42 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET43 ~24,16,3e~%", float(q30(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET44 ~24,16,3e~%", float(q30(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET37 ~24,16,3e~%", float(q30(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET38 ~24,16,3e~%", float(q30(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET39 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET40 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET41 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET42 ~24,16,3e~%", float(q30(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET43 ~24,16,3e~%", float(q30(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET44 ~24,16,3e~%", float(q30(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
 
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET45 ~24,16,3e~%", float(q40(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET46 ~24,16,3e~%", float(q40(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET47 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET48 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET49 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET50 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET51 ~24,16,3e~%", float(q40(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET52 ~24,16,3e~%", float(q40(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET45 ~24,16,3e~%", float(q40(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET46 ~24,16,3e~%", float(q40(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET47 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET48 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET49 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET50 ~24,16,3e~%", float(q40(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET51 ~24,16,3e~%", float(q40(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET52 ~24,16,3e~%", float(q40(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
 
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET53 ~24,16,3e~%", float(q50(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET54 ~24,16,3e~%", float(q50(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET55 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET56 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET57 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET58 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET59 ~24,16,3e~%", float(q50(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET60 ~24,16,3e~%", float(q50(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
-                                                          
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET61 ~24,16,3e~%", float(q60(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET62 ~24,16,3e~%", float(q60(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET63 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET64 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET65 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET66 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET67 ~24,16,3e~%", float(q60(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
-printf(datafile, "#define MOMENTS_CALCQL0MATRICES_TARGET68 ~24,16,3e~%", float(q60(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET53 ~24,16,3e~%", float(q50(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET54 ~24,16,3e~%", float(q50(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET55 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET56 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET57 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET58 ~24,16,3e~%", float(q50(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET59 ~24,16,3e~%", float(q50(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET60 ~24,16,3e~%", float(q50(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET61 ~24,16,3e~%", float(q60(0, 1, 8, 0, 0, 0, 1, 9, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET62 ~24,16,3e~%", float(q60(0, 1, 8, 0, 0, 0, 2, 0, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET63 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 0, 1, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET64 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 0, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET65 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 3, 2, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET66 ~24,16,3e~%", float(q60(1, 3, 1, 0, 0, 1, 3, 3, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET67 ~24,16,3e~%", float(q60(2, 1, 2, 0, 0, 2, 1, 5, 0, 0)))$
+printf(datafile, "#define MULTIPOLE_OPERATORS_CALCQL0MATRICES_TARGET68 ~24,16,3e~%", float(q60(2, 1, 2, 0, 0, 2, 1, 6, 0, 0)))$
+
+
+close(datafile)$

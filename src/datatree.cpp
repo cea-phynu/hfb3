@@ -589,8 +589,7 @@ void DataTree::set(const std::string &key, const char *val)
 
 void DataTree::set(const std::string &key, const std::string &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "S"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "S");
 
   stringMap[key] = std::regex_replace(val, std::regex("\n"), " ");
 }
@@ -622,8 +621,7 @@ void DataTree::set(const std::string &key)
 
 void DataTree::set(const std::string &key, const bool &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "B"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "B");
 
   boolMap[key] = val;
 }
@@ -640,8 +638,7 @@ void DataTree::set(const std::string &key, const bool &val)
 
 void DataTree::set(const std::string &key, INT val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "I"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "I");
 
   intMap[key] = val;
 }
@@ -658,8 +655,7 @@ void DataTree::set(const std::string &key, INT val)
 
 void DataTree::set(const std::string &key, double val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "D"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "D");
 
   doubleMap[key] = val;
 }
@@ -676,8 +672,7 @@ void DataTree::set(const std::string &key, double val)
 
 void DataTree::set(const std::string &key, const arma::vec &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "V"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "V");
 
   vecMap[key] = val;
 }
@@ -694,8 +689,7 @@ void DataTree::set(const std::string &key, const arma::vec &val)
 
 void DataTree::set(const std::string &key, const arma::mat &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "M"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "M");
 
   matMap[key] = val;
 }
@@ -712,8 +706,7 @@ void DataTree::set(const std::string &key, const arma::mat &val)
 
 void DataTree::set(const std::string &key, const arma::cube &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "C"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "C");
 
   cubeMap[key] = val;
 }
@@ -730,8 +723,7 @@ void DataTree::set(const std::string &key, const arma::cube &val)
 
 void DataTree::set(const std::string &key, const IVEC &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "IV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "IV");
 
   ivecMap[key] = val;
 }
@@ -748,8 +740,7 @@ void DataTree::set(const std::string &key, const IVEC &val)
 
 void DataTree::set(const std::string &key, const IMAT &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "IM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "IM");
 
   imatMap[key] = val;
 }
@@ -766,8 +757,7 @@ void DataTree::set(const std::string &key, const IMAT &val)
 
 void DataTree::set(const std::string &key, const ICUBE &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "IC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "IC");
 
   icubeMap[key] = val;
 }
@@ -784,8 +774,7 @@ void DataTree::set(const std::string &key, const ICUBE &val)
 
 void DataTree::set(const std::string &key, const Multi<IVEC> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MIV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MIV");
 
   multiIVecMap[key] = val;
 }
@@ -802,8 +791,7 @@ void DataTree::set(const std::string &key, const Multi<IVEC> &val)
 
 void DataTree::set(const std::string &key, const Multi<IMAT> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MIM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MIM");
 
   multiIMatMap[key] = val;
 }
@@ -820,8 +808,7 @@ void DataTree::set(const std::string &key, const Multi<IMAT> &val)
 
 void DataTree::set(const std::string &key, const Multi<ICUBE> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MIC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MIC");
 
   multiICubeMap[key] = val;
 }
@@ -838,8 +825,7 @@ void DataTree::set(const std::string &key, const Multi<ICUBE> &val)
 
 void DataTree::set(const std::string &key, const UVEC &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "UV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "UV");
 
   uvecMap[key] = val;
 }
@@ -856,8 +842,7 @@ void DataTree::set(const std::string &key, const UVEC &val)
 
 void DataTree::set(const std::string &key, const UMAT &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "UM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "UM");
 
   umatMap[key] = val;
 }
@@ -874,8 +859,7 @@ void DataTree::set(const std::string &key, const UMAT &val)
 
 void DataTree::set(const std::string &key, const UCUBE &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "UC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "UC");
 
   ucubeMap[key] = val;
 }
@@ -892,8 +876,7 @@ void DataTree::set(const std::string &key, const UCUBE &val)
 
 void DataTree::set(const std::string &key, const Multi<UVEC> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MUV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MUV");
 
   multiUVecMap[key] = val;
 }
@@ -910,8 +893,7 @@ void DataTree::set(const std::string &key, const Multi<UVEC> &val)
 
 void DataTree::set(const std::string &key, const Multi<UMAT> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MUM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MUM");
 
   multiUMatMap[key] = val;
 }
@@ -928,8 +910,7 @@ void DataTree::set(const std::string &key, const Multi<UMAT> &val)
 
 void DataTree::set(const std::string &key, const Multi<UCUBE> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MUC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MUC");
 
   multiUCubeMap[key] = val;
 }
@@ -946,8 +927,7 @@ void DataTree::set(const std::string &key, const Multi<UCUBE> &val)
 
 void DataTree::set(const std::string &key, const Multi<arma::vec> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MV");
 
   multiVecMap[key] = val;
 }
@@ -964,8 +944,7 @@ void DataTree::set(const std::string &key, const Multi<arma::vec> &val)
 
 void DataTree::set(const std::string &key, const Multi<arma::mat> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MM");
 
   multiMatMap[key] = val;
 }
@@ -982,8 +961,7 @@ void DataTree::set(const std::string &key, const Multi<arma::mat> &val)
 
 void DataTree::set(const std::string &key, const Multi<arma::cube> &val)
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "MC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MC");
 
   multiCubeMap[key] = val;
 }
@@ -1004,8 +982,7 @@ bool DataTree::get(bool &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "B"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "B");
 
   if (boolMap.count(key) == 0)
   {
@@ -1037,8 +1014,7 @@ bool DataTree::get(INT &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "I"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "I");
 
   if (intMap.count(key) == 0)
   {
@@ -1070,8 +1046,7 @@ bool DataTree::get(double &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "D"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "D");
 
   if (doubleMap.count(key) == 0)
   {
@@ -1103,9 +1078,7 @@ bool DataTree::get(std::string &target, const std::string &key, bool ignore) con
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "S"), "Invalid DataTree: wrong type for key: '" + key + "'");
-
+  if (strict_mode) checkKeyAndType(key, "S");
 
   if (stringMap.count(key) == 0)
   {
@@ -1137,9 +1110,7 @@ bool DataTree::get(arma::vec &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "V"), "Invalid DataTree: wrong type for key: '" + key + "'");
-
+  if (strict_mode) checkKeyAndType(key, "V");
 
   if (vecMap.count(key) == 0)
   {
@@ -1171,9 +1142,7 @@ bool DataTree::get(arma::mat &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "M"), "Invalid DataTree: wrong type for key: '" + key + "'");
-
+  if (strict_mode) checkKeyAndType(key, "M");
 
   if (matMap.count(key) == 0)
   {
@@ -1205,8 +1174,7 @@ bool DataTree::get(arma::cube &target, const std::string &key, bool ignore) cons
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "C"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "C");
 
   if (cubeMap.count(key) == 0)
   {
@@ -1238,8 +1206,7 @@ bool DataTree::get(UVEC &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "UV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "UV");
 
   if (uvecMap.count(key) == 0)
   {
@@ -1271,8 +1238,7 @@ bool DataTree::get(UMAT &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "UM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "UM");
 
   if (umatMap.count(key) == 0)
   {
@@ -1304,8 +1270,7 @@ bool DataTree::get(UCUBE &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "UC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "UC");
 
   if (ucubeMap.count(key) == 0)
   {
@@ -1337,8 +1302,7 @@ bool DataTree::get(Multi<UVEC > &target, const std::string &key, bool ignore) co
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MUV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MUV");
 
   if (multiUVecMap.count(key) == 0)
   {
@@ -1370,8 +1334,7 @@ bool DataTree::get(Multi<UMAT > &target, const std::string &key, bool ignore) co
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MUM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MUM");
 
   if (multiUMatMap.count(key) == 0)
   {
@@ -1403,8 +1366,7 @@ bool DataTree::get(Multi<UCUBE > &target, const std::string &key, bool ignore) c
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MUC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MUC");
 
   if (multiUCubeMap.count(key) == 0)
   {
@@ -1436,8 +1398,7 @@ bool DataTree::get(IVEC &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "IV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "IV");
 
   if (ivecMap.count(key) == 0)
   {
@@ -1469,8 +1430,7 @@ bool DataTree::get(IMAT &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "IM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "IM");
 
   if (imatMap.count(key) == 0)
   {
@@ -1502,8 +1462,7 @@ bool DataTree::get(ICUBE &target, const std::string &key, bool ignore) const
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "IC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "IC");
 
   if (icubeMap.count(key) == 0)
   {
@@ -1535,8 +1494,7 @@ bool DataTree::get(Multi<IVEC > &target, const std::string &key, bool ignore) co
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MIV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MIV");
 
   if (multiIVecMap.count(key) == 0)
   {
@@ -1568,8 +1526,7 @@ bool DataTree::get(Multi<IMAT > &target, const std::string &key, bool ignore) co
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MIM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MIM");
 
   if (multiIMatMap.count(key) == 0)
   {
@@ -1601,8 +1558,7 @@ bool DataTree::get(Multi<ICUBE > &target, const std::string &key, bool ignore) c
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MIC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MIC");
 
   if (multiICubeMap.count(key) == 0)
   {
@@ -1634,8 +1590,7 @@ bool DataTree::get(Multi<arma::vec> &target, const std::string &key, bool ignore
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MV"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MV");
 
   if (multiVecMap.count(key) == 0)
   {
@@ -1667,8 +1622,7 @@ bool DataTree::get(Multi<arma::mat> &target, const std::string &key, bool ignore
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MM"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MM");
 
   if (multiMatMap.count(key) == 0)
   {
@@ -1700,8 +1654,7 @@ bool DataTree::get(Multi<arma::cube > &target, const std::string &key, bool igno
 {
   DBG_ENTER;
 
-  if (strict_mode)
-    ASSERT(isValid(key, "MC"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "MC");
 
   if (multiCubeMap.count(key) == 0)
   {
@@ -1729,8 +1682,7 @@ bool DataTree::get(Multi<arma::cube > &target, const std::string &key, bool igno
 
 bool DataTree::getB(const std::string &key, bool ignore, bool *isFound) const
 {
-  if (strict_mode)
-    ASSERT(isValid(key, "B"), "Invalid DataTree: wrong type for key: '" + key + "'");
+  if (strict_mode) checkKeyAndType(key, "B");
 
   bool result = false;
   bool found = false;
@@ -2550,28 +2502,28 @@ void DataTree::validate(void) const
   for (auto &key : stringMap    ) { if (!(keys.insert(key.first).second)) ERROR("Invalid DataTree: duplicate key found: '" + key.first + "'"); };
 
   // Ckeck key types
-  for (auto &key : boolMap      ) { if (!(isValid(key.first, "B"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : intMap       ) { if (!(isValid(key.first, "I"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : doubleMap    ) { if (!(isValid(key.first, "D"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : uvecMap      ) { if (!(isValid(key.first, "UV" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : umatMap      ) { if (!(isValid(key.first, "UM" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : ucubeMap     ) { if (!(isValid(key.first, "UC" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : ivecMap      ) { if (!(isValid(key.first, "IV" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : imatMap      ) { if (!(isValid(key.first, "IM" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : icubeMap     ) { if (!(isValid(key.first, "IC" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : vecMap       ) { if (!(isValid(key.first, "V"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : matMap       ) { if (!(isValid(key.first, "M"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : cubeMap      ) { if (!(isValid(key.first, "C"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiUVecMap ) { if (!(isValid(key.first, "MUV"))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiUMatMap ) { if (!(isValid(key.first, "MUM"))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiUCubeMap) { if (!(isValid(key.first, "MUC"))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiIVecMap ) { if (!(isValid(key.first, "MIV"))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiIMatMap ) { if (!(isValid(key.first, "MIM"))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiICubeMap) { if (!(isValid(key.first, "MIC"))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiVecMap  ) { if (!(isValid(key.first, "MV" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiMatMap  ) { if (!(isValid(key.first, "MM" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : multiCubeMap ) { if (!(isValid(key.first, "MC" ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
-  for (auto &key : stringMap    ) { if (!(isValid(key.first, "S"  ))) ERROR("Invalid DataTree: wrong type or invalid key: '" + key.first + "'"); };
+  for (auto &key : boolMap      ) checkKeyAndType(key.first, "B"  );
+  for (auto &key : intMap       ) checkKeyAndType(key.first, "I"  );
+  for (auto &key : doubleMap    ) checkKeyAndType(key.first, "D"  );
+  for (auto &key : uvecMap      ) checkKeyAndType(key.first, "UV" );
+  for (auto &key : umatMap      ) checkKeyAndType(key.first, "UM" );
+  for (auto &key : ucubeMap     ) checkKeyAndType(key.first, "UC" );
+  for (auto &key : ivecMap      ) checkKeyAndType(key.first, "IV" );
+  for (auto &key : imatMap      ) checkKeyAndType(key.first, "IM" );
+  for (auto &key : icubeMap     ) checkKeyAndType(key.first, "IC" );
+  for (auto &key : vecMap       ) checkKeyAndType(key.first, "V"  );
+  for (auto &key : matMap       ) checkKeyAndType(key.first, "M"  );
+  for (auto &key : cubeMap      ) checkKeyAndType(key.first, "C"  );
+  for (auto &key : multiUVecMap ) checkKeyAndType(key.first, "MUV");
+  for (auto &key : multiUMatMap ) checkKeyAndType(key.first, "MUM");
+  for (auto &key : multiUCubeMap) checkKeyAndType(key.first, "MUC");
+  for (auto &key : multiIVecMap ) checkKeyAndType(key.first, "MIV");
+  for (auto &key : multiIMatMap ) checkKeyAndType(key.first, "MIM");
+  for (auto &key : multiICubeMap) checkKeyAndType(key.first, "MIC");
+  for (auto &key : multiVecMap  ) checkKeyAndType(key.first, "MV" );
+  for (auto &key : multiMatMap  ) checkKeyAndType(key.first, "MM" );
+  for (auto &key : multiCubeMap ) checkKeyAndType(key.first, "MC" );
+  for (auto &key : stringMap    ) checkKeyAndType(key.first, "S"  );
 }
 
 //==============================================================================
@@ -2671,19 +2623,38 @@ const std::string DataTree::getType(const std::string &key) const
 /** Test if a couple (key, type) is valid.
  */
 
-bool DataTree::isValid(const std::string &key, const std::string &type) const
+void DataTree::checkKeyAndType(const std::string &key, const std::string &type) const
 {
   for (auto &o : general.globalValidKeys)
   {
-    if (o.key != key ) continue;
+    if (o.key != key) continue;
     if ((type != "") && (o.type != type)) continue;
 
-    return true;
+    return;
   }
 
-  INFO("invalid key: " + key + " type: " + type);
+  // invalid (key, type) couple
 
-  return false;
+  bool keyExists = false;
+  std::string rightType = "";
+  for (auto &o : general.globalValidKeys)
+  {
+    if (o.key == key)
+    {
+      keyExists = true;
+      rightType = o.type;
+      break;
+    }
+  }
+
+  if (keyExists)
+  {
+    ERROR("invalid type (" + type + ") for key: " + key + " (should be " + rightType + ")");
+  }
+  else
+  {
+    ERROR("invalid key: " + key + " (key does not exist)");
+  }
 }
 
 //==============================================================================
@@ -3123,6 +3094,159 @@ void DataTree::setMC(const std::string &key, const Multi<arma::cube> &val)
 //==============================================================================
 //==============================================================================
 
+/** Return only a section of a DataTree.
+ *
+ *  \param sectionName The section name.
+ */
+
+DataTree DataTree::getFiltered(const std::string &sectionName) const
+{
+  DBG_ENTER;
+
+  DataTree result;
+  result.strict_mode = false;
+
+  if (boolMap.size() != 0)
+  {
+    for (auto it = boolMap.begin(); it != boolMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (intMap.size() != 0)
+  {
+    for (auto it = intMap.begin(); it != intMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (doubleMap.size() != 0)
+  {
+    for (auto it = doubleMap.begin(); it != doubleMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (stringMap.size() != 0)
+  {
+    for (auto it = stringMap.begin(); it != stringMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (vecMap.size() != 0)
+  {
+    for (auto it = vecMap.begin(); it != vecMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (matMap.size() != 0)
+  {
+    for (auto it = matMap.begin(); it != matMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (cubeMap.size() != 0)
+  {
+    for (auto it = cubeMap.begin(); it != cubeMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (uvecMap.size() != 0)
+  {
+    for (auto it = uvecMap.begin(); it != uvecMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (umatMap.size() != 0)
+  {
+    for (auto it = umatMap.begin(); it != umatMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (ucubeMap.size() != 0)
+  {
+    for (auto it = ucubeMap.begin(); it != ucubeMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiUVecMap.size() != 0)
+  {
+    for (auto it = multiUVecMap.begin(); it != multiUVecMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiUMatMap.size() != 0)
+  {
+    for (auto it = multiUMatMap.begin(); it != multiUMatMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiUCubeMap.size() != 0)
+  {
+    for (auto it = multiUCubeMap.begin(); it != multiUCubeMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (ivecMap.size() != 0)
+  {
+    for (auto it = ivecMap.begin(); it != ivecMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (imatMap.size() != 0)
+  {
+    for (auto it = imatMap.begin(); it != imatMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (icubeMap.size() != 0)
+  {
+    for (auto it = icubeMap.begin(); it != icubeMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiIVecMap.size() != 0)
+  {
+    for (auto it = multiIVecMap.begin(); it != multiIVecMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiIMatMap.size() != 0)
+  {
+    for (auto it = multiIMatMap.begin(); it != multiIMatMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiICubeMap.size() != 0)
+  {
+    for (auto it = multiICubeMap.begin(); it != multiICubeMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiVecMap.size() != 0)
+  {
+    for (auto it = multiVecMap.begin(); it != multiVecMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiMatMap.size() != 0)
+  {
+    for (auto it = multiMatMap.begin(); it != multiMatMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  if (multiCubeMap.size() != 0)
+  {
+    for (auto it = multiCubeMap.begin(); it != multiCubeMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
+  result.strict_mode = true;
+
+  DBG_RETURN(result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** Return a DataTree from a section of an existing DataTree.
  *
  *  \param sectionName The section name.
@@ -3134,6 +3258,12 @@ DataTree DataTree::getSection(const std::string &sectionName) const
 
   DataTree result;
   result.strict_mode = false;
+
+  if (boolMap.size() != 0)
+  {
+    for (auto it = boolMap.begin(); it != boolMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
+  }
 
   if (intMap.size() != 0)
   {

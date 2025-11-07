@@ -36,9 +36,10 @@ class FieldWS : public Field
 {
 public:
 
-  FieldWS(Field::Parameters fp, State *_state);     // #TEST#
-  void calcField(void) override;                                      // #TEST#
-  void setDef(const Multi<double> &_def) override;                    // #TEST#
+  FieldWS(Field::Parameters fp, State *_state);                        // #TEST#
+  void calcField(void) override;                                       // #TEST#
+  void setDef(const Multi<double> &_def) override;                     // #TEST#
+  WSPot getWSPot(void);                                                // #TEST#
 
   //============================================================================
   //============================================================================
@@ -48,6 +49,9 @@ private:
 
   /// The deformation parameters.
   Multi<double> def;
+
+  /// The WS potential.
+  WSPot wsPot;
 };
 
 #endif // FIELD_WOODS_SAXON_H

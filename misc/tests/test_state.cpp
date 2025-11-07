@@ -24,6 +24,7 @@
 #include "state.h"
 #include "constraint.h"
 #include "multipole_operators.h"
+#include "solver_hfb_broyden.h"
 
 //==============================================================================
 
@@ -353,6 +354,131 @@ TEST(State, getDataTree)
   dt.set("state/basis/d_0", 9.8);
   result.merge(dt);
   ASSERT_FALSE(d == result);
+}
+
+//==============================================================================
+
+TEST(State, calcUVFromRhoKappa)
+{
+  {
+    DataTree dataTree("examples/42Ca_deformed_1x11.msg.gz");
+
+    State state(dataTree);
+
+    state.U(NEUTRON).clear();
+    state.U(PROTON ).clear();
+    state.V(NEUTRON).clear();
+    state.V(PROTON ).clear();
+
+    double totalEnergy0 = 0.0;
+    double totalEnergy1 = 0.0;
+
+    arma::mat qlmValues0;
+    arma::mat qlmValues1;
+
+    {
+      SolverHFBBroyden solverHFBBroyden(dataTree, state);
+      solverHFBBroyden.init();
+      solverHFBBroyden.interaction.calcEnergies();
+      // INFO(solverHFBBroyden.interaction.getNiceInfo());
+      totalEnergy0 = solverHFBBroyden.state.totalEnergy;
+
+      MultipoleOperators multipoleOperators(state);
+      // INFO(multipoleOperators.getNiceInfo());
+      qlmValues0 = multipoleOperators.qlm;
+    }
+
+    state.calcUVFromRhoKappa();
+
+    state.rho(NEUTRON).clear();
+    state.rho(PROTON ).clear();
+    state.kappa(NEUTRON).clear();
+    state.kappa(PROTON ).clear();
+
+    state.calcRhoKappaFromUV();
+
+    {
+      SolverHFBBroyden solverHFBBroyden(dataTree, state);
+      solverHFBBroyden.init();
+      solverHFBBroyden.interaction.calcEnergies();
+      // INFO(solverHFBBroyden.interaction.getNiceInfo());
+      totalEnergy1 = solverHFBBroyden.state.totalEnergy;
+
+      MultipoleOperators multipoleOperators(state);
+      // INFO(multipoleOperators.getNiceInfo());
+      qlmValues1 = multipoleOperators.qlm;
+    }
+
+    ASSERT_NEAR(totalEnergy0, totalEnergy1, 1e-6);
+
+    ASSERT_NEAR(arma::norm(qlmValues1.row(0) - qlmValues0.row(0), "inf"), 0.0, 1e-7);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(1) - qlmValues0.row(1), "inf"), 0.0, 1e-6);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(2) - qlmValues0.row(2), "inf"), 0.0, 1e-5);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(3) - qlmValues0.row(3), "inf"), 0.0, 1e-4);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(4) - qlmValues0.row(4), "inf"), 0.0, 1e-3);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(5) - qlmValues0.row(5), "inf"), 0.0, 1e-2);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(6) - qlmValues0.row(6), "inf"), 0.0, 1e-1);
+  }
+
+  {
+    DataTree dataTree("examples/42Ca_deformed_2x9.msg.gz");
+
+    State state(dataTree);
+
+    state.U(NEUTRON).clear();
+    state.U(PROTON ).clear();
+    state.V(NEUTRON).clear();
+    state.V(PROTON ).clear();
+
+    double totalEnergy0 = 0.0;
+    double totalEnergy1 = 0.0;
+
+    arma::mat qlmValues0;
+    arma::mat qlmValues1;
+
+    {
+      SolverHFBBroyden solverHFBBroyden(dataTree, state);
+      solverHFBBroyden.init();
+      solverHFBBroyden.interaction.calcEnergies();
+      // INFO(solverHFBBroyden.interaction.getNiceInfo());
+      totalEnergy0 = solverHFBBroyden.state.totalEnergy;
+
+      MultipoleOperators multipoleOperators(state);
+      // INFO(multipoleOperators.getNiceInfo());
+      qlmValues0 = multipoleOperators.qlm;
+    }
+
+    state.calcUVFromRhoKappa();
+
+    state.rho(NEUTRON).clear();
+    state.rho(PROTON ).clear();
+    state.kappa(NEUTRON).clear();
+    state.kappa(PROTON ).clear();
+
+    state.calcRhoKappaFromUV();
+
+    {
+      SolverHFBBroyden solverHFBBroyden(dataTree, state);
+      solverHFBBroyden.init();
+      solverHFBBroyden.interaction.calcEnergies();
+      // INFO(solverHFBBroyden.interaction.getNiceInfo());
+      totalEnergy1 = solverHFBBroyden.state.totalEnergy;
+
+      MultipoleOperators multipoleOperators(state);
+      // INFO(multipoleOperators.getNiceInfo());
+      qlmValues1 = multipoleOperators.qlm;
+    }
+
+    ASSERT_NEAR(totalEnergy0, totalEnergy1, 1e-6);
+
+    ASSERT_NEAR(arma::norm(qlmValues1.row(0) - qlmValues0.row(0), "inf"), 0.0, 1e-7);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(1) - qlmValues0.row(1), "inf"), 0.0, 1e-6);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(2) - qlmValues0.row(2), "inf"), 0.0, 1e-5);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(3) - qlmValues0.row(3), "inf"), 0.0, 1e-4);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(4) - qlmValues0.row(4), "inf"), 0.0, 1e-3);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(5) - qlmValues0.row(5), "inf"), 0.0, 1e-2);
+    ASSERT_NEAR(arma::norm(qlmValues1.row(6) - qlmValues0.row(6), "inf"), 0.0, 1e-1);
+  }
 }
 
 //==============================================================================

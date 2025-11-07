@@ -123,7 +123,7 @@ void SolverHFBGradient::init()
     // if (nbIter == 0)
     //   Tools::mesg("SolGra", "starting from previous rho and kappa");
 
-    state.calcUVFromRhoKappa(dataTree);
+    state.calcUVFromRhoKappa();
 
     rho(NEUTRON) = state.rho(NEUTRON);
     rho(PROTON ) = state.rho(PROTON );

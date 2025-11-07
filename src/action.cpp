@@ -487,6 +487,12 @@ void Action::calcHFB(void)
   {
     Tools::mesg("ActHFB", Tools::boxed(TABLE_RED + "Converged solution not found !"));
 
+    if (saveResultFiles)
+    {
+      DataTree finalDataTree = dataTree + state.getDataTree();
+      finalDataTree.save(jobName + ".msg.gz");
+    }
+
     // calculate the energy contributions
     SolverHFBBroyden solverHFBBroyden(dataTree, state);
     solverHFBBroyden.init();
@@ -603,7 +609,7 @@ void Action::calcObservables(void)
   //===========================
 
   // calculate U and V matrices if needed
-  state.calcUVFromRhoKappa(dataTree);
+  state.calcUVFromRhoKappa();
 
   // calculate inertia
   state.calcInertia();

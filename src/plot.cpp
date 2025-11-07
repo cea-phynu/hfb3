@@ -143,8 +143,8 @@ void Plot::mat(const std::string &title, const arma::mat &mat)
 
 void Plot::map(const std::string &title, const arma::mat &mat, const Mesh &mesh, const std::string &xlabel, const std::string &ylabel)
 {
-  ASSERT(mesh.ax.p.n_rows == mat.n_rows, "incompatible dimensions: %d (x.rows) vs. %d (mat.rows).", mesh.ax.p.n_rows, mat.n_rows);
-  ASSERT(mesh.az.p.n_rows == mat.n_cols, "incompatible dimensions: %d (z.rows) vs. %d (mat.cols).", mesh.az.p.n_rows, mat.n_cols);
+  ASSERT(mesh.ax.p.n_rows == mat.n_rows, "[%s] incompatible dimensions: %d (x.rows) vs. %d (mat.rows).", title.c_str(), mesh.ax.p.n_rows, mat.n_rows);
+  ASSERT(mesh.az.p.n_rows == mat.n_cols, "[%s] incompatible dimensions: %d (z.rows) vs. %d (mat.cols).", title.c_str(), mesh.az.p.n_rows, mat.n_cols);
 
   for (UINT i = 0; i < mat.n_rows; i++)
   {

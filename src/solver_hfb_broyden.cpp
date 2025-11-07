@@ -17,6 +17,7 @@
 //==============================================================================
 
 #include "solver_hfb_broyden.h"
+#include "global.h"
 #include "tools.h"
 #include "plot.h"
 #include "mixing.h"

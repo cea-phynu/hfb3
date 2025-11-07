@@ -285,6 +285,7 @@ void MultipoleOperators::calcBeta(void)
 //==============================================================================
 
 /** Calculate the \f$\langle m,n_a|\hat{r}^{2l}|m,n_b\rangle\f$ values.
+ * TODO: use A-28 in Berger's PhD + Talmanr transformation ?
  */
 
 void MultipoleOperators::calcR2l(void)
@@ -337,6 +338,7 @@ void MultipoleOperators::calcR2l(void)
 //==============================================================================
 
 /** Calculate the \f$\langle n_z^a, d_a|\hat{z}^{k}|n_z^b, d_b\rangle\f$ values.
+ * TODO: use A-27 in Berger's PhD + Talmanz transformation ?
  */
 
 void MultipoleOperators::calcZk(void)

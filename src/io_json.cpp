@@ -105,35 +105,45 @@ void IOjson::updateDataTree(DataTree &dataTree, const std::string key, const std
 {
   DBG_ENTER;
 
+  bool previous_strict_mode = dataTree.strict_mode;
+  dataTree.strict_mode = false;
+
   if (type == "")
   {
-    INT ival;
-    double dval;
+    int bval = -1;
+    if ((val == "True")||(val == "true")||(val == "T")) bval = 1;
+    if ((val == "False")||(val == "false")||(val == "F")) bval = 0;
+
+    if (bval != -1)
+    {
+      dataTree.set(key, bval == 1);
+      goto end_label;
+    }
+
     std::stringstream st(val);
     st >> std::ws;
+    INT ival;
     st >> ival;
-
     if (!st.fail() && st.eof())
     {
       dataTree.set(key, ival);
       goto end_label;
     }
+
+    std::stringstream st2(val);
+    st2 >> std::ws;
+    double dval;
+    st2 >> std::setprecision(16) >> std::scientific >> dval;
+
+    if (!st2.fail() && st2.eof())
+    {
+      dataTree.set(key, dval);
+      goto end_label;
+    }
     else
     {
-      std::stringstream st2(val);
-      st2 >> std::ws;
-      st2 >> std::setprecision(16) >> std::scientific >> dval;
-
-      if (!st2.fail() && st2.eof())
-      {
-        dataTree.set(key, dval);
-        goto end_label;
-      }
-      else
-      {
-        dataTree.set(key, val);
-        goto end_label;
-      }
+      dataTree.set(key, val);
+      goto end_label;
     }
   }
 
@@ -260,6 +270,9 @@ void IOjson::updateDataTree(DataTree &dataTree, const std::string key, const std
   }
 
 end_label:
+
+
+  dataTree.strict_mode = previous_strict_mode;
   DBG_LEAVE;
 }
 

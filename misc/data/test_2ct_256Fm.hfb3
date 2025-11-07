@@ -23,3 +23,12 @@ q30t 2000.0
 [system]
 nNeut        156
 nProt        100
+
+
+[state/basis]
+nOscil  12
+d_0     5.2
+b_r     2.0
+b_z     2.2
+g_q     1.1
+n_zMax  14

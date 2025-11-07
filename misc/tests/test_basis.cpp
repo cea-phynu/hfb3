@@ -29,11 +29,16 @@
 
 //==============================================================================
 
+TEST(Basis, Basis)
+{
+}
+
+//==============================================================================
+
 TEST(Basis, Basis_)
 {
   std::string filename = "misc/data/test_2ct_256Fm.hfb3";
-  DataTree dataTree(filename);
-  Basis basis(dataTree);
+  Basis basis(filename);
   ASSERT_EQ(basis.nOscil, 11);
   ASSERT_EQ(basis.dMax, 2);
   ASSERT_EQ(basis.n_zMaxImposed, 24);
@@ -49,6 +54,7 @@ TEST(Basis, Basis__)
 {
   std::string filename = "misc/data/test_2ct_256Fm.hfb3";
   DataTree dataTree(filename);
+
   Basis basis(dataTree);
   ASSERT_EQ(basis.nOscil, 11);
   ASSERT_EQ(basis.dMax, 2);
@@ -57,11 +63,21 @@ TEST(Basis, Basis__)
   ASSERT_NEAR(basis.b_r, 2.1, 1e-15);
   ASSERT_NEAR(basis.b_z, 2.4, 1e-15);
   ASSERT_NEAR(basis.g_q, 1.3, 1e-15);
+
+  // test using a prefix
+  Basis basis2(dataTree, "state/");
+  ASSERT_EQ(basis2.nOscil, 12);
+  ASSERT_EQ(basis2.dMax, 2);
+  ASSERT_EQ(basis2.n_zMaxImposed, 14);
+  ASSERT_NEAR(basis2.d_0, 5.2, 1e-15);
+  ASSERT_NEAR(basis2.b_r, 2.0, 1e-15);
+  ASSERT_NEAR(basis2.b_z, 2.2, 1e-15);
+  ASSERT_NEAR(basis2.g_q, 1.1, 1e-15);
 }
 
 //==============================================================================
 
-TEST(Basis, cylindrical)
+TEST(Basis, Basis___)
 {
   Basis basis(-1.0, 2.6108016647931507, 2.8296839564912175, 14, 24, 1.3);
   ASSERT_EQ(basis.nOscil, 14);
@@ -75,16 +91,16 @@ TEST(Basis, cylindrical)
 
 //==============================================================================
 
-TEST(Basis, berger2ct)
+TEST(Basis, fromBerger2ct)
 {
   Basis basis = Basis::fromBerger2ct(14, 1.3, 12.0, 1.2, -1.0, 24);
+  ASSERT_EQ(basis.nOscil, 14);
+  ASSERT_EQ(basis.dMax, 1);
+  ASSERT_EQ(basis.n_zMaxImposed, 24);
   ASSERT_NEAR(basis.d_0, 0.0, 1e-15);
   ASSERT_NEAR(basis.b_r, 1.9163431074141117, 1e-15);
   ASSERT_NEAR(basis.b_z, 1.7493739130837576, 1e-15);
   ASSERT_NEAR(basis.g_q, 1.3, 1e-15);
-  ASSERT_EQ(basis.nOscil, 14);
-  ASSERT_EQ(basis.dMax, 1);
-  ASSERT_EQ(basis.n_zMaxImposed, 24);
 }
 
 //==============================================================================
@@ -322,7 +338,7 @@ TEST(Basis, rPart)
 
   double precision = 1e-15;
 
-  double r = -2.238; // TODO: use a positive value !
+  double r = 2.238;
 
   ASSERT_NEAR(b.rPartScalar(r,  0,  2), BASIS_RPART_TARGET00, precision);
   ASSERT_NEAR(b.rPartScalar(r,  1,  1), BASIS_RPART_TARGET01, precision);
@@ -355,7 +371,7 @@ TEST(Basis, rPart_big)
 
   double precision = 1e-15;
 
-  double r = -2.238; // TODO: use a positive value !
+  double r = 2.238;
 
   ASSERT_NEAR(b.rPartScalar(r,  0,  2), BASIS_RPART_BIG_TARGET00, precision);
   ASSERT_NEAR(b.rPartScalar(r,  1,  1), BASIS_RPART_BIG_TARGET01, precision);

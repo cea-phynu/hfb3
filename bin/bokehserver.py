@@ -256,13 +256,13 @@ def bkapp(doc, dataDict, cmdList):
             if not hasattr(doc, 'p0'):
               logging.debug("plot is now p0")
               doc.p0 = p
-    
+
             if p is not doc.p0:
               logging.debug("plot is not p0")
               p.x_range = doc.p0.x_range
             doc.sources[k] = ColumnDataSource(data = {'x':[], 'y':[]})
             line   = p.line  (x = 'x', y = 'y', alpha = 1.0, line_width = 1, source = doc.sources[k])
-            circle = p.circle(x = 'x', y = 'y', alpha = 1.0, line_width = 1, source = doc.sources[k])
+            circle = p.circle(x = 'x', y = 'y', alpha = 1.0, line_width = 1, size = 8, source = doc.sources[k])
             hover_tool = HoverTool(tooltips=[
                                              ('(x, y)', '(@x, @y)'),
                                             ], renderers=[circle], mode = 'vline')
@@ -279,10 +279,10 @@ def bkapp(doc, dataDict, cmdList):
             p.yaxis.axis_label = v['ylabel']
             p.sizing_mode = "stretch_both"
             p.toolbar.logo = None
-    
+
             doc.sources[k] = ColumnDataSource(data = {'x':[], 'y':[]})
             line   = p.line  (x = 'x', y = 'y', alpha = 1.0, line_width = 1, source = doc.sources[k])
-            circle = p.circle(x = 'x', y = 'y', alpha = 1.0, line_width = 1, source = doc.sources[k])
+            circle = p.circle(x = 'x', y = 'y', alpha = 1.0, line_width = 1, size = 8, source = doc.sources[k])
             hover_tool = HoverTool(tooltips=[
                                              ('(x, y)', '(@x, @y)'),
                                             ], renderers=[circle], mode = 'vline')

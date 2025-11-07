@@ -72,7 +72,7 @@ public:
   General(void);                                                       // #TEST#
   General(const DataTree &dataTree);                                   // #TEST#
 
-  /// Global list of keys.
+  /// Global list of valid keys.
   std::list<KeyStruct > globalValidKeys;
 
   /// List of keys used by this class.

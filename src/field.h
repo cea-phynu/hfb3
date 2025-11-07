@@ -55,7 +55,6 @@ public :
   virtual void calcField(void);                                        // #TEST#
   virtual void calcEnergy(void);                                       // #TEST#
   virtual void setDef(const Multi<double> &_def);                      // #TEST#
-  virtual WSPot getWSPot(void);                                        // #TEST#
   virtual void clear(void);                                            // #TEST#
   double getEnergy(INT iso, INT type);                                 // #TEST#
 
