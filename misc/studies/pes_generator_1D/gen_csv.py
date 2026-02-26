@@ -29,8 +29,8 @@ def process(fileName):
     # a = hfb3.Action(d)
     # a.calcObservables()
 
-    coords = np.array((2,), dtype=np.int32  , order='F')
-    s.calcInertia(coords)
+    s.calcInertia()
+
     result = {}
     result["beta2"]       = multipoleOperators.beta[hfb3.TOTAL]
     result["q20"]         = multipoleOperators.qlm[2, hfb3.TOTAL]

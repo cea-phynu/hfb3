@@ -34,6 +34,23 @@
 
 class DataTree;
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define SOLVER_HFB_BROYDEN_VALID_KEYS \
+{ "solver/broyden/cvgTarget"           , "Convergence target value."                                         , "1e-6" , "D" }, \
+{ "solver/broyden/maxIter"             , "Maximum number of iterations"                                      , "200"  , "I" }, \
+{ "solver/broyden/emptyKappaProtection", "Force non-empty kappa matrices"                                    , "False", "B" }, \
+{ "solver/broyden/cvgTargetLambda"     , "Convergence target value for lambda-iterations"                    , "1e-5" , "D" }, \
+{ "solver/broyden/maxIterLambda"       , "Maximum number of iterations for lambda-iterations"                , "10"   , "I" }, \
+{ "solver/broyden/earlyLambdaMixing"   , "Mix Lagrange multipliers in the linear phase of the Broyden mixing", "True" , "B" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief A Broyden-mixing solver for the HFB equations.
  *
  *  This class implements a solver for the HFB equations using the Broyden mixing method.
@@ -62,9 +79,6 @@ public:
   //============================================================================
   //============================================================================
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// A Mixing instance.
   Mixing mixing;
 
@@ -86,10 +100,16 @@ public:
   //============================================================================
 
   /// Total binding energy.
-  double ene = 1e99;
+  double energy = 1e99;
 
   /// Best total binding energy.
-  double bestEne = 1e99;
+  double bestEnergy = 1e99;
+
+  /// Convergence value.
+  double convergence = 1e99;
+
+  /// Convergence target value.
+  double cvgTarget = 1e99;
 
   /// Target value for Lambda variation.
   double cvgTargetLambda = 1e-09;

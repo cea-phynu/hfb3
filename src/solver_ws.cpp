@@ -17,7 +17,6 @@
 //==============================================================================
 
 #include "solver_ws.h"
-#include "field_ws.h"
 #include "interaction.h"
 #include "tools.h"
 #include "plot.h"
@@ -25,18 +24,6 @@
 /** \file
  *  \brief Methods of the SolverWS class.
  */
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-std::list<KeyStruct > SolverWS::validKeys =
-  {
-    { "solver/ws/beta20tInit", "Temporary constraint on beta20t.", "0.1"   , "D" },
-    { "solver/ws/q30tInit"   , "Temporary constraint on q30t."   , "1000.0", "D" },
-    { "solver/ws/maxIter"    , "Maximum number of iterations"    , "50"    , "I" },
-    { "solver/ws/cvgTarget"  , "Error target value."             , "1e-6"  , "D" },
-  };
 
 //==============================================================================
 //==============================================================================
@@ -75,7 +62,7 @@ SolverWS::SolverWS(const DataTree &_dataTree) : SolverWS(_dataTree, State(_dataT
 
 SolverWS::SolverWS(const DataTree &_dataTree, State _state) : Solver(_dataTree, _state),
   wsInteraction(dataTree, &_state),
-  discrete(state.basis,  Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 101, 1, 151))
+  discrete(state.basis,  Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 81, 1, 151))
 {
   DBG_ENTER;
 
@@ -84,7 +71,7 @@ SolverWS::SolverWS(const DataTree &_dataTree, State _state) : Solver(_dataTree, 
   dataTree.get(beta20tInit, "solver/ws/beta20tInit" , true);
   dataTree.get(q30tInit   , "solver/ws/q30tInit"    , true);
   dataTree.get(maxIter    , "solver/ws/maxIter"     , true);
-  dataTree.get(cvgTarget  , "solver/ws/cvgTarget"   , true);
+  dataTree.get(errorTarget, "solver/ws/errorTarget" , true);
 
   DBG_LEAVE;
 }
@@ -253,13 +240,13 @@ double SolverWS::getError(double scalingFactor)
 
   for(auto &c : state.constraints)
   {
-    c.second.measuredVal = multipoleOperators.qlm(c.second.lm, TOTAL);
+    c.second.measuredVal = multipoleOperators.qlmObs(c.second.lambda, c.second.mu, TOTAL);
   }
 
   double wsError = 0.0;
   for(auto &c : state.constraints)
   {
-    wsError += fabs(c.second.val - c.second.measuredVal) / pow(scalingFactor, c.second.lm);
+    wsError += fabs(c.second.val - c.second.measuredVal) / pow(scalingFactor, c.second.lambda);
     // INFO("%s %f %f", c.first.c_str(), c.second.val, c.second.measuredVal);
   }
 
@@ -292,12 +279,12 @@ std::string SolverWS::niceStr(Multi<double> &def)
   {
 
 #ifdef WS_IGNORE_Q10_CONSTRAINT
-    if (c.second.lm == 1) continue;
+    if (c.second.lambda == 1) continue;
 #endif
 
     if (!ifirst) result += ", ";
 
-    result += PF("%s%s:%s%9.2e%s", Tools::color("yellow").c_str(), deformationNames[c.second.lm].c_str(), Tools::color("blue").c_str(), def(c.second.lm, 0), Tools::color().c_str());
+    result += PF("%sa%01d%01d:%s%9.2e%s", Tools::color("yellow").c_str(), c.second.lambda, c.second.mu, Tools::color("blue").c_str(), def(c.second.lambda, c.second.mu), Tools::color().c_str());
     ifirst = false;
   }
   result += ")";
@@ -346,14 +333,14 @@ void SolverWS::init()
   for (auto &c : state.constraints)
   {
 #ifdef WS_IGNORE_Q10_CONSTRAINT
-    if(c.second.lm == 1) continue;
+    if(c.second.lambda == 1) continue;
 #endif
 
-    currentDef(c.second.lm, 0) = 0.0;
+    currentDef(c.second.lambda, c.second.mu) = 0.0;
     // INFO("currentDef: %d %e", c.second.lm, c.second.val);
 
-    if (c.second.lm == 2) constraintOnQ20t = true;
-    if (c.second.lm == 3) constraintOnQ30t = true;
+    if ((c.second.lambda == 2)&&(c.second.mu == 0)) constraintOnQ20t = true;
+    if ((c.second.lambda == 3)&&(c.second.mu == 0)) constraintOnQ30t = true;
   }
 
   dim = currentDef.size();
@@ -365,6 +352,7 @@ void SolverWS::init()
     double nPart = state.sys.nProt + state.sys.nNeut;
     double q20tValue = MultipoleOperators::getQ20FromBeta(nPart, nPart, beta20tInit);
     state.constraints["q20t"] = Constraint("q20t", q20tValue);
+
     Tools::mesg("SolWS.", PF("Temporary constraint created <beta20t>=%.3f (converted to <q20t>=%.3f)", beta20tInit, q20tValue));
 
     currentDef(2, 0) = 0.0;
@@ -374,6 +362,7 @@ void SolverWS::init()
   if (!constraintOnQ30t) // no constraint on Q30t given by the user => we use q30tInit as a temporary constraint
   {
     state.constraints["q30t"] = Constraint("q30t", q30tInit);
+
     Tools::mesg("SolWS.", PF("Temporary constraint created <q30t>=%.3f", q30tInit));
 
     currentDef(3, 0) = 0.0;
@@ -410,10 +399,10 @@ void SolverWS::bokehPlot(void)
   if (useBokeh)
   {
     Plot::slot(0);
-    Plot::curve("a20", "q20", currentDef(2, 0), multipoleOperators.qlm(2));
+    Plot::curve("a20", "q20", currentDef(2, 0), multipoleOperators.qlmObs(2, 0, TOTAL));
 
     Plot::slot(1);
-    Plot::curve("a20", "Error", currentDef(2, 0), value);
+    Plot::curve("a20", "Error", currentDef(2, 0), errorValue);
 
     Plot::slot(2);
     arma::mat densn = discrete.getLocalXZ(state.rho(NEUTRON), true);
@@ -466,28 +455,28 @@ bool SolverWS::nextIter()
   {
     updateCurrentDef(next);
     calcWS();
-    value = getError();
+    errorValue = getError();
 
     bokehPlot();
 
-    gradientWalk.addEval(next, -value, true);
+    gradientWalk.addEval(next, -errorValue, true);
     //Tools::mesg("SolWS.", getHistTable());
   }
 
   bool isBest = false;
 
-  if (value < bestError)
+  if (errorValue < bestError)
   {
-    bestError = value;
+    bestError = errorValue;
     bestDef = currentDef;
     bestState = state;
     isBest = true;
   }
 
   Tools::mesg("SolWS.",
-              PF("#it: %03d ", nbIter) +
+              getIterMesg() +
               PF("def: ") + niceStr(currentDef) + " " +
-              PF("err: %9.2e ", value) +
+              PF("err: %9.2e ", errorValue) +
               (isBest ? PF_GREEN(" *") : "")
               );
 
@@ -509,9 +498,9 @@ bool SolverWS::nextIter()
   }
 
 
-  if (value < cvgTarget)
+  if (errorValue < errorTarget)
   {
-    Tools::mesg("SolWS.", PF_GREEN("target value reached %e < %e", value, cvgTarget));
+    Tools::mesg("SolWS.", PF_GREEN("Error target value reached %e < %e", errorValue, errorTarget));
 
     status = Solver::CONVERGED;
 
@@ -601,7 +590,7 @@ const std::string SolverWS::info(bool isShort) const
       {"state ", state.info(true)},
       {"basis ", state.basis.info(true)},
       {"max.it", Tools::infoStr(maxIter)},
-      {"target", Tools::infoStr(cvgTarget)},
+      {"target", Tools::infoStr(errorTarget)},
       {"status", Solver::statusStr[status]},
       {"dim.  ", Tools::infoStr(dim)},
       {"momen.", multipoleOperators.info(true)},

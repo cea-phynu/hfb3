@@ -23,7 +23,7 @@
 # Comment out the following line to show compilation commands
 QUIET = TRUE
 
-SHELL = bash
+# SHELL = bash
 # RED    = "\x1b[38;2;255;150;150m"
 # YELLOW = "\x1b[38;2;255;255;100m"
 # GREEN  = "\x1b[38;2;150;255;150m"
@@ -46,7 +46,7 @@ install   = echo -e "["$1"]" $(BLUE)"Install"$(GREEN) $2$(NORM)
 VERSION_FLAG     = -DCFG_VERSION=\"$(VERSION)\"
 
 # Logo type (possible values: ANSI24B, ANSI8B, ASCII, NONE)
-LOGO = ASCII
+LOGO = ANSI24B
 
 ifeq ($(QUIET),TRUE)
 	MAKEFLAGS+ = --no-print-directory

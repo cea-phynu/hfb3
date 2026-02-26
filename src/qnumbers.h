@@ -118,7 +118,6 @@ private:
   /// The index map structure.
   std::unordered_map<IVEC, ulong, VecHash, VecEqual> index;
 
-
 };
 
 #endif

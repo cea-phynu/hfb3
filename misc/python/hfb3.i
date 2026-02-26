@@ -107,6 +107,7 @@ using namespace std;
 %shared_ptr(FieldSpinOrbit)
 %shared_ptr(FieldWS)
 %shared_ptr(Fragments)
+%shared_ptr(General)
 %shared_ptr(GeometricalOperators)
 %shared_ptr(Geometry)
 %shared_ptr(GradientWalk)
@@ -125,6 +126,7 @@ using namespace std;
 %shared_ptr(Qnumbers)
 %shared_ptr(State)
 %shared_ptr(Solver)
+%shared_ptr(SolverAlternator)
 %shared_ptr(SolverBasis)
 %shared_ptr(SolverHFBBroyden)
 %shared_ptr(SolverHFBGradient)
@@ -363,6 +365,7 @@ PY_INFO_TO_REPR(MultipoleOperators)
 PY_INFO_TO_REPR(Plot)
 PY_INFO_TO_REPR(Qnumbers)
 PY_INFO_TO_REPR(State)
+PY_INFO_TO_REPR(SolverAlternator)
 PY_INFO_TO_REPR(SolverBasis)
 PY_INFO_TO_REPR(SolverHFBBroyden)
 PY_INFO_TO_REPR(SolverHFBGradient)
@@ -434,6 +437,7 @@ PY_INFO_TO_REPR(Tools)
 %include "field_ws.h"
 %include "fragments.h"
 %include "gradientwalk.h"
+%include "general.h"
 %include "geometrical_operators.h"
 %include "geometry.h"
 %include "global.h"
@@ -453,6 +457,7 @@ PY_INFO_TO_REPR(Tools)
 %include "qnumbers.h"
 %include "state.h"
 %include "solver.h"
+%include "solver_alternator.h"
 %include "solver_hfb_broyden.h"
 %include "solver_hfb_gradient.h"
 %include "solver_basis.h"
@@ -514,6 +519,15 @@ class PyCallback(Callback):
     #print(str, end = " ", flush = True)
     #print(str)
     print(str, flush = True)
+
+def armai(v):
+    return np.array(v, dtype=np.int32, order='F')
+
+def armaf(v):
+    return np.array(v, dtype=np.float64, order='F')
+
+def armau(v):
+    return np.array(v, dtype=np.uint64, order='F')
 
 cvar.useColors = True
 cvar.msgToOut = [MSG_ERROR, MSG_MAIN, MSG_INFO, MSG_WARNING]

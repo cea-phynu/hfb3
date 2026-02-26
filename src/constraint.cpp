@@ -30,86 +30,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > Constraint::validKeys =
-  {
-    { "constraints/q00n", "Constraint on <q00> value [neut.]", ""   , "D" },
-    { "constraints/q10n", "Constraint on <q10> value [neut.]", ""   , "D" },
-    { "constraints/q20n", "Constraint on <q20> value [neut.]", ""   , "D" },
-    { "constraints/q30n", "Constraint on <q30> value [neut.]", ""   , "D" },
-    { "constraints/q40n", "Constraint on <q40> value [neut.]", ""   , "D" },
-    { "constraints/q50n", "Constraint on <q50> value [neut.]", ""   , "D" },
-    { "constraints/q60n", "Constraint on <q60> value [neut.]", ""   , "D" },
-    { "constraints/q00p", "Constraint on <q00> value [prot.]", ""   , "D" },
-    { "constraints/q10p", "Constraint on <q10> value [prot.]", ""   , "D" },
-    { "constraints/q20p", "Constraint on <q20> value [prot.]", ""   , "D" },
-    { "constraints/q30p", "Constraint on <q30> value [prot.]", ""   , "D" },
-    { "constraints/q40p", "Constraint on <q40> value [prot.]", ""   , "D" },
-    { "constraints/q50p", "Constraint on <q50> value [prot.]", ""   , "D" },
-    { "constraints/q60p", "Constraint on <q60> value [prot.]", ""   , "D" },
-    { "constraints/q00t", "Constraint on <q00> value [total]", ""   , "D" },
-    { "constraints/q10t", "Constraint on <q10> value [total]", "0.0", "D" },
-    { "constraints/q20t", "Constraint on <q20> value [total]", ""   , "D" },
-    { "constraints/q30t", "Constraint on <q30> value [total]", ""   , "D" },
-    { "constraints/q40t", "Constraint on <q40> value [total]", ""   , "D" },
-    { "constraints/q50t", "Constraint on <q50> value [total]", ""   , "D" },
-    { "constraints/q60t", "Constraint on <q60> value [total]", ""   , "D" },
-    { "constraints/beta2p", "Constraint on <q60> value [prot.]", ""   , "D" },
-    { "constraints/beta2n", "Constraint on <q60> value [neut.]", ""   , "D" },
-    { "constraints/beta2t", "Constraint on <q60> value [total]", ""   , "D" },
-
-    { "constraints/sepDistn" , "Constraint on the fragment separation distance [neut.]", "", "D" },
-    { "constraints/sepDistp" , "Constraint on the fragment separation distance [prot.]", "", "D" },
-    { "constraints/sepDistt" , "Constraint on the fragment separation distance [total]", "", "D" },
-    { "constraints/massAsymn", "Constraint on the fragment mass asymmetry [neut.]"     , "", "D" },
-    { "constraints/massAsymp", "Constraint on the fragment mass asymmetry [prot.]"     , "", "D" },
-    { "constraints/massAsymt", "Constraint on the fragment mass asymmetry [total]"     , "", "D" },
-    { "constraints/qNeckn"   , "Constraint on <Qneck> value [prot.]"                   , "", "D" },
-    { "constraints/qNeckp"   , "Constraint on <Qneck> value [neut.]"                   , "", "D" },
-    { "constraints/qNeckt"   , "Constraint on <Qneck> value [total]"                   , "", "D" },
-    { "constraints/nNeut"    , "Constraint on the number of neutrons"                  , "", "D" },
-    { "constraints/nProt"    , "Constraint on the number of protons"                   , "", "D" },
-    { "constraints/nNucl"    , "Constraint on the number of nucleons"                  , "", "D" },
-
-    { "state/constraints/lambda_q00n", "Lagrange multiplier for the constraint on <q00> value [neut.]", "", "D" },
-    { "state/constraints/lambda_q10n", "Lagrange multiplier for the constraint on <q10> value [neut.]", "", "D" },
-    { "state/constraints/lambda_q20n", "Lagrange multiplier for the constraint on <q20> value [neut.]", "", "D" },
-    { "state/constraints/lambda_q30n", "Lagrange multiplier for the constraint on <q30> value [neut.]", "", "D" },
-    { "state/constraints/lambda_q40n", "Lagrange multiplier for the constraint on <q40> value [neut.]", "", "D" },
-    { "state/constraints/lambda_q50n", "Lagrange multiplier for the constraint on <q50> value [neut.]", "", "D" },
-    { "state/constraints/lambda_q60n", "Lagrange multiplier for the constraint on <q60> value [neut.]", "", "D" },
-    { "state/constraints/lambda_q00p", "Lagrange multiplier for the constraint on <q00> value [prot.]", "", "D" },
-    { "state/constraints/lambda_q10p", "Lagrange multiplier for the constraint on <q10> value [prot.]", "", "D" },
-    { "state/constraints/lambda_q20p", "Lagrange multiplier for the constraint on <q20> value [prot.]", "", "D" },
-    { "state/constraints/lambda_q30p", "Lagrange multiplier for the constraint on <q30> value [prot.]", "", "D" },
-    { "state/constraints/lambda_q40p", "Lagrange multiplier for the constraint on <q40> value [prot.]", "", "D" },
-    { "state/constraints/lambda_q50p", "Lagrange multiplier for the constraint on <q50> value [prot.]", "", "D" },
-    { "state/constraints/lambda_q60p", "Lagrange multiplier for the constraint on <q60> value [prot.]", "", "D" },
-    { "state/constraints/lambda_q00t", "Lagrange multiplier for the constraint on <q00> value [total]", "", "D" },
-    { "state/constraints/lambda_q10t", "Lagrange multiplier for the constraint on <q10> value [total]", "", "D" },
-    { "state/constraints/lambda_q20t", "Lagrange multiplier for the constraint on <q20> value [total]", "", "D" },
-    { "state/constraints/lambda_q30t", "Lagrange multiplier for the constraint on <q30> value [total]", "", "D" },
-    { "state/constraints/lambda_q40t", "Lagrange multiplier for the constraint on <q40> value [total]", "", "D" },
-    { "state/constraints/lambda_q50t", "Lagrange multiplier for the constraint on <q50> value [total]", "", "D" },
-    { "state/constraints/lambda_q60t", "Lagrange multiplier for the constraint on <q60> value [total]", "", "D" },
-
-    { "state/constraints/lambda_sepDistn" , "Lagrange multiplier for the constraint on the fragment separation distance [neut.]", "", "D" },
-    { "state/constraints/lambda_sepDistp" , "Lagrange multiplier for the constraint on the fragment separation distance [prot.]", "", "D" },
-    { "state/constraints/lambda_sepDistt" , "Lagrange multiplier for the constraint on the fragment separation distance [total]", "", "D" },
-    { "state/constraints/lambda_massAsymn", "Lagrange multiplier for the constraint on the fragment mass asymmetry [neut.]"     , "", "D" },
-    { "state/constraints/lambda_massAsymp", "Lagrange multiplier for the constraint on the fragment mass asymmetry [prot.]"     , "", "D" },
-    { "state/constraints/lambda_massAsymt", "Lagrange multiplier for the constraint on the fragment mass asymmetry [total]"     , "", "D" },
-    { "state/constraints/lambda_qNeckn"   , "Lagrange multiplier for the constraint on <Qneck> value [prot.]"                   , "", "D" },
-    { "state/constraints/lambda_qNeckp"   , "Lagrange multiplier for the constraint on <Qneck> value [neut.]"                   , "", "D" },
-    { "state/constraints/lambda_qNeckt"   , "Lagrange multiplier for the constraint on <Qneck> value [total]"                   , "", "D" },
-    { "state/constraints/lambda_nNeut"    , "Lagrange multiplier for the constraint on the number of neutrons"                  , "", "D" },
-    { "state/constraints/lambda_nProt"    , "Lagrange multiplier for the constraint on the number of protons"                   , "", "D" },
-    { "state/constraints/lambda_nNucl"    , "Lagrange multiplier for the constraint on the number of nucleons"                  , "", "D" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** Static initialization
  */
 
@@ -127,12 +47,19 @@ const std::vector<std::string> Constraint::types =
   "nNucl", "q00t", "q10t", "q20t", "q30t", "q40t", "q50t", "q60t", "sepDistt", "massAsymt", "qNeckt"
 };
 
-// Using this to define the unit of measure as well. That is, the lm value for the prefragments properties is their unit of measure, [fm^lm].
-const IVEC Constraint::lmValue =
+// Using this to define the unit of measure as well. That is, the lambda value for the prefragments properties is their unit of measure, [fm^lambda].
+const IVEC Constraint::lambdaValue =
 {
   0, 0, 1, 2, 3, 4, 5, 6, 1, 0, 0,
   0, 0, 1, 2, 3, 4, 5, 6, 1, 0, 0,
   0, 0, 1, 2, 3, 4, 5, 6, 1, 0, 0
+};
+
+const IVEC Constraint::muValue =
+{
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
 const IVEC Constraint::isoValue =
@@ -148,14 +75,6 @@ const arma::vec Constraint::factorValue =
   2 * sqrt(PI), 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
   2 * sqrt(PI), 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
 };
-
-const std::vector<bool> Constraint::useForInertiasValue =
-{
-  false, false, false, false, false, false, false, false, false, false, false,
-  false, false, false, false, false, false, false, false, false, false, false,
-  false, false, false,  true,  true,  true,  true,  true, false, false, false
-};
-
 
 //==============================================================================
 //==============================================================================
@@ -179,7 +98,7 @@ Constraint::Constraint(void)
  *  \param _lambda   Lambda of the constraint.
  */
 
-Constraint::Constraint(const std::string &_typeStr, double _val, double _lambda)
+Constraint::Constraint(const std::string &_typeStr, double _val, double _lagrangeMultiplier)
 {
   DBG_ENTER;
   UINT _type = Tools::index(types, _typeStr);
@@ -189,14 +108,14 @@ Constraint::Constraint(const std::string &_typeStr, double _val, double _lambda)
   type = INT(_type);
   typeStr = _typeStr;
   val = _val;
-  lm = lmValue[type];
+  lambda = lambdaValue[type];
+  mu     = muValue[type];
 
   iso = isoValue[type];
-  lambda = _lambda;
+  lagrangeMultiplier = _lagrangeMultiplier;
   measuredVal = val;
   gender = genderValue[type];
   factor = factorValue[type];
-  useForInertias = useForInertiasValue[type];
 
   DBG_LEAVE;
 }
@@ -251,7 +170,9 @@ DataTree Constraint::getDataTree(void) const
   DataTree result;
 
   result.set("constraints/" + types[type], val);
-  result.set("state/constraints/lambda_" + types[type], lambda);
+  result.set("state/constraints/lambda_" + types[type], lagrangeMultiplier);
+
+  // remove beta2 constraints
   result.set("constraints/beta2p");
   result.set("constraints/beta2n");
   result.set("constraints/beta2t");
@@ -281,10 +202,10 @@ std::map<std::string, Constraint> Constraint::fromDataTree(const DataTree &dataT
 
       if (dataTree.get(val, "constraints/" + type))
       {
-        double lambda = 0.0;
-        dataTree.get(lambda, "state/constraints/lambda_" + type, true);
+        double lagrangeMultiplier = 0.0;
+        dataTree.get(lagrangeMultiplier, "state/constraints/lambda_" + type, true);
 
-        result[type] = Constraint(type, val, lambda);
+        result[type] = Constraint(type, val, lagrangeMultiplier);
       }
     }
   }
@@ -317,10 +238,12 @@ std::map<std::string, Constraint> Constraint::fromDataTree(const DataTree &dataT
 
         double equivValue = MultipoleOperators::getQ20FromBeta(parts, A, val);
 
-        double lambda = 0.0;
-        dataTree.get(lambda, "state/constraints/lambda_" + type, true);
+        Tools::warning("Converting the " + equivType + PF(" constraint (val: %.3f)", val) + " to a " + type + PF(" constraint (val: %.3f)", equivValue));
 
-        result[type] = Constraint(type, equivValue, lambda);
+        double lagrangeMultiplier = 0.0;
+        dataTree.get(lagrangeMultiplier, "state/constraints/lambda_" + type, true);
+
+        result[type] = Constraint(type, equivValue, lagrangeMultiplier);
       }
     }
   }
@@ -372,14 +295,14 @@ const std::string Constraint::niceStr(const std::map<std::string, Constraint> &v
 
   for (auto &c : v)
   {
-    list.push_back({PF("%-6s", c.first.c_str()), PF("%9.3e", c.second.val)});
+    list.push_back({PF("%-6s", c.second.typeStr.c_str()), PF("%9.3e", c.second.val)});
   }
 
   if (!isShort)
   {
     for (auto &c : v)
     {
-      list.push_back({PF("l%-5s", c.first.c_str()), PF("%9.3e", c.second.lambda)});
+      list.push_back({PF("l%-5s", c.second.typeStr.c_str()), PF("%9.3e", c.second.lagrangeMultiplier)});
     }
   }
 

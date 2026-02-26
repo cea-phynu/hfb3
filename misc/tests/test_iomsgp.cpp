@@ -36,8 +36,9 @@ TEST(IOmsgp, IOmsgp)
 
 TEST(IOmsgp, saveDataTree)
 {
+  forceValidDataTree = true;
+
   DataTree d0;
-  d0.strict_mode = false;
 
   arma::vec V;
   V.randu(20);
@@ -83,8 +84,9 @@ TEST(IOmsgp, saveDataTree)
 
 TEST(IOmsgp, fromContent)
 {
+  forceValidDataTree = true;
+
   DataTree d0;
-  d0.strict_mode = false;
 
   // Creation of the DataTree
   arma::vec V;
@@ -128,8 +130,9 @@ TEST(IOmsgp, fromContent)
 
 TEST(IOmsgp, serializeDataTree)
 {
+  forceValidDataTree = true;
+
   DataTree d0;
-  d0.strict_mode = false;
 
   d0.set("int", 1);
   d0.set("dbl"  , 2.0);

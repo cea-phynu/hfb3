@@ -100,7 +100,7 @@ void FieldCoulombSlater::calcField(void)
       {
         if (s == 0)
         {
-          Rmat(mp) =  rho(PROTON ).submat(bras.filter, kets.filter);
+          Rmat(mp) = rho(PROTON ).submat(bras.filter, kets.filter);
         }//if
 
         if (s == 1)

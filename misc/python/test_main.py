@@ -72,34 +72,34 @@ def test_energy_contributions():
     # print(f'{interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.PAIRING )}')
     # print(f'{interaction("rearrangement"   ).energy(hfb3.PROTON , hfb3.Field.DIRECT  )}')
 
-    assert abs(interaction("kinetic"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 370.70623090137644     ) < err
+    assert abs(interaction("kinetic"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 370.70622377017673     ) < err
     assert abs(interaction("coulomb (Slater)").energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 0.0                    ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -1007.1240004113139    ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -44.99291691651361     ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - 458.16425126818154     ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - -529.4983310724099     ) < err
-    assert abs(interaction("spin-orbit"      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -7.154425576360787     ) < err
-    assert abs(interaction("density"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 557.0562499267664      ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 4.629345460554472      ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 0.2017422315083795     ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -1007.123989785407     ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -44.99291527243233     ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - 458.1642461286716      ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - -529.498325278552      ) < err
+    assert abs(interaction("spin-orbit"      ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - -7.1544247078073       ) < err
+    assert abs(interaction("density"         ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 557.0562430020889      ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 4.62934534289015       ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 0.20174223293732496    ) < err
     assert abs(interaction("coulomb (Slater)").energy(hfb3.NEUTRON, hfb3.Field.EXCHANGE) - 0.0                    ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 4.329000174746898      ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - -8.604880887779457     ) < err
-    assert abs(interaction("rearrangement"   ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 96.94061675961605      ) < err
-    assert abs(interaction("kinetic"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 310.32157604814023     ) < err
-    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 79.17077112707433      ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1014.9830261091117    ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -21.069887564989056    ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - 451.1225769487202      ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -516.2029247611621     ) < err
-    assert abs(interaction("spin-orbit"      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1.6851945501713979    ) < err
-    assert abs(interaction("density"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 557.0562519704362      ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 3.6782756420797758     ) < err
-    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 4.137638724498449e-14  ) < err
-    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -7.449355310684268     ) < err
-    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 8.310101313285302e-13  ) < err
-    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - -1.6849451323794346e-12) < err
-    assert abs(interaction("rearrangement"   ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 88.74404973296623      ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - 4.329000054826592      ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.NEUTRON, hfb3.Field.PAIRING ) - -8.604880652993009     ) < err
+    assert abs(interaction("rearrangement"   ).energy(hfb3.NEUTRON, hfb3.Field.DIRECT  ) - 96.94061525699817      ) < err
+    assert abs(interaction("kinetic"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 310.3215766395044      ) < err
+    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 79.17077104428267      ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1014.9830147281235    ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -21.069888256947138    ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - 451.1225724858045      ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -516.2029202559115     ) < err
+    assert abs(interaction("spin-orbit"      ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - -1.685194840934315     ) < err
+    assert abs(interaction("density"         ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 557.0562450457587      ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 3.678275643616604      ) < err
+    assert abs(interaction("2-body COM cor." ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 3.069596623626445e-14  ) < err
+    assert abs(interaction("coulomb (Slater)").energy(hfb3.PROTON , hfb3.Field.EXCHANGE) - -7.44935530441347      ) < err
+    assert abs(interaction("central", 0      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - 6.079116915327814e-13  ) < err
+    assert abs(interaction("central", 1      ).energy(hfb3.PROTON , hfb3.Field.PAIRING ) - -1.2309742838176036e-12) < err
+    assert abs(interaction("rearrangement"   ).energy(hfb3.PROTON , hfb3.Field.DIRECT  ) - 88.74404892733176      ) < err
 
 # ==============================================================================
 # ==============================================================================
@@ -136,6 +136,8 @@ def test_fragment_properties():
 
 @noel_test
 def test_datatree():
+
+    hfb3.cvar.forceValidDataTree = True
 
     vq20 = 999.0
     myDict = {'constraints/q20t': vq20, 'testbool': True}
@@ -177,15 +179,15 @@ def test_dictToDataTree():
     assert d.getI('int') == 1
     assert d.getD('dbl') == 2.0
     assert d.getS('str') == '3.00'
-    assert norm(d.getV('vec'   ) - np.ones((3,     ), dtype=np.float64, order='F')) < 1e-14
-    assert norm(d.getM('mat'   ) - np.ones((3, 3   ), dtype=np.float64, order='F')) < 1e-14
-    assert norm(d.getC('cube'  ) - np.ones((3, 3, 3), dtype=np.float64, order='F')) < 1e-14
-    assert norm(d.getIV('ivec' ) - np.ones((3,     ), dtype=np.int32  , order='F')) < 1e-14
-    assert norm(d.getIM('imat' ) - np.ones((3, 3   ), dtype=np.int32  , order='F')) < 1e-14
-    assert norm(d.getIC('icube') - np.ones((3, 3, 3), dtype=np.int32  , order='F')) < 1e-14
-    assert norm(d.getUV('uvec' ) - np.ones((3,     ), dtype=np.uint64 , order='F')) < 1e-14
-    assert norm(d.getUM('umat' ) - np.ones((3, 3   ), dtype=np.uint64 , order='F')) < 1e-14
-    assert norm(d.getUC('ucube') - np.ones((3, 3, 3), dtype=np.uint64 , order='F')) < 1e-14
+    assert norm(d.getV('vec'   ) - hfb3.armaf([1] * 3))             < 1e-14
+    assert norm(d.getM('mat'   ) - hfb3.armaf([[1] * 3] * 3))       < 1e-14
+    assert norm(d.getC('cube'  ) - hfb3.armaf([[[1] * 3] * 3] * 3)) < 1e-14
+    assert norm(d.getIV('ivec' ) - hfb3.armai([1] * 3))             < 1e-14
+    assert norm(d.getIM('imat' ) - hfb3.armai([[1] * 3] * 3))       < 1e-14
+    assert norm(d.getIC('icube') - hfb3.armai([[[1] * 3] * 3] * 3)) < 1e-14
+    assert norm(d.getUV('uvec' ) - hfb3.armau([1] * 3))             < 1e-14
+    assert norm(d.getUM('umat' ) - hfb3.armau([[1] * 3] * 3))       < 1e-14
+    assert norm(d.getUC('ucube') - hfb3.armau([[[1] * 3] * 3] * 3)) < 1e-14
 
 # ==============================================================================
 # ==============================================================================
@@ -194,19 +196,18 @@ def test_dictToDataTree():
 
 @noel_test
 def test_zippedDataTree():
-    import numpy as np
     import gzip
 
     d = hfb3.dictToDataTree({
         'int'  : 1,
         'dbl'  : 2.0,
         'str'  : '3.00',
-        'vec'  : np.ones((3,     ), dtype=np.float64, order='F'),
-        'mat'  : np.ones((3, 3   ), dtype=np.float64, order='F'),
-        'cube' : np.ones((3, 3, 3), dtype=np.float64, order='F'),
-        'ivec' : np.ones((3,     ), dtype=np.int32  , order='F'),
-        'imat' : np.ones((3, 3   ), dtype=np.int32  , order='F'),
-        'icube': np.ones((3, 3, 3), dtype=np.int32  , order='F'), })
+        'vec'  : hfb3.armaf([1] * 3),
+        'mat'  : hfb3.armaf([[1] * 3] * 3),
+        'cube' : hfb3.armaf([[[1] * 3] * 3] * 3),
+        'ivec' : hfb3.armai([1] * 3),
+        'imat' : hfb3.armai([[1] * 3] * 3),
+        'icube': hfb3.armai([[[1] * 3] * 3] * 3)})
 
     serialized = hfb3.dataTreeToBytes(d)
     assert type(serialized) is bytes
@@ -335,44 +336,44 @@ def test_multi():
     # types V, IV, UV
 
     multiV = hfb3.MultiV()
-    multiV[(2, -6, 87)] = np.zeros((4,), dtype=np.float64, order="F")
+    multiV[(2, -6, 87)] = hfb3.armaf([0] * 4)
     assert norm(multiV[(2, -6, 87)] - multiV(2, -6, 87)) < 1e-14
 
     multiIV = hfb3.MultiIV()
-    multiIV[(2, -6, 87)] = np.zeros((4,), dtype=np.int32, order="F")
-    multiIV[(2, -2)] = np.zeros((0,), dtype=np.int32, order="F")
+    multiIV[(2, -6, 87)] = hfb3.armai([0] * 4)
+    multiIV[(2, -2)] = hfb3.armai([0] * 0)
     assert multiIV.size() == 2
 
     multiUV = hfb3.MultiUV()
-    multiUV[(2, -6, 87)] = np.zeros((4,), dtype=np.uint64, order="F")
-    multiUV[(2, -2)] = np.zeros((0,), dtype=np.uint64, order="F")
+    multiUV[(2, -6, 87)] = hfb3.armau([0] * 4)
+    multiUV[(2, -2)] = hfb3.armau([])
     assert multiUV.size() == 2
 
     # types M, IM, UM
 
     multiM = hfb3.MultiM()
-    multiM[(2, -6, 87)] = np.zeros((4, 3), dtype=np.float64, order="F")
+    multiM[(2, -6, 87)] = hfb3.armaf([[0] * 4] * 3)
     assert norm(multiM[(2, -6, 87)] - multiM(2, -6, 87)) < 1e-14
 
     multiIM = hfb3.MultiIM()
-    multiIM[(2, -6, 87)] = np.zeros((4, 2), dtype=np.int32, order="F")
-    multiIM[(2, -2)] = np.zeros((0, 0), dtype=np.int32, order="F")
+    multiIM[(2, -6, 87)] = hfb3.armai([[0] * 4] * 3)
+    multiIM[(2, -2)]     = hfb3.armai([[]])
     assert multiIM.size() == 2
 
     multiUM = hfb3.MultiUM()
-    multiUM[(2, -6, 87)] = np.zeros((4, 2), dtype=np.uint64, order="F")
-    multiUM[(2, -2)] = np.zeros((0, 0), dtype=np.uint64, order="F")
+    multiUM[(2, -6, 87)] = hfb3.armau([[0] * 4] * 3)
+    multiUM[(2, -2)]     = hfb3.armau([[]])
     assert multiUM.size() == 2
 
     # types C, IC, UC
 
     multiC = hfb3.MultiC()
-    multiC[(2, -6, 87)] = np.zeros((4, 3, 2), dtype=np.float64, order="F")
+    multiC[(2, -6, 87)] = hfb3.armaf([[[0] * 4] * 3] * 2)
     assert norm(multiC[(2, -6, 87)] - multiC(2, -6, 87)) < 1e-14
 
     multiIC = hfb3.MultiIC()
-    multiIC[(2, -6, 87)] = np.zeros((4, 2, 3), dtype=np.int32, order="F")
-    multiIC[(2, -2)] = np.zeros((0, 0, 0), dtype=np.int32, order="F")
+    multiIC[(2, -6, 87)] = hfb3.armai([[[0] * 4] * 3] * 2)
+    multiIC[(2, -2)]     = hfb3.armai([[[]]])
     assert multiIC.size() == 2
 
     # TODO: make the following work
@@ -380,8 +381,8 @@ def test_multi():
     # assert not multiIC.contains((5, 2))
 
     multiUC = hfb3.MultiUC()
-    multiUC[(2, -6, 87)] = np.zeros((4, 2, 3), dtype=np.uint64, order="F")
-    multiUC[(2, -2)] = np.zeros((0, 0, 0), dtype=np.uint64, order="F")
+    multiUC[(2, -6, 87)] = hfb3.armau([[[0] * 4] * 3] * 2)
+    multiUC[(2, -2)]     = hfb3.armau([[[]]])
     assert multiUC.size() == 2
 
     # example of use for State class
@@ -390,7 +391,7 @@ def test_multi():
     state = hfb3.State(dataTree)
     assert state.rho(hfb3.NEUTRON).shape == (438, 438)
 
-    state.rho[(hfb3.NEUTRON,)] = np.zeros((4, 3), dtype=np.float64, order="F")
+    state.rho[(hfb3.NEUTRON,)] = hfb3.armaf([[0] * 3] * 4)
     assert state.rho(hfb3.NEUTRON).shape == (4, 3)
 
 # ==============================================================================

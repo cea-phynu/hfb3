@@ -105,9 +105,6 @@ void IOjson::updateDataTree(DataTree &dataTree, const std::string key, const std
 {
   DBG_ENTER;
 
-  bool previous_strict_mode = dataTree.strict_mode;
-  dataTree.strict_mode = false;
-
   if (type == "")
   {
     int bval = -1;
@@ -269,10 +266,8 @@ void IOjson::updateDataTree(DataTree &dataTree, const std::string key, const std
     dataTree.set(key, temp);
   }
 
-end_label:
+  end_label:
 
-
-  dataTree.strict_mode = previous_strict_mode;
   DBG_LEAVE;
 }
 

@@ -30,20 +30,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > SolverHFBBroyden::validKeys =
-  {
-    { "solver/broyden/cvgTarget"           , "Convergence target value."                                         , "1e-6" , "D" },
-    { "solver/broyden/maxIter"             , "Maximum number of iterations"                                      , "200"  , "I" },
-    { "solver/broyden/emptyKappaProtection", "Force non-empty kappa matrices"                                    , "False", "B" },
-    { "solver/broyden/cvgTargetLambda"     , "Convergence target value for lambda-iterations"                    , "1e-5" , "D" },
-    { "solver/broyden/maxIterLambda"       , "Maximum number of iterations for lambda-iterations"                , "10"   , "I" },
-    { "solver/broyden/earlyLambdaMixing"   , "Mix Lagrange multipliers in the linear phase of the Broyden mixing", "True" , "B" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** The constructor from a filename.
  */
 
@@ -78,7 +64,7 @@ SolverHFBBroyden::SolverHFBBroyden(const DataTree &dataTree) : SolverHFBBroyden(
 SolverHFBBroyden::SolverHFBBroyden(const DataTree &dataTree, State _state) : Solver(dataTree, _state),
   mixing(dataTree),
   interaction(dataTree, &state),
-  discrete(state.basis,  Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 101, 1, 151)),
+  discrete(state.basis,  Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0, 81, 1, 151)),
   multipoleOperators(state)
 {
   DBG_ENTER;
@@ -89,6 +75,12 @@ SolverHFBBroyden::SolverHFBBroyden(const DataTree &dataTree, State _state) : Sol
   dataTree.get(cvgTargetLambda,      "solver/broyden/cvgTargetLambda",      true);
   dataTree.get(maxIterLambda,        "solver/broyden/maxIterLambda",        true);
   dataTree.get(earlyLambdaMixing,    "solver/broyden/earlyLambdaMixing",    true);
+
+  if (useBokeh)
+  {
+    Plot::clear("Ene HFB [MeV]");
+    Plot::clear("Convergence (log10)");
+  }
 
   DBG_LEAVE;
 }
@@ -105,6 +97,9 @@ void SolverHFBBroyden::init()
   DBG_ENTER;
 
   startTime = Tools::clock();
+
+  // Calculate the basis orthogonalization.
+  state.basis.calcWDN();
 
   nbIter = 0;
 
@@ -150,7 +145,7 @@ void SolverHFBBroyden::init()
   ASSERT(state.constraints.size() != 0, "no constraints !?");
 
   // Calculate the multipole moment operator matrices.
-  multipoleOperators.calcQl0Matrices();
+  multipoleOperators.calcQlmHO();
 
   for (auto &c : state.constraints)
   {
@@ -169,8 +164,7 @@ void SolverHFBBroyden::init()
     geometricalOperators.calcQneck(state.rho(NEUTRON), state.rho(PROTON));
   }
 
-  // Calculate the basis orthogonalization.
-  state.basis.calcWDN();
+  // Tools::mesg("SolBro", info());
 
   DBG_LEAVE;
 }
@@ -189,10 +183,10 @@ void SolverHFBBroyden::bokehPlot(void)
   if (useBokeh)
   {
     Plot::slot(0);
-    Plot::curve("#iter", "Ene HFB [MeV]", nbIter, ene);
+    Plot::curve("#iter", "Ene HFB [MeV]", nbIter + iterShift, energy);
 
     Plot::slot(1);
-    Plot::curve("#iter", "Convergence", nbIter, log10(value));
+    Plot::curve("#iter", "Convergence (log10)", nbIter + iterShift, log10(convergence));
 
     if (plotDensities)
     {
@@ -230,7 +224,7 @@ bool SolverHFBBroyden::nextIter()
   if (!singleHFBiter())
   {
     status = Solver::DIVERGED;
-    bestEne = 0.0;
+    bestEnergy = 0.0;
 
     DBG_RETURN(false);
   }
@@ -245,24 +239,38 @@ bool SolverHFBBroyden::nextIter()
 
   // print iteration message
 
-  std::string eneStr = ((ene > -9999.999 ) && (ene < 0.0)) ? PF_GREEN("%9.3f", ene) : PF_RED("%9.2e", ene);
+  std::string cvgStr;
+  if      (convergence < 1e-4) cvgStr = PF_GREEN( "%8.2e", convergence);
+  else if (convergence < 1e-1) cvgStr = PF_YELLOW("%8.2e", convergence);
+  else                         cvgStr = PF_RED(   "%8.2e", convergence);
 
-  std::string lambdaIterStrn = (lambdaIter(NEUTRON) < maxIterLambda) ? PF("#%2d", lambdaIter(NEUTRON)) :
-                                                                       PF_RED("#%2d", lambdaIter(NEUTRON));
+  std::string eneStr;
+  if      (energy > 0.0)     eneStr = PF_RED("%9.2e", energy);
+  else if (energy < -9999.0) eneStr = PF_RED("%9.2e", energy);
+  else if (energy < -100.0)  eneStr = PF_GREEN("%9.3f", energy);
+  else                       eneStr = PF_YELLOW("%9.3f", energy);
 
-  std::string lambdaIterStrp = (lambdaIter(PROTON ) < maxIterLambda) ? PF("#%2d", lambdaIter(PROTON)) :
-                                                                       PF_RED("#%2d", lambdaIter(PROTON));
+  std::string lambdaIterNeutStr;
+  if      (lambdaIter(NEUTRON) < 3)             lambdaIterNeutStr = PF_GREEN( "#%2d", lambdaIter(NEUTRON));
+  else if (lambdaIter(NEUTRON) < maxIterLambda) lambdaIterNeutStr = PF_YELLOW("#%2d", lambdaIter(NEUTRON));
+  else                                          lambdaIterNeutStr = PF_RED(   "#%2d", lambdaIter(NEUTRON));
+
+  std::string lambdaIterProtStr;
+  if      (lambdaIter(PROTON) < 3)             lambdaIterProtStr = PF_GREEN( "#%2d", lambdaIter(PROTON));
+  else if (lambdaIter(PROTON) < maxIterLambda) lambdaIterProtStr = PF_YELLOW("#%2d", lambdaIter(PROTON));
+  else                                         lambdaIterProtStr = PF_RED(   "#%2d", lambdaIter(PROTON));
 
   Tools::mesg("SolBro",
-              PF("#it: %03d ", nbIter) +
-              PF("cvg: %8.2e ", value) +
+              getIterMesg() +
+              PF("cvg: ") + cvgStr + " " +
               PF("ene: ") + eneStr + " " +
 #ifdef PRINT_ITER_DURATION
               PF("tot: %6.3fs (fld: %6.3fs)", iterLength, interaction.calcLength) + " " +
 #endif
-              PF("ln: %7.3f(%s) ", state.chemPot(NEUTRON), lambdaIterStrn.c_str()) +
-              PF("lp: %7.3f(%s) ", state.chemPot(PROTON ), lambdaIterStrp.c_str())
+              PF("ln: %7.3f(", state.chemPot(NEUTRON)) + lambdaIterNeutStr + ")" +
+              PF("lp: %7.3f(", state.chemPot(PROTON )) + lambdaIterProtStr + ")"
              );
+
   // Tools::mesg("SolBro", multipoleOperators.getNiceInfo());
   // Tools::mesg("SolBro", state.info());
   // Tools::mesg("SolBro", state.getOmegaContributionsInfo());
@@ -273,6 +281,8 @@ bool SolverHFBBroyden::nextIter()
   state.nbIter = nbIter;
   status = Solver::ITERATING;
 
+  state.converged = false;
+
   if (nbIter >= maxIter)
   {
     Tools::mesg("SolBro", "Maximum number of iterations reached, exiting HFB loop");
@@ -280,24 +290,24 @@ bool SolverHFBBroyden::nextIter()
     DBG_RETURN(false);
   }
 
-  if ((value < cvgTarget) && (nbIter > 1))
+  if ((convergence < cvgTarget) && (nbIter > 1))
   {
-    Tools::mesg("SolBro", "Target value reached, exiting HFB loop");
-    state.totalEnergy = ene;
+    Tools::mesg("SolBro", "Convergence target value reached, exiting HFB loop");
+    state.totalEnergy = energy;
     state.converged = true;
 
     status = Solver::CONVERGED;
     DBG_RETURN(false);
   }
 
-  if (fabs(value) > 1e20)
+  if (fabs(convergence) > 1e20)
   {
     Tools::mesg("SolBro", "Convergence is too high, exiting HFB loop");
     status = Solver::DIVERGED;
     DBG_RETURN(false);
   }
 
-  if (fabs(ene) > 1e16)
+  if (fabs(energy) > 1e16)
   {
     Tools::mesg("SolBro", "Energy is too high, exiting HFB loop");
     status = Solver::DIVERGED;
@@ -312,7 +322,7 @@ bool SolverHFBBroyden::nextIter()
   mixStates();
 
   // Re-calculate multipole moments.
-  multipoleOperators.calcQlm(state.rho);
+  multipoleOperators.calcQlmObs(state.rho);
 
   if (fragInLoop)
   {
@@ -326,7 +336,7 @@ bool SolverHFBBroyden::nextIter()
   {
     if (c.second.gender == Constraint::MM)
     {
-      c.second.measuredVal = multipoleOperators.qlm(c.second.lm, c.second.iso) * c.second.factor;
+      c.second.measuredVal = multipoleOperators.qlmObs(c.second.lambda, c.second.mu, c.second.iso) * c.second.factor;
     }
     else if (c.second.gender == Constraint::QN)
     {
@@ -382,7 +392,7 @@ bool SolverHFBBroyden::mixStates(void)
   UINT i = 0;
   for (auto &c : state.constraints)
   {
-    vec(index4 + i) = c.second.lambda;
+    vec(index4 + i) = c.second.lagrangeMultiplier;
     i++;
   }
 
@@ -390,7 +400,7 @@ bool SolverHFBBroyden::mixStates(void)
   if (!mixing.newVec(vec))
   {
     // mixing failed !?
-    bestEne = 0.0;
+    bestEnergy = 0.0;
 
     DBG_RETURN(false);
   }
@@ -434,7 +444,7 @@ bool SolverHFBBroyden::mixStates(void)
     i = 0;
     for (auto &c : state.constraints)
     {
-      c.second.lambda = vec(index4 + i); // DEBUG
+      c.second.lagrangeMultiplier = vec(index4 + i); // DEBUG
       // INFO("lambda: %e", c.second.lambda);
       i++;
     }
@@ -466,10 +476,8 @@ void SolverHFBBroyden::calc()
   //===== HFB LOOP END =====
   //========================
 
-  if (status == Solver::CONVERGED)
-    Tools::mesg("SolBro", PF("iter: %3d, ene: %9.3f MeV", nbIter + 1, bestEne));
-  else
-    Tools::mesg("SolBro", PF("iter: %3d, NOT CONVERGED", nbIter + 1));
+  if (status != Solver::CONVERGED)
+    Tools::mesg("SolBro", getIterMesg() + PF("NOT CONVERGED"));
 
   DBG_LEAVE;
 }
@@ -503,7 +511,7 @@ bool SolverHFBBroyden::singleHFBiter(void)
   // Force some field recalculations.
   interaction.clear();
 
-  // Calculate the energy contributions (and the interaction).
+  // Calculate the energy contributions (and the fields).
   interaction.calcEnergies();
 
   // Print the energy contributions.
@@ -578,9 +586,16 @@ bool SolverHFBBroyden::singleHFBiter(void)
     double minError = 0;
     double maxError = 0;
 
+    //==========================================================================
+    //== Lambda-iterations =====================================================
+    //==========================================================================
+
     while (true)
     {
       // INFO("trace rho (before)    : %9.6f", arma::trace(rhoNext(iso)) * 2.0);
+
+      state.partStates(iso) = States(PF("Part. %s", iso == NEUTRON ? "n" : "p"));
+      state.qpStates(iso) = States(PF("QP. %s", iso == NEUTRON ? "n" : "p"));
 
       for (INT omega = 0; omega < basis.mMax; omega++)
       {
@@ -598,15 +613,15 @@ bool SolverHFBBroyden::singleHFBiter(void)
           {
             if (c.second.gender == Constraint::MM)
             {
-              constraintHam += multipoleOperators.ql0(c.second.lm).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega))
-                               * c.second.lambda * c.second.factor;
+              constraintHam += multipoleOperators.qlmHO(c.second.lambda, c.second.mu).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega))
+                               * c.second.lagrangeMultiplier * c.second.factor;
             }
             else if (c.second.gender == Constraint::QN)
             {
               if (geometricalOperators.izNeck != -1)
               {
                 constraintHam += geometricalOperators.qneck0(0).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega))
-                                 * c.second.lambda * c.second.factor;
+                                 * c.second.lagrangeMultiplier * c.second.factor;
               }
               else
               {
@@ -680,76 +695,85 @@ bool SolverHFBBroyden::singleHFBiter(void)
         state.U(iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexOR(omega)) = Uho;
         state.V(iso).submat(basis.omegaIndexHO(omega), basis.omegaIndexOR(omega)) = Vho;
 
-        INT localId = -1;
+
+        //======================================================================
+        //======================================================================
+        //======================================================================
 
         // blocking for rho and kappa matrices
-        if (state.blockedQP(iso) > -1)
+
+        INT localId = -1;
+        for (auto &s: state.blockedQPStates)
         {
-          if (arma::any(arma::find(state.basis.omegaIndexOR(omega) == state.blockedQP(iso))))
+          if ((s.omega == omega) && (s.isospin == iso))
           {
-            localId = 0;
-            while(state.basis.omegaIndexOR(omega)(localId) != state.blockedQP(iso)) localId++;
+            localId = s.index;
             // INFO("found state ! omega: %d %d %d", omega, localId, state.basis.omegaIndexOR(omega)(localId));
+            break;
           }
+        }
 
-          if (localId != -1)
-          {
-            // Do the blocking
-            rhoNext(iso).submat(state.basis.omegaIndexHO(omega), state.basis.omegaIndexHO(omega))
-              += 0.5 * (Uho.col(localId) * Uho.col(localId).t() - Vho.col(localId) * Vho.col(localId).t());
-            kappaNext(iso).submat(state.basis.omegaIndexHO(omega), state.basis.omegaIndexHO(omega))
-              += 0.5 * (-1.0 * Uho.col(localId) * Vho.col(localId).t() - Vho.col(localId) * Uho.col(localId).t());
-          }
-        } // blocking ?
+        if (localId != -1)
+        {
+          // Tools::warning("blocking enabled !");
+
+          // Do the blocking
+          ASSERT(localId < Vho.n_cols, PF("Wrong QP state id (%d)", localId));
+
+          rhoNext(iso).submat(state.basis.omegaIndexHO(omega), state.basis.omegaIndexHO(omega))
+            += 0.5 * (Uho.col(localId) * Uho.col(localId).t() - Vho.col(localId) * Vho.col(localId).t());
+          kappaNext(iso).submat(state.basis.omegaIndexHO(omega), state.basis.omegaIndexHO(omega))
+            += 0.5 * (-1.0 * Uho.col(localId) * Vho.col(localId).t() - Vho.col(localId) * Uho.col(localId).t());
+        }
+
+        //======================================================================
+        //======================================================================
+        //======================================================================
+
       } // omega
-
 
       // Estimator for v2 ?
       VV(iso) = arma::clamp(arma::sum(arma::square(V(iso))), 0.0, 1.0).t();
+
+      // Store particle states.
+      for (INT i = 0; i < state.basis.ORqn.nb; i++)
+      {
+        INT m = basis.ORqn(0, i);
+        INT s = basis.ORqn(4, i);
+
+        INT localId = state.basis.blockIdHO(i);
+        state.partStates(iso).add(i, partEne(iso)(i), VV(iso)(i), StateId({localId, m - s, iso}));
+      } // i
+
+      // Store quasi-particle states.
+      for (INT i = 0; i < state.basis.ORqn.nb; i++)
+      {
+        INT m = basis.ORqn(0, i);
+        INT s = basis.ORqn(4, i);
+
+        INT localId = state.basis.blockIdOR(i);
+        state.qpStates(iso).add(i, qpEne(iso)(i), VV(iso)(i), StateId({localId, m - s, iso}));
+      } // i
+
 
       // if (state.blockedQP(iso) > -1)
       // {
       //   VV(iso)(state.blockedQP(iso)) = 0.5;
       // }
 
-      // Store particle states.
-      state.partStates(iso) = States(PF("Part. %s", iso == NEUTRON ? "n" : "p"));
-      for (INT i = 0; i < partEne(iso).n_elem; i++)
-      {
-        INT m = basis.ORqn(0, i);
-        INT s = basis.ORqn(4, i);
-        std::string label = PF("%d/2", 2 * m - 2 * s + 1);
-
-        state.partStates(iso).add(i, partEne(iso)(i), 0.0, label);
-      } // i
-
-      // Store quasi-particle states.
-      state.qpStates(iso) = States(PF("QP. %s", iso == NEUTRON ? "n" : "p"));
-      for (INT i = 0; i < qpEne(iso).n_elem; i++)
-      {
-        INT m = basis.ORqn(0, i);
-        INT s = basis.ORqn(4, i);
-
-        std::string strBlocked = "";
-        if (i == state.blockedQP(iso)) strBlocked = "* ";
-
-        std::string label = strBlocked + PF("%d/2", 2 * m - 2 * s + 1);
-
-        state.qpStates(iso).add(i, qpEne(iso)(i), VV(iso)(i), label);
-      } // i
 
       // Sort the quasi-particle states by ascending energy.
-      state.qpStates(iso).sort();
+      // state.qpStates(iso).sort("energy");
 
       // optionally print qpStates
       // Tools::mesg("SolBro", state.qpStates(iso).info());
 
-      multipoleOperators.calcQlm(rhoNext);
+      multipoleOperators.calcQlmObs(rhoNext);
 
       double v2error = multipoleOperators.nPart(iso) - nPart(iso);
 
-      if ((lambdaIter(iso) >= maxIterLambda) || (fabs(v2error) < cvgTargetLambda)) {
-
+      if ((lambdaIter(iso) >= maxIterLambda) || (fabs(v2error) < cvgTargetLambda))
+      {
         // The step for the next iteration should be proportional to the change in λ
         lambdaStep(iso) = fabs(initialLambda(iso) - state.chemPot(iso)) * 10 + 0.001;
         // INFO("[λstep] updated %f", lambdaStep(iso));
@@ -803,6 +827,10 @@ bool SolverHFBBroyden::singleHFBiter(void)
 
   } // iso
 
+  // state.qpStates(NEUTRON).sort("occupation");
+  // state.qpStates(PROTON ).sort("occupation");
+  // INFO(state.qpStates(NEUTRON).info());
+  // INFO(state.qpStates(PROTON ).info());
 
   lastState = state;
 
@@ -816,13 +844,10 @@ bool SolverHFBBroyden::singleHFBiter(void)
 
   //==============================================================================
 
-  value = arma::norm(state.rho(NEUTRON) - rhoNext(NEUTRON), "inf")
-        + arma::norm(state.rho(PROTON ) - rhoNext(PROTON ), "inf");
+  convergence = arma::norm(state.rho(NEUTRON) - rhoNext(NEUTRON), "inf")
+              + arma::norm(state.rho(PROTON ) - rhoNext(PROTON ), "inf");
 
-  ene = arma::accu(interaction.totalEnergy);
-
-  state.eneQP = qpEne;
-  state.vecOc = VV;
+  energy = arma::accu(interaction.totalEnergy);
 
   DBG_RETURN(true);
 }
@@ -858,7 +883,7 @@ bool SolverHFBBroyden::adjustConstraints(void)
   }
 
   //Re-calculate multipole moments.
-  multipoleOperators.calcQlm(rhoNext);
+  multipoleOperators.calcQlmObs(rhoNext);
 
   if (fragInLoop)
   {
@@ -871,7 +896,7 @@ bool SolverHFBBroyden::adjustConstraints(void)
   {
     if (c.second.gender == Constraint::MM)
     {
-      c.second.measuredVal = multipoleOperators.qlm(c.second.lm, c.second.iso) * c.second.factor;
+      c.second.measuredVal = multipoleOperators.qlmObs(c.second.lambda, c.second.mu, c.second.iso) * c.second.factor;
     }
     else if (c.second.gender == Constraint::QN)
     {
@@ -884,7 +909,6 @@ bool SolverHFBBroyden::adjustConstraints(void)
         c.second.measuredVal = c.second.val;
       }
     }
-
   }
 
   //==============================================================================
@@ -915,7 +939,7 @@ bool SolverHFBBroyden::adjustConstraints(void)
             arma::mat U_omega = U(iso).submat(basis.omegaIndexOR(omega), basis.omegaIndexOR(omega));
             arma::mat V_omega = V(iso).submat(basis.omegaIndexOR(omega), basis.omegaIndexOR(omega));
             arma::mat M_omega = M.submat(basis.omegaIndexHO(omega), basis.omegaIndexOR(omega));
-            arma::mat ql0_omega  = multipoleOperators.ql0(c.second.lm).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega));
+            arma::mat ql0_omega  = multipoleOperators.qlmHO(c.second.lambda, c.second.mu).submat(basis.omegaIndexHO(omega), basis.omegaIndexHO(omega));
 
             Q1(iso, ic).submat(basis.omegaIndexOR(omega), basis.omegaIndexOR(omega)) = U_omega.t() * M_omega.t() * ql0_omega * M_omega * U_omega
                 - V_omega.t() * M_omega.t() * ql0_omega * M_omega * V_omega;
@@ -968,9 +992,9 @@ bool SolverHFBBroyden::adjustConstraints(void)
 
     DF(iso) = arma::zeros(ic, ic);
 
-    for (INT c = 0; c < ic; c++) 
+    for (INT c = 0; c < ic; c++)
     {
-      for (INT d = 0; d < ic; d++) 
+      for (INT d = 0; d < ic; d++)
       {
         DF(iso)(c, d) = 2.0 * arma::accu(Q2(iso, c) % Q2(iso, d) % qpEne_inv(iso));
       }
@@ -978,8 +1002,6 @@ bool SolverHFBBroyden::adjustConstraints(void)
   } // iso
 
   arma::mat DF_tot = DF(NEUTRON) + DF(PROTON);
-
-  // Tools::info("DF", DF_tot);
 
   //==============================================================================
   // constraints: lambda correction calculation
@@ -999,24 +1021,19 @@ bool SolverHFBBroyden::adjustConstraints(void)
 
 
   INT ic = 0;
-
   for (auto &c : state.constraints)
   {
-    Constraint &cstc = c.second;
     lambdaCor(ic) = 0.0;
 
     INT id = 0;
-
-    for (auto &d : state.constraints)
+    for (auto &c2 : state.constraints)
     {
-      Constraint &cstd = d.second;
       // Eq. (97) p. 163, Berger's PhD Thesis
-      lambdaCor(ic) += DF_inv(ic, id) * (cstd.val - cstd.measuredVal);
+      lambdaCor(ic) += DF_inv(ic, id) * (c2.second.val - c2.second.measuredVal);
       id++;
     }
 
-    cstc.lambda += lambdaCor(ic) * 1.0;
-
+    c.second.lagrangeMultiplier += lambdaCor(ic) * 1.0;
     ic++;
   }
 
@@ -1094,14 +1111,8 @@ const std::string SolverHFBBroyden::info(bool isShort) const
   }
   else
   {
-    std::string nBlocked = "none";
-    std::string pBlocked = "none";
-
-    if (!state.qpStates.empty())
-    {
-      nBlocked =state.qpStates(NEUTRON).info(state.blockedQP(NEUTRON), 0, false);
-      pBlocked =state.qpStates(PROTON ).info(state.blockedQP(PROTON ), 0, false);
-    }
+    INT nbBlocked = state.blockedQPStates.size();
+    std::string nBlocked = nbBlocked == 0 ? "none" : PF("%d", nbBlocked);
 
     result += Tools::treeStr(
     {
@@ -1116,8 +1127,7 @@ const std::string SolverHFBBroyden::info(bool isShort) const
       {"momen.", multipoleOperators.info(true)},
       {"maxItL", Tools::infoStr(maxIterLambda)},
       {"ltarg.", Tools::infoStr(cvgTargetLambda)},
-      {"bloc.n", nBlocked},
-      {"bloc.p", pBlocked},
+      {"block.", nBlocked},
     }, false);
   }
 

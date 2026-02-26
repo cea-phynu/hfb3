@@ -181,8 +181,9 @@ public:
   INT del(const std::string &key);
 
   void validate(void) const;
-  void checkKeyAndType(const std::string &key, const std::string &type) const;
+  bool checkKeyAndType(const std::string &key, const std::string &type, bool quiet = false) const;
   const std::string getType(const std::string &key) const;
+  const std::string getDefaultValue(const std::string &key) const;
 
   void save(const std::string &filename, bool verbose = true) const;
 
@@ -197,6 +198,16 @@ public:
   //============================================================================
   //============================================================================
   //============================================================================
+
+  struct KeyStruct
+  {
+    std::string key;
+    std::string description;
+    std::string defaultValue;
+    std::string type;
+  };
+
+  static std::list<KeyStruct > globalValidKeys;
 
   /// Equality operator between std::map<std::string, arma::xxx> objects
   template<typename T> static bool mapStringArmaEquals(const std::map<std::string, T> &a, const std::map<std::string, T> &b)
@@ -350,10 +361,6 @@ public:
 
   /// Empty keys : keys that are to be deleted in case of a merge operation.
   std::set<std::string> emptyKeys;
-
-  /// Enforce valid keys only.
-  bool strict_mode = true;
 };
-
 
 #endif // DATATREE_H

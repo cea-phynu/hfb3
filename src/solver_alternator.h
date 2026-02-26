@@ -37,6 +37,21 @@
 
 class DataTree;
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description, optional default value and type for each input or output.
+#define SOLVER_ALTERNATOR_VALID_KEYS \
+{ "solver/alternator/maxIter", "Maximum number of iterations when alternating solvers",   "200", "I" }, \
+{ "solver/alternator/scheme" , "Scheme for the alternating solvers"                   ,  "[GB]", "S" }, \
+{ "solver/alternator/snapshotInterval" , "Interval between snapshots"                 ,  "-1"  , "I" }, \
+{ "solver/alternator/gradientOnlyFromScratch" , "Skip the Gradient solver if an initial state is given", "True", "B" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief The basis parameters optimizer.
  *
  *  This class represents the optimizer of the basis parameters.
@@ -71,9 +86,6 @@ public:
   /// Scheme for the alternating solvers (vector<int> version).
   std::vector<INT> schemeList = {};
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// Current scheme index.
   INT schemeId = 0;
 
@@ -91,6 +103,9 @@ public:
 
   /// Basis iteration number.
   INT basisIter = 0;
+
+  /// Skip the Gradient solver if an initial state is given.
+  bool gradientOnlyFromScratch = false;
 
   //============================================================================
   //============================================================================

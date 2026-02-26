@@ -24,7 +24,7 @@
 #include "basis.h"
 #include "discrete.h"
 #include "state.h"
-#include "maxima_targets.h"
+#include "maxima_targets2.h"
 #include "tools.h"
 
 //==============================================================================
@@ -268,132 +268,134 @@ TEST(Basis, legendre_)
 
 TEST(Basis, zPart)
 {
-  Basis b(12.3, 1.3, 1.2, 12, 20, 1.1);
+#define TEST_ZPART(T, A) ASSERT_NEAR(state.basis.zPartScalar(A), T, err);
 
-  double precision = 1e-15;
+#ifdef BASIS_ZPART_1CT_ACTIVE
+  {
+    double err = 1e-15;
 
-  double z = -2.238;
+    State state(BASIS_ZPART_1CT_STATE);
 
-  ASSERT_NEAR(b.zPartScalar(z,  0, 0), BASIS_ZPART_TARGET00, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  1, 1), BASIS_ZPART_TARGET01, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  2, 0), BASIS_ZPART_TARGET02, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  3, 1), BASIS_ZPART_TARGET03, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  4, 0), BASIS_ZPART_TARGET04, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  5, 1), BASIS_ZPART_TARGET05, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  6, 0), BASIS_ZPART_TARGET06, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  7, 1), BASIS_ZPART_TARGET07, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  8, 0), BASIS_ZPART_TARGET08, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  9, 1), BASIS_ZPART_TARGET09, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 10, 0), BASIS_ZPART_TARGET10, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 11, 1), BASIS_ZPART_TARGET11, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 12, 0), BASIS_ZPART_TARGET12, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 13, 1), BASIS_ZPART_TARGET13, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 14, 0), BASIS_ZPART_TARGET14, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 15, 1), BASIS_ZPART_TARGET15, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 16, 0), BASIS_ZPART_TARGET16, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 17, 1), BASIS_ZPART_TARGET17, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 18, 0), BASIS_ZPART_TARGET18, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 19, 1), BASIS_ZPART_TARGET19, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 20, 0), BASIS_ZPART_TARGET20, precision);
-}
+    TEST_ZPART(BASIS_ZPART_1CT_00_TARGET, BASIS_ZPART_1CT_00_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_01_TARGET, BASIS_ZPART_1CT_01_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_02_TARGET, BASIS_ZPART_1CT_02_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_03_TARGET, BASIS_ZPART_1CT_03_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_04_TARGET, BASIS_ZPART_1CT_04_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_05_TARGET, BASIS_ZPART_1CT_05_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_06_TARGET, BASIS_ZPART_1CT_06_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_07_TARGET, BASIS_ZPART_1CT_07_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_08_TARGET, BASIS_ZPART_1CT_08_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_09_TARGET, BASIS_ZPART_1CT_09_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_10_TARGET, BASIS_ZPART_1CT_10_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_11_TARGET, BASIS_ZPART_1CT_11_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_12_TARGET, BASIS_ZPART_1CT_12_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_13_TARGET, BASIS_ZPART_1CT_13_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_14_TARGET, BASIS_ZPART_1CT_14_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_15_TARGET, BASIS_ZPART_1CT_15_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_16_TARGET, BASIS_ZPART_1CT_16_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_17_TARGET, BASIS_ZPART_1CT_17_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_18_TARGET, BASIS_ZPART_1CT_18_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_19_TARGET, BASIS_ZPART_1CT_19_ARG0);
+    TEST_ZPART(BASIS_ZPART_1CT_20_TARGET, BASIS_ZPART_1CT_20_ARG0);
+  }
+#endif
 
-//==============================================================================
+#ifdef BASIS_ZPART_2CT_ACTIVE
+  {
+    double err = 1e-15;
 
-TEST(Basis, zPart_big)
-{
-  Basis b(12.3, 1.3, 5.2, 24, 24, 1.1);
+    State state(BASIS_ZPART_2CT_STATE);
 
-  double precision = 1e-15;
-
-  double z = -2.238;
-
-  ASSERT_NEAR(b.zPartScalar(z,  0, 0), BASIS_ZPART_BIG_TARGET00, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  1, 1), BASIS_ZPART_BIG_TARGET01, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  2, 0), BASIS_ZPART_BIG_TARGET02, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  3, 1), BASIS_ZPART_BIG_TARGET03, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  4, 0), BASIS_ZPART_BIG_TARGET04, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  5, 1), BASIS_ZPART_BIG_TARGET05, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  6, 0), BASIS_ZPART_BIG_TARGET06, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  7, 1), BASIS_ZPART_BIG_TARGET07, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  8, 0), BASIS_ZPART_BIG_TARGET08, precision);
-  ASSERT_NEAR(b.zPartScalar(z,  9, 1), BASIS_ZPART_BIG_TARGET09, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 10, 0), BASIS_ZPART_BIG_TARGET10, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 11, 1), BASIS_ZPART_BIG_TARGET11, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 12, 0), BASIS_ZPART_BIG_TARGET12, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 13, 1), BASIS_ZPART_BIG_TARGET13, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 14, 0), BASIS_ZPART_BIG_TARGET14, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 15, 1), BASIS_ZPART_BIG_TARGET15, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 16, 0), BASIS_ZPART_BIG_TARGET16, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 17, 1), BASIS_ZPART_BIG_TARGET17, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 18, 0), BASIS_ZPART_BIG_TARGET18, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 19, 1), BASIS_ZPART_BIG_TARGET19, precision);
-  ASSERT_NEAR(b.zPartScalar(z, 20, 0), BASIS_ZPART_BIG_TARGET20, precision);
+    TEST_ZPART(BASIS_ZPART_2CT_00_TARGET, BASIS_ZPART_2CT_00_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_01_TARGET, BASIS_ZPART_2CT_01_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_02_TARGET, BASIS_ZPART_2CT_02_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_03_TARGET, BASIS_ZPART_2CT_03_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_04_TARGET, BASIS_ZPART_2CT_04_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_05_TARGET, BASIS_ZPART_2CT_05_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_06_TARGET, BASIS_ZPART_2CT_06_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_07_TARGET, BASIS_ZPART_2CT_07_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_08_TARGET, BASIS_ZPART_2CT_08_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_09_TARGET, BASIS_ZPART_2CT_09_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_10_TARGET, BASIS_ZPART_2CT_10_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_11_TARGET, BASIS_ZPART_2CT_11_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_12_TARGET, BASIS_ZPART_2CT_12_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_13_TARGET, BASIS_ZPART_2CT_13_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_14_TARGET, BASIS_ZPART_2CT_14_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_15_TARGET, BASIS_ZPART_2CT_15_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_16_TARGET, BASIS_ZPART_2CT_16_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_17_TARGET, BASIS_ZPART_2CT_17_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_18_TARGET, BASIS_ZPART_2CT_18_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_19_TARGET, BASIS_ZPART_2CT_19_ARG0);
+    TEST_ZPART(BASIS_ZPART_2CT_20_TARGET, BASIS_ZPART_2CT_20_ARG0);
+  }
+#endif
 }
 
 //==============================================================================
 
 TEST(Basis, rPart)
 {
-  Basis b(12.3, 1.3, 1.2, 12, 20, 1.1);
+#define TEST_RPART(T, A) ASSERT_NEAR(state.basis.rPartScalar(A), T, err);
 
-  double precision = 1e-15;
+#ifdef BASIS_RPART_1CT_ACTIVE
+  {
+    double err = 1e-15;
 
-  double r = 2.238;
+    State state(BASIS_RPART_1CT_STATE);
 
-  ASSERT_NEAR(b.rPartScalar(r,  0,  2), BASIS_RPART_TARGET00, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  1,  1), BASIS_RPART_TARGET01, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  2,  3), BASIS_RPART_TARGET02, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  3,  2), BASIS_RPART_TARGET03, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  4,  1), BASIS_RPART_TARGET04, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  5,  4), BASIS_RPART_TARGET05, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  6,  3), BASIS_RPART_TARGET06, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  7,  4), BASIS_RPART_TARGET07, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  8,  2), BASIS_RPART_TARGET08, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  9,  5), BASIS_RPART_TARGET09, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 10,  2), BASIS_RPART_TARGET10, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 11, 11), BASIS_RPART_TARGET11, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 12,  3), BASIS_RPART_TARGET12, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 13, 12), BASIS_RPART_TARGET13, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 14,  1), BASIS_RPART_TARGET14, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 15, 14), BASIS_RPART_TARGET15, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 16,  3), BASIS_RPART_TARGET16, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 17, 14), BASIS_RPART_TARGET17, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 18,  2), BASIS_RPART_TARGET18, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 19, 15), BASIS_RPART_TARGET19, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 20,  5), BASIS_RPART_TARGET20, precision);
-}
+    TEST_RPART(BASIS_RPART_1CT_00_TARGET, BASIS_RPART_1CT_00_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_01_TARGET, BASIS_RPART_1CT_01_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_02_TARGET, BASIS_RPART_1CT_02_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_03_TARGET, BASIS_RPART_1CT_03_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_04_TARGET, BASIS_RPART_1CT_04_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_05_TARGET, BASIS_RPART_1CT_05_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_06_TARGET, BASIS_RPART_1CT_06_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_07_TARGET, BASIS_RPART_1CT_07_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_08_TARGET, BASIS_RPART_1CT_08_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_09_TARGET, BASIS_RPART_1CT_09_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_10_TARGET, BASIS_RPART_1CT_10_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_11_TARGET, BASIS_RPART_1CT_11_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_12_TARGET, BASIS_RPART_1CT_12_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_13_TARGET, BASIS_RPART_1CT_13_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_14_TARGET, BASIS_RPART_1CT_14_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_15_TARGET, BASIS_RPART_1CT_15_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_16_TARGET, BASIS_RPART_1CT_16_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_17_TARGET, BASIS_RPART_1CT_17_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_18_TARGET, BASIS_RPART_1CT_18_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_19_TARGET, BASIS_RPART_1CT_19_ARG0);
+    TEST_RPART(BASIS_RPART_1CT_20_TARGET, BASIS_RPART_1CT_20_ARG0);
+  }
+#endif
 
-//==============================================================================
+#ifdef BASIS_RPART_2CT_ACTIVE
+  {
+    double err = 1e-15;
 
-TEST(Basis, rPart_big)
-{
-  Basis b(12.3, 5.3, 1.2, 24, 24, 1.1);
+    State state(BASIS_RPART_2CT_STATE);
 
-  double precision = 1e-15;
-
-  double r = 2.238;
-
-  ASSERT_NEAR(b.rPartScalar(r,  0,  2), BASIS_RPART_BIG_TARGET00, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  1,  1), BASIS_RPART_BIG_TARGET01, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  2,  3), BASIS_RPART_BIG_TARGET02, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  3,  2), BASIS_RPART_BIG_TARGET03, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  4,  1), BASIS_RPART_BIG_TARGET04, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  5,  4), BASIS_RPART_BIG_TARGET05, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  6,  3), BASIS_RPART_BIG_TARGET06, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  7,  4), BASIS_RPART_BIG_TARGET07, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  8,  2), BASIS_RPART_BIG_TARGET08, precision);
-  ASSERT_NEAR(b.rPartScalar(r,  9,  5), BASIS_RPART_BIG_TARGET09, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 10,  2), BASIS_RPART_BIG_TARGET10, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 11, 11), BASIS_RPART_BIG_TARGET11, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 12,  3), BASIS_RPART_BIG_TARGET12, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 13, 12), BASIS_RPART_BIG_TARGET13, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 14,  1), BASIS_RPART_BIG_TARGET14, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 15, 14), BASIS_RPART_BIG_TARGET15, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 16,  3), BASIS_RPART_BIG_TARGET16, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 17, 14), BASIS_RPART_BIG_TARGET17, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 18,  2), BASIS_RPART_BIG_TARGET18, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 19, 15), BASIS_RPART_BIG_TARGET19, precision);
-  ASSERT_NEAR(b.rPartScalar(r, 20,  5), BASIS_RPART_BIG_TARGET20, precision);
+    TEST_RPART(BASIS_RPART_2CT_00_TARGET, BASIS_RPART_2CT_00_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_01_TARGET, BASIS_RPART_2CT_01_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_02_TARGET, BASIS_RPART_2CT_02_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_03_TARGET, BASIS_RPART_2CT_03_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_04_TARGET, BASIS_RPART_2CT_04_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_05_TARGET, BASIS_RPART_2CT_05_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_06_TARGET, BASIS_RPART_2CT_06_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_07_TARGET, BASIS_RPART_2CT_07_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_08_TARGET, BASIS_RPART_2CT_08_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_09_TARGET, BASIS_RPART_2CT_09_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_10_TARGET, BASIS_RPART_2CT_10_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_11_TARGET, BASIS_RPART_2CT_11_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_12_TARGET, BASIS_RPART_2CT_12_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_13_TARGET, BASIS_RPART_2CT_13_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_14_TARGET, BASIS_RPART_2CT_14_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_15_TARGET, BASIS_RPART_2CT_15_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_16_TARGET, BASIS_RPART_2CT_16_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_17_TARGET, BASIS_RPART_2CT_17_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_18_TARGET, BASIS_RPART_2CT_18_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_19_TARGET, BASIS_RPART_2CT_19_ARG0);
+    TEST_RPART(BASIS_RPART_2CT_20_TARGET, BASIS_RPART_2CT_20_ARG0);
+  }
+#endif
 }
 
 //==============================================================================
@@ -539,7 +541,7 @@ TEST(Basis, calcWDN)
   // basis.calcWDN();
   // arma::mat rho(NEUTRON)HO = basis.S * state.rho(NEUTRON) * basis.S.t();
   // arma::mat rho(NEUTRON)HF = state.HOtoHFn * rho(NEUTRON)HO * state.HOtoHFn.t();
-  // arma::vec ui2b = arma::sort(state.vecOcn, "descend");
+  // arma::vec ui2b = arma::sort(state.occupation(NEUTRON), "descend");
   // arma::vec ui2 = arma::sort(arma::diagvec(rho(NEUTRON)HF), "descend");
   // ASSERT_NEAR(arma::norm(ui2 - ui2b, "inf"), 0., 1.0e-07);
   // arma::mat kappanHO = basis.S * state.kappan * basis.S.t();
@@ -554,35 +556,93 @@ TEST(Basis, calcWDN)
 
 TEST(Basis, calcHharmo2ct)
 {
-  // Test the calculation of the "harmonic 2-center potential" matrix elements for a cylindrical 2-center basis.
-  Basis basis("examples/42Ca_deformed_2x9.msg.gz");
-  basis.calcHharmo2ct();
+#define TEST_IRECOUV(T, A) { IVEC arg; INT nz = arg(0); INT nzp = arg(1); INT d = arg(2); INT dp = arg(3); ASSERT_NEAR(state.basis.Recouv(nz * 2 + d, nzp * 2 + dp), T, err);}
 
-  ASSERT_NEAR(basis.Recouv( 0 +  9 * 2, 0 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET00, 1e-14);
-  ASSERT_NEAR(basis.Recouv( 0 +  9 * 2, 1 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET01, 1e-14);
-  ASSERT_NEAR(basis.Recouv( 1 +  9 * 2, 0 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET02, 1e-14);
-  ASSERT_NEAR(basis.Recouv( 1 +  9 * 2, 1 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET03, 1e-14);
-  ASSERT_NEAR(basis.Recouvz(0 + 11 * 2, 0 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET04, 1e-14);
-  ASSERT_NEAR(basis.Recouvz(0 + 11 * 2, 1 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET05, 1e-13);
-  ASSERT_NEAR(basis.Recouvz(1 + 11 * 2, 0 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET06, 1e-13);
-  ASSERT_NEAR(basis.Recouvz(1 + 11 * 2, 1 + 10 * 2), BASIS_CALCHHARMO2CT_TARGET07, 1e-14);
+#ifdef BASIS_IRECOUV_1CT
+  {
+    double err = 1e-15;
 
-  // (2, 0, 5, 0, 0) x (2, 0, 3, 0, 0)
-  ASSERT_NEAR(basis.H(2)(5 + 0 * basis.n_zMax(2), 3 + 0 * basis.n_zMax(2)), BASIS_CALCHHARMO2CT_TARGET08, 1e-14);
-  // (2, 0, 5, 0, 0) x (2, 0, 3, 1, 0)
-  ASSERT_NEAR(basis.H(2)(5 + 0 * basis.n_zMax(2), 3 + 1 * basis.n_zMax(2)), BASIS_CALCHHARMO2CT_TARGET09, 1e-14);
-  // (2, 0, 5, 1, 0) x (2, 0, 3, 0, 0)
-  ASSERT_NEAR(basis.H(2)(5 + 1 * basis.n_zMax(2), 3 + 0 * basis.n_zMax(2)), BASIS_CALCHHARMO2CT_TARGET10, 1e-14);
-  // (2, 0, 5, 1, 0) x (2, 0, 3, 1, 0)
-  ASSERT_NEAR(basis.H(2)(5 + 1 * basis.n_zMax(2), 3 + 1 * basis.n_zMax(2)), BASIS_CALCHHARMO2CT_TARGET11, 1e-14);
-  // (3, 0, 3, 0, 0) x (3, 0, 1, 0, 0)
-  ASSERT_NEAR(basis.H(3)(3 + 0 * basis.n_zMax(3), 1 + 0 * basis.n_zMax(3)), BASIS_CALCHHARMO2CT_TARGET12, 1e-14);
-  // (3, 0, 3, 0, 0) x (3, 0, 1, 1, 0)
-  ASSERT_NEAR(basis.H(3)(3 + 0 * basis.n_zMax(3), 1 + 1 * basis.n_zMax(3)), BASIS_CALCHHARMO2CT_TARGET13, 1e-13);
-  // (3, 0, 3, 1, 0) x (3, 0, 1, 0, 0)
-  ASSERT_NEAR(basis.H(3)(3 + 1 * basis.n_zMax(3), 1 + 0 * basis.n_zMax(3)), BASIS_CALCHHARMO2CT_TARGET14, 1e-13);
-  // (3, 0, 3, 1, 0) x (3, 0, 1, 1, 0)
-  ASSERT_NEAR(basis.H(3)(3 + 1 * basis.n_zMax(3), 1 + 1 * basis.n_zMax(3)), BASIS_CALCHHARMO2CT_TARGET15, 1e-14);
+    State state(BASIS_IRECOUV_1CT_STATE);
+    state.basis.calcHharmo2ct();
+
+    TEST_IRECOUV(BASIS_IRECOUV_1CT_00_TARGET, BASIS_IRECOUV_1CT_00_ARG0);
+    TEST_IRECOUV(BASIS_IRECOUV_1CT_01_TARGET, BASIS_IRECOUV_1CT_01_ARG0);
+    TEST_IRECOUV(BASIS_IRECOUV_1CT_02_TARGET, BASIS_IRECOUV_1CT_02_ARG0);
+    TEST_IRECOUV(BASIS_IRECOUV_1CT_03_TARGET, BASIS_IRECOUV_1CT_03_ARG0);
+  }
+#endif
+
+#ifdef BASIS_IRECOUV_2CT
+  {
+    double err = 1e-15;
+
+    State state(BASIS_IRECOUV_2CT_STATE);
+    state.basis.calcHharmo2ct();
+
+    TEST_IRECOUV(BASIS_IRECOUV_2CT_00_TARGET, BASIS_IRECOUV_2CT_00_ARG0);
+    TEST_IRECOUV(BASIS_IRECOUV_2CT_01_TARGET, BASIS_IRECOUV_2CT_01_ARG0);
+    TEST_IRECOUV(BASIS_IRECOUV_2CT_02_TARGET, BASIS_IRECOUV_2CT_02_ARG0);
+    TEST_IRECOUV(BASIS_IRECOUV_2CT_03_TARGET, BASIS_IRECOUV_2CT_03_ARG0);
+  }
+#endif
+
+#define TEST_IZRECOUV(T, A) { IVEC arg; INT nz = arg(0); INT nzp = arg(1); INT d = arg(2); INT dp = arg(3); ASSERT_NEAR(state.basis.Recouvz(nz * 2 + d, nzp * 2 + dp), T, err);}
+
+#ifdef BASIS_IZRECOUV_1CT
+  {
+    double err = 1e-15;
+
+    State state(BASIS_IZRECOUV_1CT_STATE);
+    state.basis.calcHharmo2ct();
+
+    TEST_IZRECOUV(BASIS_IZRECOUV_1CT_00_TARGET, BASIS_IZRECOUV_1CT_00_ARG0);
+    TEST_IZRECOUV(BASIS_IZRECOUV_1CT_01_TARGET, BASIS_IZRECOUV_1CT_01_ARG0);
+    TEST_IZRECOUV(BASIS_IZRECOUV_1CT_02_TARGET, BASIS_IZRECOUV_1CT_02_ARG0);
+    TEST_IZRECOUV(BASIS_IZRECOUV_1CT_03_TARGET, BASIS_IZRECOUV_1CT_03_ARG0);
+  }
+#endif
+
+#ifdef BASIS_IZRECOUV_2CT
+  {
+    double err = 1e-15;
+
+    State state(BASIS_IZRECOUV_2CT_STATE);
+    state.basis.calcHharmo2ct();
+
+    TEST_IZRECOUV(BASIS_IZRECOUV_2CT_00_TARGET, BASIS_IZRECOUV_2CT_00_ARG0);
+    TEST_IZRECOUV(BASIS_IZRECOUV_2CT_01_TARGET, BASIS_IZRECOUV_2CT_01_ARG0);
+    TEST_IZRECOUV(BASIS_IZRECOUV_2CT_02_TARGET, BASIS_IZRECOUV_2CT_02_ARG0);
+    TEST_IZRECOUV(BASIS_IZRECOUV_2CT_03_TARGET, BASIS_IZRECOUV_2CT_03_ARG0);
+  }
+#endif
+
+#define TEST_HCYL(T, A) \
+  { \
+    IVEC arg;\
+    INT m = arg(0);\
+    INT n = arg(1);\
+    INT nz = arg(2);\
+    INT nzp = arg(3);\
+    INT d = arg(4);\
+    INT dp = arg(5);\
+    ASSERT_NEAR(state.basis.H(m)(d * state.basis.n_zMax(m, n) + nz,\
+                                 dp * state.basis.n_zMax(m, n) + nzp),\
+                                 T, err);\
+  }
+
+#ifdef BASIS_HCYL_1CT
+  {
+    double err = 1e-15;
+
+    State state(BASIS_HCYL_1CT_STATE);
+    state.basis.calcHharmo2ct();
+
+    TEST_HCYL(BASIS_HCYL_1CT_00_TARGET, BASIS_HCYL_1CT_00_ARG0);
+    TEST_HCYL(BASIS_HCYL_1CT_01_TARGET, BASIS_HCYL_1CT_01_ARG0);
+    TEST_HCYL(BASIS_HCYL_1CT_02_TARGET, BASIS_HCYL_1CT_02_ARG0);
+    TEST_HCYL(BASIS_HCYL_1CT_03_TARGET, BASIS_HCYL_1CT_03_ARG0);
+  }
+#endif
 }
 
 //==============================================================================
@@ -644,17 +704,37 @@ TEST(Basis, getOverlapMatrixHOZ)
     }
   }
 
-  b1 = Basis("examples/42Ca_deformed_2x9.msg.gz");
-  b2 = Basis("examples/42Ca_deformed_1x11.msg.gz");
-  ASSERT_NEAR(b1.getOverlapMatrixHOZ(b2)(b1.QNn_zMaxd.find({3, 0}), b2.QNn_zMaxd.find({0, 0})), BASIS_GETOVERLAPMATRIXHOZ_TARGET00, 1e-12);
+#define TEST_OVERLAPZ(T, A) \
+  { \
+    IVEC arg;\
+    INT nz = arg(0);\
+    INT nzp = arg(1);\
+    INT d = arg(2);\
+    INT dp = arg(3);\
+    ASSERT_NEAR(b1.getOverlapMatrixHOZ(b2)(b1.QNn_zMaxd.find({nz, d}), b2.QNn_zMaxd.find({nzp, dp})), T, 1e-12);\
+  }
 
-  b1 = Basis("examples/42Ca_deformed_2x9.msg.gz");
-  b2 = Basis("examples/42Ca_deformed_2x9.msg.gz");
-  ASSERT_NEAR(b1.getOverlapMatrixHOZ(b2)(b1.QNn_zMaxd.find({3, 0}), b2.QNn_zMaxd.find({5, 1})), BASIS_GETOVERLAPMATRIXHOZ_TARGET01, 1e-12);
+#ifdef BASIS_OVERLAPZ_12
+  {
+    State stateA(BASIS_OVERLAPZ_12_A_STATE);
+    State stateB(BASIS_OVERLAPZ_12_B_STATE);
+    auto b1 = stateA.basis;
+    auto b2 = stateB.basis;
 
-  b1 = Basis("examples/42Ca_deformed_1x11.msg.gz");
-  b2 = Basis("examples/42Ca_deformed_1x11.msg.gz");
-  ASSERT_NEAR(arma::norm(b1.getOverlapMatrixHOZ(b2) - arma::eye(b1.QNn_zMaxd.nb, b1.QNn_zMaxd.nb), "inf"), 0.0, 1e-12);
+    TEST_OVERLAPZ(BASIS_OVERLAPZ_12_00_TARGET, BASIS_OVERLAPZ_12_00_ARG0);
+  }
+#endif
+
+#ifdef BASIS_OVERLAPZ_22
+  {
+    State stateA(BASIS_OVERLAPZ_22_A_STATE);
+    State stateB(BASIS_OVERLAPZ_22_B_STATE);
+    auto b1 = stateA.basis;
+    auto b2 = stateB.basis;
+
+    TEST_OVERLAPZ(BASIS_OVERLAPZ_22_00_TARGET, BASIS_OVERLAPZ_22_00_ARG0);
+  }
+#endif
 }
 
 //==============================================================================
@@ -701,24 +781,74 @@ TEST(Basis, getOverlapMatrixHOR)
     }
   }
 
-  b1 = Basis("examples/42Ca_deformed_1x11.msg.gz");
-  b2 = Basis("examples/42Ca_deformed_2x9.msg.gz");
-  ASSERT_NEAR(b1.getOverlapMatrixHOR(b2)(b1.QNmn.find({2, 2}), b2.QNmn.find({2, 1})), BASIS_GETOVERLAPMATRIXHOR_TARGET00, 1e-14);
-  ASSERT_NEAR(b1.getOverlapMatrixHOR(b2)(b1.QNmn.find({2, 1}), b2.QNmn.find({2, 2})), BASIS_GETOVERLAPMATRIXHOR_TARGET01, 1e-14);
+#define TEST_OVERLAPR(T, A) \
+  { \
+    IVEC arg;\
+    INT nz = arg(0);\
+    INT nzp = arg(1);\
+    INT d = arg(2);\
+    INT dp = arg(3);\
+    ASSERT_NEAR(b1.getOverlapMatrixHOR(b2)(b1.QNmn.find({m, n}), b2.QNn_zMaxd.find({mp, np})), T, 1e-12);\
+  }
+
+#ifdef BASIS_OVERLAPR_12
+  {
+    State stateA(BASIS_OVERLAPR_12_A_STATE);
+    State stateB(BASIS_OVERLAPR_12_B_STATE);
+    auto b1 = stateA.basis;
+    auto b2 = stateB.basis;
+
+    TEST_OVERLAPZ(BASIS_OVERLAPR_12_00_TARGET, BASIS_OVERLAPR_12_00_ARG0);
+  }
+#endif
+
+#ifdef BASIS_OVERLAPR_2X
+  {
+    State stateA(BASIS_OVERLAPR_2X_A_STATE);
+    State stateB(BASIS_OVERLAPR_2X_B_STATE);
+    auto b1 = stateA.basis;
+    auto b2 = stateB.basis;
+
+    TEST_OVERLAPZ(BASIS_OVERLAPR_2X_00_TARGET, BASIS_OVERLAPR_2X_00_ARG0);
+  }
+#endif
 }
 
 //==============================================================================
 
 TEST(Basis, calcTab)
 {
-  Basis basis("examples/42Ca_deformed_2x9.msg.gz");
-  basis.calcTab();
-  ASSERT_NEAR(basis.Tab(5, 3),           BASIS_CALCTAB_TARGET00, 1e-12);
-  ASSERT_NEAR(basis.Tab(3, 5),           BASIS_CALCTAB_TARGET01, 1e-12);
-  ASSERT_NEAR(basis.Tab(2, 7),           BASIS_CALCTAB_TARGET02, 1e-12);
-  ASSERT_NEAR(basis.Tab(7, 2),           BASIS_CALCTAB_TARGET03, 1e-12);
-  ASSERT_NEAR(basis.tabzd(10, 10, 0, 1), BASIS_CALCTAB_TARGET04, 1e-12);
-  ASSERT_NEAR(basis.tabzd( 9, 10, 0, 1), BASIS_CALCTAB_TARGET05, 1e-12);
+#define TEST_Z0RECOUV(T, A) { IVEC arg; INT nz = arg(0); INT nzp = arg(1); INT d = arg(2); INT dp = arg(3); ASSERT_NEAR(state.basis.tabzd(nz, nzp, d, dp), T, err);}
+
+#ifdef BASIS_Z0RECOUV_1CT
+  {
+    double err = 1e-15;
+
+    State state(BASIS_Z0RECOUV_1CT_STATE);
+
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_1CT_00_TARGET, BASIS_Z0RECOUV_1CT_00_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_1CT_01_TARGET, BASIS_Z0RECOUV_1CT_01_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_1CT_02_TARGET, BASIS_Z0RECOUV_1CT_02_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_1CT_03_TARGET, BASIS_Z0RECOUV_1CT_03_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_1CT_04_TARGET, BASIS_Z0RECOUV_1CT_04_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_1CT_05_TARGET, BASIS_Z0RECOUV_1CT_05_ARG0);
+  }
+#endif
+
+#ifdef BASIS_Z0RECOUV_2CT
+  {
+    double err = 1e-15;
+
+    State state(BASIS_Z0RECOUV_2CT_STATE);
+
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_2CT_00_TARGET, BASIS_Z0RECOUV_2CT_00_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_2CT_01_TARGET, BASIS_Z0RECOUV_2CT_01_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_2CT_02_TARGET, BASIS_Z0RECOUV_2CT_02_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_2CT_03_TARGET, BASIS_Z0RECOUV_2CT_03_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_2CT_04_TARGET, BASIS_Z0RECOUV_2CT_04_ARG0);
+    TEST_Z0RECOUV(BASIS_Z0RECOUV_2CT_05_TARGET, BASIS_Z0RECOUV_2CT_05_ARG0);
+  }
+#endif
 }
 
 //==============================================================================
@@ -889,37 +1019,81 @@ TEST(Basis, getBasisDistance)
 
 TEST(Basis, calcTalmanz)
 {
+#define TEST_TALMANZ(T, A) { IVEC arg; INT nz = arg(0); INT nzp = arg(1); INT d = arg(2); INT dp = arg(3); INT nzc = arg(4); ASSERT_NEAR(state.basis.talmanz(nz, nzp, d, dp)(nzc), T, err);}
+
+#ifdef BASIS_TALMANZ_1CT
+  {
+    double err = 1e-9;
+
+    State state(BASIS_TALMANZ_1CT_STATE);
+    state.basis.calcTalmanz();
+
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_00_TARGET, BASIS_TALMANZ_1CT_00_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_01_TARGET, BASIS_TALMANZ_1CT_01_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_02_TARGET, BASIS_TALMANZ_1CT_02_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_03_TARGET, BASIS_TALMANZ_1CT_03_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_04_TARGET, BASIS_TALMANZ_1CT_04_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_05_TARGET, BASIS_TALMANZ_1CT_05_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_06_TARGET, BASIS_TALMANZ_1CT_06_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_07_TARGET, BASIS_TALMANZ_1CT_07_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_08_TARGET, BASIS_TALMANZ_1CT_08_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_09_TARGET, BASIS_TALMANZ_1CT_09_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_10_TARGET, BASIS_TALMANZ_1CT_10_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_11_TARGET, BASIS_TALMANZ_1CT_11_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_12_TARGET, BASIS_TALMANZ_1CT_12_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_13_TARGET, BASIS_TALMANZ_1CT_13_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_14_TARGET, BASIS_TALMANZ_1CT_14_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_15_TARGET, BASIS_TALMANZ_1CT_15_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_16_TARGET, BASIS_TALMANZ_1CT_16_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_17_TARGET, BASIS_TALMANZ_1CT_17_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_18_TARGET, BASIS_TALMANZ_1CT_18_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_19_TARGET, BASIS_TALMANZ_1CT_19_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_20_TARGET, BASIS_TALMANZ_1CT_20_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_21_TARGET, BASIS_TALMANZ_1CT_21_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_22_TARGET, BASIS_TALMANZ_1CT_22_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_1CT_23_TARGET, BASIS_TALMANZ_1CT_23_ARG0);
+  }
+#endif
+
+#ifdef BASIS_TALMANZ_2CT
+  {
+    double err = 1e-9;
+
+    State state(BASIS_TALMANZ_2CT_STATE);
+    state.basis.calcTalmanz();
+
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_00_TARGET, BASIS_TALMANZ_2CT_00_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_01_TARGET, BASIS_TALMANZ_2CT_01_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_02_TARGET, BASIS_TALMANZ_2CT_02_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_03_TARGET, BASIS_TALMANZ_2CT_03_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_04_TARGET, BASIS_TALMANZ_2CT_04_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_05_TARGET, BASIS_TALMANZ_2CT_05_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_06_TARGET, BASIS_TALMANZ_2CT_06_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_07_TARGET, BASIS_TALMANZ_2CT_07_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_08_TARGET, BASIS_TALMANZ_2CT_08_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_09_TARGET, BASIS_TALMANZ_2CT_09_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_10_TARGET, BASIS_TALMANZ_2CT_10_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_11_TARGET, BASIS_TALMANZ_2CT_11_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_12_TARGET, BASIS_TALMANZ_2CT_12_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_13_TARGET, BASIS_TALMANZ_2CT_13_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_14_TARGET, BASIS_TALMANZ_2CT_14_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_15_TARGET, BASIS_TALMANZ_2CT_15_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_16_TARGET, BASIS_TALMANZ_2CT_16_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_17_TARGET, BASIS_TALMANZ_2CT_17_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_18_TARGET, BASIS_TALMANZ_2CT_18_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_19_TARGET, BASIS_TALMANZ_2CT_19_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_20_TARGET, BASIS_TALMANZ_2CT_20_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_21_TARGET, BASIS_TALMANZ_2CT_21_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_22_TARGET, BASIS_TALMANZ_2CT_22_ARG0);
+    TEST_TALMANZ(BASIS_TALMANZ_2CT_23_TARGET, BASIS_TALMANZ_2CT_23_ARG0);
+  }
+#endif
+
   {
     // 1ct state
     Basis basis(0.0, 5.3, 5.2, 20, 24, 1.0);
     basis.calcTalmanz();
 
-    double precision = 1e-9;
-
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 0), BASIS_CALCTALMANZ_TARGET00, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 1), BASIS_CALCTALMANZ_TARGET01, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 2), BASIS_CALCTALMANZ_TARGET02, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 3), BASIS_CALCTALMANZ_TARGET03, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 4), BASIS_CALCTALMANZ_TARGET04, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 5), BASIS_CALCTALMANZ_TARGET05, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 6), BASIS_CALCTALMANZ_TARGET06, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 7), BASIS_CALCTALMANZ_TARGET07, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 8), BASIS_CALCTALMANZ_TARGET08, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)( 9), BASIS_CALCTALMANZ_TARGET09, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(10), BASIS_CALCTALMANZ_TARGET10, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(11), BASIS_CALCTALMANZ_TARGET11, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(12), BASIS_CALCTALMANZ_TARGET12, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(13), BASIS_CALCTALMANZ_TARGET13, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(14), BASIS_CALCTALMANZ_TARGET14, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(15), BASIS_CALCTALMANZ_TARGET15, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(16), BASIS_CALCTALMANZ_TARGET16, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(17), BASIS_CALCTALMANZ_TARGET17, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(18), BASIS_CALCTALMANZ_TARGET18, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(19), BASIS_CALCTALMANZ_TARGET19, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(20), BASIS_CALCTALMANZ_TARGET20, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(21), BASIS_CALCTALMANZ_TARGET21, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(22), BASIS_CALCTALMANZ_TARGET22, precision);
-    ASSERT_NEAR(basis.talmanz(11, 0, 11, 0)(23), BASIS_CALCTALMANZ_TARGET23, precision);
     double z = 4.1;
 
     for (INT n_za = 0; n_za < basis.n_zGlobalMax + 1; n_za++)
@@ -951,26 +1125,6 @@ TEST(Basis, calcTalmanz)
     // 2ct state
     Basis basis(12.0, 5.3, 5.2, 20, 24, 1.1);
     basis.calcTalmanz();
-
-    double precision = 1e-10;
-
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 0), BASIS_CALCTALMANZ_TARGET24, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 1), BASIS_CALCTALMANZ_TARGET25, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 2), BASIS_CALCTALMANZ_TARGET26, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 3), BASIS_CALCTALMANZ_TARGET27, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 4), BASIS_CALCTALMANZ_TARGET28, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 5), BASIS_CALCTALMANZ_TARGET29, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 6), BASIS_CALCTALMANZ_TARGET30, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 7), BASIS_CALCTALMANZ_TARGET31, precision);
-
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 3), BASIS_CALCTALMANZ_TARGET32, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 1)( 3), BASIS_CALCTALMANZ_TARGET33, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 0)( 3), BASIS_CALCTALMANZ_TARGET34, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 0, 8, 1)( 3), BASIS_CALCTALMANZ_TARGET35, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 1, 8, 0)( 3), BASIS_CALCTALMANZ_TARGET36, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 1, 8, 1)( 3), BASIS_CALCTALMANZ_TARGET37, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 1, 8, 0)( 3), BASIS_CALCTALMANZ_TARGET38, precision);
-    ASSERT_NEAR(basis.talmanz( 9, 1, 8, 1)( 3), BASIS_CALCTALMANZ_TARGET39, precision);
 
     double z = 4.1;
 

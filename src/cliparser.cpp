@@ -58,8 +58,9 @@ CliParser::CliParser(INT argc, char **argv)
     {
       if      (arg == "-h" || arg == "--help")  help();
       else if (arg == "-o")                     readSaveTo = true;
-      else if (arg == "-f" || arg == "--force") forceInvalidDataTree = true;
+      else if (arg == "-f" || arg == "--force") forceValidDataTree = true;
       else if (arg == "-g" || arg == "--bokeh") useBokeh = true;
+      else if (arg == "-c" || arg == "--clean") cleanDataTree = true;
 
       else if (arg == "--list-keys") printKeys();
       else if (arg == "--list-interactions") printInteractions();
@@ -120,6 +121,7 @@ void CliParser::help(void)
   std::cout << "  -o FILE.msg.gz       save the DataTree in FILE.msg.gz" << std::endl;
   std::cout << "  -f, --force          force the loading of an invalid DataTree" << std::endl;
   std::cout << "  -g, --bokeh          enable bokeh plots" << std::endl;
+  std::cout << "  -c, --clean          clean the dataTree" << std::endl;
   std::cout << std::endl;
   std::cout << "  -v[0...6]    verbosity level (default 1)" << std::endl;
   std::cout << "  -t[0...2]    style of the printed tables" << std::endl;
@@ -149,7 +151,7 @@ void CliParser::help(void)
 
 void CliParser::printInteractions(void)
 {
-  INFO("Possible interactions: D1S, D1M, D1N, D3G3, D12S, D2, DG. Add 'X' for exact Coulomb (for example 'D1S' -> 'D1SX').");
+  std::cout << "Possible interactions: D1S, D1M, D1N, D3G3, D12S, D2, DG. Add 'X' for exact Coulomb (for example 'D1S' -> 'D1SX')." << std::endl;
 
   Tools::end(0);
 }
@@ -186,17 +188,19 @@ void CliParser::printKeys(void)
     {"MC", "Multi Cube" },
   };
 
-  for (auto &o : general.globalValidKeys)
+  for (auto &o : DataTree::globalValidKeys)
   {
     table +=
       TABLE_NORM  + o.key                + TABLE_TD
-    + TABLE_GREEN + o.description        + TABLE_TD
+// TODO: make this work
+//    + TABLE_GREEN + Tools::wrap(o.description, 40) + TABLE_TD
+    + TABLE_GREEN + o.description + TABLE_TD
     + TABLE_BLUE  + o.defaultValue + " " + TABLE_TD
     + TABLE_NORM  + fullTypeName[o.type] + TABLE_TD + TABLE_TR;
   }
 
   Tools::info(Tools::printTable(table));
-  Tools::info("* " + PF_BLUE("state/") + " keys change from one HFB iteration to another");
+  // IMPORTANT: "state/* values are supposed to store results. They WILL be overwritten if a state is saved.
 
   Tools::end(0);
 }

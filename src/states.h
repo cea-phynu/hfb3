@@ -31,6 +31,20 @@
 //============================================================================
 //============================================================================
 
+/** \brief Identification of a state.
+ */
+
+struct StateId
+{
+  INT index;
+  INT omega;
+  INT isospin;
+};
+
+//============================================================================
+//============================================================================
+//============================================================================
+
 /** \brief Store one individual state.
  */
 
@@ -39,7 +53,7 @@ struct IndivState
   INT index;
   double energy;
   double occupation;
-  std::string label;
+  StateId stateId;
 };
 
 //============================================================================
@@ -54,15 +68,21 @@ struct IndivState
 class States : public Generic
 {
 public :
-  States(const std::string _title = "");                               // #TEST#
-  void sort(void);                                                     // #TEST#
-  void add(INT _index,                                                 // #TEST#
+  States(const std::string _title = " ");
+  void sort(const std::string& type = "energy");
+  void add(INT _index,
            double _energy,
            double _occupation,
-           const std::string &_label);
-  const std::string info(INT id = -2, INT nbShown = 25, bool = false) const;         // #TEST#
-  void clear(void);                                                    // #TEST#
-  const IVEC getFirstEmptyStates(INT nbStates = 1) const;        // #TEST#
+           StateId _stateId);
+  const std::string info(StateId _stateId, bool = false) const;
+  const std::string info(INT nbShown = 25, bool onlyOccupiedStates = false) const;
+  void clear(void);
+  const std::list<StateId> getFirstEmptyStates(INT nbStates = 1);
+  VEC getEnergy(void) const;
+  IVEC getIndex(void) const;
+  VEC getOccupation(void) const;
+  UINT findState(const StateId &) const;
+  bool empty(void) const;
 
   //============================================================================
   //============================================================================
@@ -84,6 +104,9 @@ extern bool operator==(const States &, const States &);
 extern bool operator==(const IndivState &, const IndivState &);
 extern bool operator!=(const States &, const States &);
 extern bool operator!=(const IndivState &, const IndivState &);
+extern bool operator<(const StateId &, const StateId &);
+extern bool operator==(const StateId &, const StateId &);
+extern bool operator!=(const StateId &, const StateId &);
 
 #endif // STATES_H
 

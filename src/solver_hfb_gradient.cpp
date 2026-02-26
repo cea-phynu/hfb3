@@ -29,19 +29,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > SolverHFBGradient::validKeys =
-  {
-    { "solver/gradient/cvgTarget"      , "Convergence target value"                                       , "1e-1", "D" },
-    { "solver/gradient/maxIter"        , "Maximum number of iterations"                                   , "50"  , "I" },
-    { "solver/gradient/cvgTargetLambda", "Convergence target value for lambda-iterations"                 , "1e-5", "D" },
-    { "solver/gradient/maxIterLambda"  , "Maximum number of iterations for lambda-iterations"             , "10"  , "I" },
-    { "solver/gradient/randomSeed"     , "Seed used for the generation of initial random U and V matrices", "1337", "I" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** The constructor from a filename.
  */
 
@@ -75,7 +62,7 @@ SolverHFBGradient::SolverHFBGradient(const DataTree &dataTree) : SolverHFBGradie
 
 SolverHFBGradient::SolverHFBGradient(const DataTree &dataTree, State _state) : Solver(dataTree, _state),
   interaction(dataTree, &state),
-  discrete(state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0,  101, 1, 151)),
+  discrete(state.basis, Mesh::regular(-10.0, 0.0, -15.0, 10.0, 0.0, 15.0,  81, 1, 151)),
   multipoleOperators(state)
 {
   DBG_ENTER;
@@ -90,6 +77,12 @@ SolverHFBGradient::SolverHFBGradient(const DataTree &dataTree, State _state) : S
   dataTree.get(randomSeed,      "solver/gradient/randomSeed",      true);
 
   Tools::setSeed(randomSeed);
+
+  if (useBokeh)
+  {
+    Plot::clear("Ene HFB [MeV]");
+    Plot::clear("Convergence (log10)");
+  }
 
   DBG_LEAVE;
 }
@@ -107,15 +100,15 @@ void SolverHFBGradient::init()
 
   startTime = Tools::clock();
 
+  // Calculate the basis orthogonalization.
+  state.basis.calcWDN();
+
   nbIter = 0;
 
   if (maxIter < 1) maxIter = 1;
 
   // Chemical potentials (lagrange multipliers for the numbers of particles).
   mu = state.chemPot;
-
-  // Calculate the basis orthogonalization.
-  state.basis.calcWDN();
 
   // Initialize objects.
   if (!state.empty())
@@ -154,7 +147,7 @@ void SolverHFBGradient::init()
   }
 
   // Calculate the multipole moment operator matrices.
-  multipoleOperators.calcQl0Matrices();
+  multipoleOperators.calcQlmHO();
 
   // If a constraint on geometrical operators is active, calculates fragment properties at each HFB iteration.
   for (auto &c : state.constraints)
@@ -206,17 +199,13 @@ void SolverHFBGradient::init()
   // Tools::mesg("SolGra", "starting HFB iterations (Gradient method)");
   // Tools::mesg("SolGra", info(false));
 
-  if (state.eneQP(NEUTRON).n_elem == 0)
-  {
-    state.eneQP(NEUTRON).ones(state.basis.HOqn.nb);
-    state.eneQP(PROTON ).ones(state.basis.HOqn.nb);
-  }
-
   G(0) = arma::zeros(state.basis.ORqn.nb, state.basis.ORqn.nb);
   G(1) = arma::zeros(state.basis.ORqn.nb, state.basis.ORqn.nb);
 
   mu = arma::vec{.0, 0.};
   nu = arma::vec{.001, .001};
+
+  // Tools::mesg("SolGra", info());
 
   DBG_LEAVE;
 }
@@ -250,13 +239,13 @@ bool SolverHFBGradient::nextIter()
   state.kappa(NEUTRON) = kappa(NEUTRON);
   state.kappa(PROTON ) = kappa(PROTON);
 
-  value = (arma::norm(G(0), "inf") + arma::norm(G(1), "inf")) / arma::sum(nu);
+  convergence = (arma::norm(G(0), "inf") + arma::norm(G(1), "inf")) / arma::sum(nu);
 
   // adjusting mu and nu
   for (INT iso: {NEUTRON, PROTON})
   {
     double    emin, emax;
-    arma::vec indivEne = state.eneQP(iso);
+    arma::vec indivEne = state.qpStates(iso).getEnergy();
     emin          = 2. * arma::min(arma::abs(indivEne));
     emax          = 4. * arma::max(arma::abs(indivEne));
     nu(iso)       = std::pow(2. / (std::sqrt(emin) + std::sqrt(emax)), 2);
@@ -271,7 +260,7 @@ bool SolverHFBGradient::nextIter()
   state.kappa(NEUTRON) = kappa(NEUTRON);
   state.kappa(PROTON ) = kappa(PROTON);
 
-  multipoleOperators.calcQlm(rho);
+  multipoleOperators.calcQlmObs(rho);
 
 
   if (fragInLoop)
@@ -284,7 +273,7 @@ bool SolverHFBGradient::nextIter()
     }
   }
 
-  ene = interaction.totalEnergy(NEUTRON) + interaction.totalEnergy(PROTON);
+  energy = interaction.totalEnergy(NEUTRON) + interaction.totalEnergy(PROTON);
 
   // double iterLength = Tools::clock() - startTime;
 
@@ -292,14 +281,25 @@ bool SolverHFBGradient::nextIter()
 
   // print iteration message
 
-  std::string eneStr = ((ene > -9999.999 ) && (ene < 0.0)) ? PF_GREEN("%9.3f", ene) : PF_RED("%9.2e", ene);
+  std::string cvgStr;
+  if      (convergence < 1e-4) cvgStr = PF_GREEN( "%8.2e", convergence);
+  else if (convergence < 1e-1) cvgStr = PF_YELLOW("%8.2e", convergence);
+  else                         cvgStr = PF_RED(   "%8.2e", convergence);
 
-  std::string lambdaIterStr = (lambdaIter < maxIterLambda) ? PF("#%2d", lambdaIter) :
-                                                             PF_RED("#%2d", lambdaIter);
+  std::string eneStr;
+  if      (energy > 0.0)     eneStr = PF_RED(   "%9.2e", energy);
+  else if (energy < -9999.0) eneStr = PF_RED(   "%9.2e", energy);
+  else if (energy < -100.0)  eneStr = PF_GREEN( "%9.3f", energy);
+  else                       eneStr = PF_YELLOW("%9.3f", energy);
+
+  std::string lambdaIterStr;
+  if      (lambdaIter < 3)             lambdaIterStr = PF_GREEN( "#%2d", lambdaIter);
+  else if (lambdaIter < maxIterLambda) lambdaIterStr = PF_YELLOW("#%2d", lambdaIter);
+  else                                 lambdaIterStr = PF_RED(   "#%2d", lambdaIter);
 
   Tools::mesg("SolGra",
-              PF("#it: %03d ", nbIter) +
-              PF("cvg: %8.2e ", value) +
+              getIterMesg() +
+              PF("cvg: ") + cvgStr + " " +
               PF("ene: ") + eneStr + " " +
               // PF("tot: %6.3fs (fld: %6.3fs)", iterLength, interaction.calcLength) + " " +
               PF("ln: %7.3f ", state.chemPot(NEUTRON)) +
@@ -316,10 +316,10 @@ bool SolverHFBGradient::nextIter()
   if (useBokeh)
   {
     Plot::slot(0);
-    Plot::curve("#iter", "Ene HFB [MeV]", nbIter, ene);
+    Plot::curve("#iter", "Ene [HFB [MeV]", nbIter + iterShift, energy);
 
     Plot::slot(1);
-    Plot::curve("#iter", "Convergence", nbIter, log10(value));
+    Plot::curve("#iter", "Convergence (log10)", nbIter + iterShift, log10(convergence));
 
     if (plotDensities)
     {
@@ -345,19 +345,19 @@ bool SolverHFBGradient::nextIter()
     status = Solver::MAXITER;
   }
 
-  if ((value < cvgTarget) && (nbIter > 1))
+  if ((convergence < cvgTarget) && (nbIter > 1))
   {
-    Tools::mesg("SolGra", "Target value reached, exiting HFB loop");
+    Tools::mesg("SolGra", "Convergence target value reached, exiting HFB loop");
     status = Solver::CONVERGED;
   }
 
-  if (fabs(value) > 1e20)
+  if (fabs(convergence) > 1e20)
   {
     Tools::mesg("SolGra", "Convergence is too high, exiting HFB loop");
     status = Solver::DIVERGED;
   }
 
-  if (fabs(ene) > 1e16)
+  if (fabs(energy) > 1e16)
   {
     Tools::mesg("SolGra", "Energy is too high, exiting HFB loop");
     status = Solver::DIVERGED;
@@ -370,19 +370,21 @@ bool SolverHFBGradient::nextIter()
     // Last HFB iteration
     finalize(G, 1.0);
 
-    state.vecOc(NEUTRON) = arma::diagvec(state.V(NEUTRON) * state.V(NEUTRON).t());
-    state.vecOc(PROTON ) = arma::diagvec(state.V(PROTON ) * state.V(PROTON ).t());
+    // state.occupation(NEUTRON) = arma::diagvec(state.V(NEUTRON) * state.V(NEUTRON).t());
+    // state.occupation(PROTON ) = arma::diagvec(state.V(PROTON ) * state.V(PROTON ).t());
 
-    bestEne = 0.0;
+    // TODO: store QP states
+
+    bestEnergy = 0.0;
 
     if (nbIter >= 0)
     {
-      if ((value <= cvgTarget) && (fabs(ene) < 1e6))
+      if ((convergence <= cvgTarget) && (fabs(energy) < 1e6))
       {
-        bestEne = ene;
+        bestEnergy = energy;
         status = Solver::CONVERGED;
         state.converged = true;
-        state.totalEnergy = bestEne;
+        state.totalEnergy = bestEnergy;
       }
     }
     state.nbIter = nbIter;
@@ -445,7 +447,7 @@ bool SolverHFBGradient::gradIter(Multi<arma::mat> oG, arma::vec m, arma::vec n)
 
     for (auto &c : state.constraints)
     {
-      lda(i + 2) = c.second.lambda;
+      lda(i + 2) = c.second.lagrangeMultiplier;
       i++;
     }
 
@@ -488,7 +490,7 @@ bool SolverHFBGradient::gradIter(Multi<arma::mat> oG, arma::vec m, arma::vec n)
 
   for (auto &c : state.constraints)
   {
-    c.second.lambda = lda(i + 2);
+    c.second.lagrangeMultiplier = lda(i + 2);
     i++;
   }
 
@@ -557,7 +559,7 @@ bool SolverHFBGradient::gradIter(Multi<arma::mat> oG, arma::vec m, arma::vec n)
 
     for (auto &c : state.constraints)
     {
-      c.second.lambda -= .5 * lda(i + 2) / (n(0) + n(1));
+      c.second.lagrangeMultiplier -= .5 * lda(i + 2) / (n(0) + n(1));
       i++;
     }
   }
@@ -654,6 +656,7 @@ Multi<arma::mat> SolverHFBGradient::getGradient()
 
   for (INT iso: {NEUTRON, PROTON})
   {
+    state.qpStates(iso).clear();
     for (INT omega = 0; omega < state.basis.mMax; omega++)
     {
       UVEC &idxHO = state.basis.omegaIndexHO(omega);
@@ -672,8 +675,7 @@ Multi<arma::mat> SolverHFBGradient::getGradient()
       arma::mat H20, H11;
       convFromSPtoQP(lh, ldelta, H11, H20, lU, lV);
 
-      G(iso)
-      (idxOR, idxOR) = H20;
+      G(iso) (idxOR, idxOR) = H20;
 
       H11 += lU.t() * lcons * lU - lV.t() * lcons * lV;
 
@@ -682,11 +684,13 @@ Multi<arma::mat> SolverHFBGradient::getGradient()
 
       Tools::eig_sym(eigVals, eigVecs, arma::symmatu(H11));
       ene(idxOR, UVEC{UINT(iso)}) = eigVals;
-    }
-  }
 
-  state.eneQP(NEUTRON) = ene.col(NEUTRON);
-  state.eneQP(PROTON ) = ene.col(PROTON);
+      for (INT i = 0; i < eigVals.n_elem; i++)
+      {
+        state.qpStates(iso).add(idxOR(i), eigVals(i), 0.0, {i, omega, iso});
+      }
+    } // omega
+  } // iso
 
   DBG_RETURN(G);
 }
@@ -825,11 +829,11 @@ arma::mat SolverHFBGradient::calcConstraints(UINT iso, UVEC &idxHO, arma::mat &M
     {
       if (c.second.itermax < 0 || nbIter < c.second.itermax)
       {
-        if (c.second.gender == Constraint::MM) e -= c.second.lambda * M.t() * multipoleOperators.ql0(c.second.lm)(idxHO, idxHO) * M;
+        if (c.second.gender == Constraint::MM) e -= c.second.lagrangeMultiplier * M.t() * multipoleOperators.qlmHO(c.second.lambda, c.second.mu)(idxHO, idxHO) * M;
 
         // if (c.second.gender == SD && fragments.izNeck != -1) e -= c.second.lambda * M.t() * fragments.sepdist0(0)(idxHO, idxHO) * M;
         // if (c.second.gender == MA && fragments.izNeck != -1) e -= c.second.lambda * M.t() * fragments.massasym0(0)(idxHO, idxHO) * M;
-        if (c.second.gender == Constraint::QN) e -= c.second.lambda * M.t() * geometricalOperators.qneck0(0)(idxHO, idxHO) * M;
+        if (c.second.gender == Constraint::QN) e -= c.second.lagrangeMultiplier * M.t() * geometricalOperators.qneck0(0)(idxHO, idxHO) * M;
       }
     }
   }
@@ -900,8 +904,6 @@ void SolverHFBGradient::calcConstraintsQP(Multi<arma::mat> &U, Multi<arma::mat> 
   UINT   size = 2 + state.constraints.size();     // 2 additional places for p and n number
 
   Multi<arma::mat> rho, kappa;
-  Multi<arma::vec> Eqp;
-  Eqp = state.eneQP;
 
   calcRhoKappa(U, V, rho, kappa);
 
@@ -962,12 +964,12 @@ void SolverHFBGradient::calcConstraintsQP(Multi<arma::mat> &U, Multi<arma::mat> 
 
           if (c.second.gender == Constraint::MM)
           {
-            F(i + 2, iso)(idxOR, idxOR) = U(iso)(idxOR, idxOR).t() * M.t() * multipoleOperators.ql0(c.second.lm)(idxHO, idxHO) *
+            F(i + 2, iso)(idxOR, idxOR) = U(iso)(idxOR, idxOR).t() * M.t() * multipoleOperators.qlmHO(c.second.lambda, c.second.mu)(idxHO, idxHO) *
                                           M * V(iso)(idxOR, idxOR) +
-                                          V(iso)(idxOR, idxOR).t() * M.t() * multipoleOperators.ql0(c.second.lm)(idxHO, idxHO) *
+                                          V(iso)(idxOR, idxOR).t() * M.t() * multipoleOperators.qlmHO(c.second.lambda, c.second.mu)(idxHO, idxHO) *
                                           M * U(iso)(idxOR, idxOR);
-            c.second.measuredVal += 2. * arma::trace(multipoleOperators.ql0(c.second.lm)(idxHO, idxHO) * rho(iso)(idxHO, idxHO).t());     // Constraint operator value at this stage
-            dF(i + 2) = c.second.measuredVal - c.second.val;     // Difference between constrain and actual value
+            c.second.measuredVal += 2. * arma::trace(multipoleOperators.qlmHO(c.second.lambda, c.second.mu)(idxHO, idxHO) * rho(iso)(idxHO, idxHO).t());     // Constraint operator value at this stage
+            dF(i + 2) = c.second.measuredVal - c.second.val;     // Difference between target and measured value
           }
 
           // if (c.second.gender == Constraint::SD)
@@ -1001,7 +1003,7 @@ void SolverHFBGradient::calcConstraintsQP(Multi<arma::mat> &U, Multi<arma::mat> 
                                             + V(iso)(idxOR, idxOR).t() * M.t() * geometricalOperators.qneck0(0)(idxHO, idxHO)
                                             * M * U(iso)(idxOR, idxOR);
               c.second.measuredVal += 2. * arma::trace(geometricalOperators.qneck0(0)(idxHO, idxHO) * rho(iso)(idxHO, idxHO).t());     // Constraint operator value at this stage
-              dF(i + 2) = c.second.measuredVal - c.second.val;     // Difference between constrain and actual value
+              dF(i + 2) = c.second.measuredVal - c.second.val;     // Difference between target and measured value
             }
             else
             {

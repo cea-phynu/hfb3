@@ -25,9 +25,33 @@
 
 #include "global.h"
 #include "generic.h"
-#include "datatree.h"
 #include "qnumbers.h"
 #include "multi.h"
+
+class DataTree;
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define BASIS_VALID_KEYS \
+{ "basis/d_0"         , "d_0 basis deformation parameter"                , "10.0", "D" }, \
+{ "basis/b_r"         , "b_r basis deformation parameter"                , "1.9" , "D" }, \
+{ "basis/b_z"         , "b_z basis deformation parameter"                , "1.9" , "D" }, \
+{ "basis/nOscil"      , "Number of major HO shells in the basis"         , "11"  , "I" }, \
+{ "basis/n_zMax"      , "Maximum value of n_z in the basis"              , "24"  , "I" }, \
+{ "basis/g_q"         , "g_q basis truncation parameter"                 , "1.0" , "D" }, \
+{ "state/basis/d_0"   , "Previous d_0 basis deformation parameter"       , ""    , "D" }, \
+{ "state/basis/b_r"   , "Previous b_r basis deformation parameter"       , ""    , "D" }, \
+{ "state/basis/b_z"   , "Previous b_z basis deformation parameter"       , ""    , "D" }, \
+{ "state/basis/nOscil", "Previous Number of major HO shells in the basis", ""    , "I" }, \
+{ "state/basis/n_zMax", "Previous Maximum value of n_z in the basis"     , ""    , "I" }, \
+{ "state/basis/g_q"   , "Previous g_q basis truncation parameter"        , ""    , "D" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
 
 /** \brief Cylindrical, one- or two-center basis.
  *
@@ -173,9 +197,6 @@ public :
   //============================================================================
   //============================================================================
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// The \f$d_0\f$ parameter.
   double d_0 = -1.0;
 
@@ -241,6 +262,12 @@ public :
 
   /// The indices of the omega blocks in the HO basis.
   Multi<UVEC> omegaIndexHO;
+
+  /// The rank in an omega block in the HO basis.
+  IVEC blockIdHO;
+
+  /// The rank in an omega block in the OR basis.
+  IVEC blockIdOR;
 
   /// The sizes of the m-blocks.
   UVEC mSize;

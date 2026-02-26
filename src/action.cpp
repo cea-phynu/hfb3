@@ -35,18 +35,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > Action::validKeys = {
-    { "action"                  , "Action to be performed (can be: 'hfb', 'ener', 'obs', 'ws')", "hfb"    , "S" },
-    { "action/jobName"          , "Name of the job"                                            , "unnamed", "S" },
-    { "action/saveResultFiles"  , "Save result files"                                          , "True"   , "B" },
-    { "action/nbBlockingTrials" , "Number of blocking trials by isospin value"                 , "4"      , "I" },
-    { "action/basisOptimization", "Optimize the basis deformation parameters"                  , "True"   , "B" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** \brief Constructor from a filename.
  */
 
@@ -68,12 +56,12 @@ Action::Action(const DataTree &_dataTree) : dataTree(_dataTree), state(_dataTree
 {
   DBG_ENTER;
 
-  // dataTree = DataTree::getDefault() + dataTree;
+  dataTree = DataTree::getDefault() + dataTree;
 
   dataTree.get(action           , "action"                  , true);
   dataTree.get(jobName          , "action/jobName"          , true);
   dataTree.get(saveResultFiles  , "action/saveResultFiles"  , true);
-  dataTree.get(nbBlockingTrials , "action/nbBlockingTrials" , true);
+  dataTree.get(nbBlockingTries  , "action/nbBlockingTries"  , true);
   dataTree.get(basisOptimization, "action/basisOptimization", true);
 
   DBG_LEAVE;
@@ -158,10 +146,6 @@ void Action::calcHFBquiet(void)
   while (solverAlternator.nextIter());
   state = solverAlternator.state;
 
-
-  // Merge the solution with the initial DataTree instance
-  dataTree = dataTree + state.getDataTree();
-
   DBG_LEAVE;
 }
 
@@ -200,35 +184,34 @@ void Action::calcHFBblocking(void)
   bool wantedNeutGiven = false;
   bool wantedProtGiven = false;
 
+  INT givenNeut = -1;
+  INT givenProt = -1;
+
+  Tools::mesg("ActBlo", PF_GREEN("Target system: " + System(state.sys.nProt, state.sys.nNeut).info()));
+
   if (!state.empty())
   {
     MultipoleOperators multipoleOperators(state);
 
-    double nNeut = multipoleOperators.nPart(NEUTRON);
-    double nProt = multipoleOperators.nPart(PROTON);
+    // INFO(multipoleOperators.getNiceInfo());
 
-    double closestEvenNeut = (INT)(nNeut / 2.0 + 0.5) * 2.0;
-    double closestEvenProt = (INT)(nProt / 2.0 + 0.5) * 2.0;
+    givenNeut = INT(multipoleOperators.nPart(NEUTRON) + 0.5);
+    givenProt = INT(multipoleOperators.nPart(PROTON ) + 0.5);
 
-    evenNeutGiven = fabs(double(nNeut) - closestEvenNeut) < 1e-5;
-    evenProtGiven = fabs(double(nProt) - closestEvenProt) < 1e-5;
-    wantedNeutGiven = fabs(double(nNeut) - double(state.sys.nNeut)) < 1e-5;
-    wantedProtGiven = fabs(double(nProt) - double(state.sys.nProt)) < 1e-5;
+    Tools::mesg("ActBlo", PF_GREEN("Given  system: " + System(givenProt, givenNeut).info()));
+
+    INT closestEvenNeut = givenNeut % 2 == 0 ? givenNeut : givenNeut - 1;
+    INT closestEvenProt = givenProt % 2 == 0 ? givenProt : givenProt - 1;
+
+    evenNeutGiven   = givenNeut == closestEvenNeut;
+    evenProtGiven   = givenProt == closestEvenProt;
+    wantedNeutGiven = givenNeut == state.sys.nNeut;
+    wantedProtGiven = givenProt == state.sys.nProt;
   }
 
   State startingState = state;
 
-  if (wantedNeutGiven && wantedProtGiven)
-  {
-    Tools::mesg("ActBlo", PF_GREEN("Same nuclear system given " + state.sys.info()));
-    Tools::mesg("ActBlo", PF("Generate the QP states by performing one HFB iteration"));
-
-    SolverHFBBroyden solverHFBBroyden(dataTree, state);
-    solverHFBBroyden.init();
-    solverHFBBroyden.nextIter();
-    startingState = solverHFBBroyden.state;
-  }
-  else
+  if ((!wantedNeutGiven) || (!wantedProtGiven))
   {
     // calculate the even-even solution first
     INT nNeutOrig = state.sys.nNeut;
@@ -242,10 +225,13 @@ void Action::calcHFBblocking(void)
       Tools::mesg("ActBlo", PF_GREEN("Neighboring nuclear system given " + System(evenProt, evenNeut).info()));
 
       // generate the QP states by performing one HFB iteration
-      Tools::mesg("ActBlo", PF("Generate the QP states by performing one HFB iteration"));
-      SolverHFBBroyden solverHFBBroyden(dataTree, state);
+      Tools::mesg("ActBlo", "(Re)calculating the QP states and U/V matrices => performing iterations of the Broyden solver");
+      DataTree dt = DataTree::getDefault() + dataTree;
+
+      SolverHFBBroyden solverHFBBroyden(dt, state);
       solverHFBBroyden.init();
-      solverHFBBroyden.nextIter();
+      //INFO(solverHFBBroyden.info());
+      while(solverHFBBroyden.nextIter());
 
       startingState = solverHFBBroyden.state;
     }
@@ -264,21 +250,49 @@ void Action::calcHFBblocking(void)
   //== DISPLAY INFO ON THE STARTING STATE ==
   //========================================
 
+  Tools::mesg("ActBlo", startingState.info());
+
   MultipoleOperators multipoleOperators(state);
   Tools::mesg("ActBlo", multipoleOperators.getNiceInfo());
 
-  // Tools::mesg("ActBlo", state.qpStates(NEUTRON).info());
-  // Tools::mesg("ActBlo", state.qpStates(PROTON ).info());
+
+
+  if (state.qpStates(NEUTRON).empty())
+  {
+    Tools::mesg("ActBlo", "(Re)calculating the QP states and U/V matrices => performing 1 iteration of the Broyden solver");
+    DataTree dt = DataTree::getDefault() + dataTree;
+
+    std::string interactionName;
+    dataTree.get(interactionName, "interaction/name");
+    dt.set("interaction/name", interactionName);
+
+    SolverHFBBroyden solver(dt, startingState);
+    solver.init();
+    solver.nextIter();
+    startingState = solver.state;
+  }
+
+  //=========================
+  //== PRINT THE QP STATES ==
+  //=========================
+
+  state = startingState;
+
+  state.qpStates(NEUTRON).sort("energy");
+  state.qpStates(PROTON ).sort("energy");
+
+  Tools::mesg("ActBlo", state.qpStates(NEUTRON).info(20, false));
+  Tools::mesg("ActBlo", state.qpStates(PROTON ).info(20, false));
 
   //==========================================
   //== IDENTIFY THE QP STATES TO BE BLOCKED ==
   //==========================================
 
-  IVEC blockingCandidatesn = {-1};
-  IVEC blockingCandidatesp = {-1};
+  std::list<StateId> blockingCandidatesn = {{-1, -1, NEUTRON}};
+  std::list<StateId> blockingCandidatesp = {{-1, -1, PROTON }};
 
-  if (!isEvenNeut) blockingCandidatesn = startingState.qpStates(NEUTRON).getFirstEmptyStates(nbBlockingTrials);
-  if (!isEvenProt) blockingCandidatesp = startingState.qpStates(PROTON ).getFirstEmptyStates(nbBlockingTrials);
+  if (!isEvenNeut) blockingCandidatesn = startingState.qpStates(NEUTRON).getFirstEmptyStates(nbBlockingTries);
+  if (!isEvenProt) blockingCandidatesp = startingState.qpStates(PROTON ).getFirstEmptyStates(nbBlockingTries);
 
   //===================================
   //== DEACTIVATE BASIS OPTIMIZATION ==
@@ -293,7 +307,7 @@ void Action::calcHFBblocking(void)
   State bestState = startingState;
   double bestTotalEnergy = 1e99;
 
-  blockingTrials.clear();
+  blockingTries.clear();
   INT id = 0;
 
   for (auto &bn : blockingCandidatesn)
@@ -302,47 +316,42 @@ void Action::calcHFBblocking(void)
     {
       std::string blockingName = PF("blk%02d", id);
 
-      bestState.blockedQP(NEUTRON) = bn;
-      bestState.blockedQP(PROTON ) = bp;
+      state = bestState;
+      state.blockedQPStates = {};
+      if (bn.index >= 0) state.blockedQPStates.insert(bn);
+      if (bp.index >= 0) state.blockedQPStates.insert(bp);
 
-      Tools::mesg("ActBlo", "New blocking try: " + blockingName);
+      Tools::mesg("ActBlo", "New blocking try: " + blockingName + " " + Tools::infoStr(state.blockedQPStates));
 
       INT maxIterTotal = 2000;
       dataTree.get(maxIterTotal, "solver/alternator/maxIter");
 
-      SolverHFBBroyden solverHFBBroyden(dataTree, bestState);
+      SolverHFBBroyden solverHFBBroyden(dataTree, state);
       solverHFBBroyden.init();
       while (solverHFBBroyden.nextIter());
       state = solverHFBBroyden.state;
 
       if (solverHFBBroyden.status == Solver::CONVERGED)
       {
-        // === optional: print some information
-        // Tools::mesg("ActBlo", state.qpStates(NEUTRON).info());
-        // Tools::mesg("ActBlo", state.qpStates(PROTON ).info());
-
-        // MultipoleOperators multipoleOperators(state);
-        // Tools::mesg("ActObs", multipoleOperators.getNiceInfo());
-
-        // for (auto &iso: {NEUTRON, PROTON})
-        // {
-        //   state.printCanonicalStatesInfo(state.rho(iso), iso);
-        // }
-
         if (state.totalEnergy < bestTotalEnergy)
         {
           bestTotalEnergy = state.totalEnergy;
           bestState = state;
 
           Tools::mesg("ActBlo", PF_GREEN("New best state found, ene: %9.6f MeV", bestTotalEnergy));
-
         }
       }
 
-      blockingTrials.push_back({id,
+      std::string blockn = " ";
+      std::string blockp = " ";
+
+      if (bn.index >= 0) blockn = PF("(%d,%d/2)", bn.index, bn.omega * 2 + 1);
+      if (bp.index >= 0) blockp = PF("(%d,%d/2)", bp.index, bp.omega * 2 + 1);
+
+      blockingTries.push_back({id,
                                blockingName,
-                               startingState.qpStates(NEUTRON).info(bn, 1, true),
-                               startingState.qpStates(PROTON ).info(bp, 1, true),
+                               blockn,
+                               blockp,
                                state.totalEnergy,
                                state.nbIter,
                                (solverHFBBroyden.status == Solver::CONVERGED)});
@@ -353,8 +362,16 @@ void Action::calcHFBblocking(void)
     }
   }
 
-  Tools::mesg("ActBlo", PF("End of blocking loop. Best energy found: %9.6f MeV", bestTotalEnergy));
   state = bestState;
+
+  if (state.converged)
+  {
+    Tools::mesg("ActBlo", "End of blocking loop. " + PF_GREEN("Best energy found: %9.6e MeV", bestTotalEnergy));
+  }
+  else
+  {
+    Tools::mesg("ActBlo", "End of blocking loop. " + PF_RED("No solution found"));
+  }
 
   DBG_LEAVE;
 }
@@ -372,7 +389,7 @@ const std::string Action::getBlockingHistTable(void) const
 
   std::string result;
   result += TABLE_CENTER + TABLE_BLUE
-            + "Trials" + TABLE_TD
+            + "Tries" + TABLE_TD
             + TABLE_YELLOW
             + "Blocked Neut." + TABLE_TD
             + "Blocked Prot." + TABLE_TD
@@ -380,17 +397,17 @@ const std::string Action::getBlockingHistTable(void) const
             + "#iter"         + TABLE_TD
             + TABLE_TR;
   result += TABLE_CENTER + TABLE_YELLOW
-            + " "               + TABLE_TD
-            + "(id,omega,ene.)" + TABLE_TD
-            + "(id,omega,ene.)" + TABLE_TD
-            + "[MeV]"           + TABLE_TD
-            + "[]"              + TABLE_TD
+            + " "          + TABLE_TD
+            + "(id,omega)" + TABLE_TD
+            + "(id,omega)" + TABLE_TD
+            + "[MeV]"      + TABLE_TD
+            + "[]"         + TABLE_TD
             + TABLE_TR;
 
   INT idMin = 0;
   double minEne = 1e99;
 
-  for (auto &blockingTry: blockingTrials)
+  for (auto &blockingTry: blockingTries)
   {
     if (!blockingTry.converged) continue;
 
@@ -401,7 +418,7 @@ const std::string Action::getBlockingHistTable(void) const
     }
   }
 
-  for (auto &blockingTry: blockingTrials)
+  for (auto &blockingTry: blockingTries)
   {
     std::string minimColor = TABLE_NORM;
     if (blockingTry.id == idMin) minimColor = TABLE_BLUE;
@@ -412,8 +429,8 @@ const std::string Action::getBlockingHistTable(void) const
     else
       result += TABLE_GREEN + TABLE_RIGHT + blockingTry.name + TABLE_TD;
 
-    result += TABLE_LEFT + minimColor + blockingTry.neut + TABLE_TD;
-    result += TABLE_CENTER + blockingTry.prot + TABLE_TD;
+    result += TABLE_CENTER + minimColor + blockingTry.blockn + TABLE_TD;
+    result += TABLE_CENTER + minimColor + blockingTry.blockp + TABLE_TD;
 
     if (blockingTry.converged)
     {
@@ -468,6 +485,8 @@ void Action::calcHFB(void)
   {
     Tools::mesg("ActHFB", Tools::boxed(TABLE_GREEN + "Converged solution found ! \\o/ Properties:"));
 
+    Tools::mesg("ActHFB", state.info());
+
     // calculate the energy contributions
     SolverHFBBroyden solverHFBBroyden(dataTree, state);
     solverHFBBroyden.init();
@@ -480,6 +499,8 @@ void Action::calcHFB(void)
     if (saveResultFiles)
     {
       DataTree finalDataTree = dataTree + state.getDataTree();
+      finalDataTree.clean();
+
       finalDataTree.save(jobName + ".msg.gz");
     }
   }
@@ -490,6 +511,8 @@ void Action::calcHFB(void)
     if (saveResultFiles)
     {
       DataTree finalDataTree = dataTree + state.getDataTree();
+      finalDataTree.clean();
+
       finalDataTree.save(jobName + ".msg.gz");
     }
 
@@ -497,7 +520,7 @@ void Action::calcHFB(void)
     SolverHFBBroyden solverHFBBroyden(dataTree, state);
     solverHFBBroyden.init();
     solverHFBBroyden.interaction.calcEnergies();
-    Tools::mesg("ActEne", solverHFBBroyden.interaction.getNiceInfo());
+    // Tools::mesg("ActEne", solverHFBBroyden.interaction.getNiceInfo());
   }
 
   state.calculationLength = Tools::clock() - startTime;
@@ -608,13 +631,23 @@ void Action::calcObservables(void)
   //== COLLECTIVE QUANTITIES ==
   //===========================
 
-  // calculate U and V matrices if needed
-  state.calcUVFromRhoKappa();
-
   // calculate inertia
-  state.calcInertia();
+  std::string interactionName;
+  dataTree.get(interactionName, "interaction/name");
+  state.calcInertia(interactionName);
 
   Tools::mesg("ActObs", state.getNiceInfo("inertia"));
+
+
+  //===================
+  //== THE QP STATES ==
+  //===================
+
+  // state.qpStates(NEUTRON).sort("energy");
+  // state.qpStates(PROTON ).sort("energy");
+  //
+  // Tools::mesg("State ", state.qpStates(NEUTRON).info(-1, true));
+  // Tools::mesg("State ", state.qpStates(PROTON ).info(-1, true));
 
   //===========
   //== BASIS ==
@@ -682,6 +715,14 @@ void Action::calcMultipoleExpansion(void)
 //==============================================================================
 
 /** Perform the DROP method.
+ */
+
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Perform the LINK method.
  */
 
 

@@ -104,6 +104,7 @@ INT Qnumbers::find(const IVEC &m) const
   }
   catch (const std::out_of_range &)
   {
+    ERROR("State not found: " + Tools::ivecToStr(m));
     return -1;
   }
 }

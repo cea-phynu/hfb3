@@ -29,6 +29,18 @@
 #include "state.h"
 #include "datatree.h"
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define SOLVER_VALID_KEYS \
+{ "solver/forceNonEmptyKappa", "Force non-empty kappa matrices at the start of HFB iterations", "True", "B" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief Virtual class for the solvers.
  *
  * This class is a virtual class for classes implementing a solver.
@@ -47,13 +59,11 @@ public:
 
   virtual void init(void);
   virtual bool nextIter(void);
+  virtual const std::string getIterMesg(void);
 
   //============================================================================
   //============================================================================
   //============================================================================
-
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
 
   /// List of status types.
   static std::vector<std::string> statusStr;
@@ -70,8 +80,11 @@ public:
   /// The maximum number of iterations.
   INT maxIter = 200;
 
-  /// The current iteration index.
+  /// The current iteration count.
   INT nbIter = 0;
+
+  /// The current iteration count shift.
+  INT iterShift = 0;
 
   /// Status of the solver.
   INT status = 0;
@@ -81,12 +94,6 @@ public:
 
   /// Length of the calculation [s].
   double calculationLength = 0.0;
-
-  /// The target convergence value.
-  double cvgTarget = 1e-3;
-
-  /// The current value to be minimized.
-  double value = 999.0;
 
   /// Must plot local densities ?
   bool plotDensities = true;

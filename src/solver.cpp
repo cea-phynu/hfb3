@@ -26,15 +26,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > Solver::validKeys =
-  {
-    { "solver/forceNonEmptyKappa", "Force non-empty kappa matrices at the start of HFB iterations", "True", "B" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 std::vector<std::string> Solver::statusStr =
   {
     "Iterating", "Starting", "Converged", "Diverged", "Maxiter", "End of scheme"
@@ -113,3 +104,21 @@ bool Solver::nextIter(void)
   DBG_RETURN(true);
 }
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Construct a standard progress message.
+ */
+
+const std::string Solver::getIterMesg(void)
+{
+  DBG_ENTER;
+
+  std::string result;
+
+  result = PF("#it: %04d ", nbIter + iterShift) +
+           PF("(%04d) ", nbIter);
+
+  DBG_RETURN(result);
+}

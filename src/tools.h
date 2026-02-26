@@ -162,6 +162,9 @@ public:
   //=== string functions ===
   //========================
 
+  /// Wrap text.
+  static const std::string wrap(const std::string, int length);       // #TEST#
+
   /// Remove whitespaces from the start and the end of a string.
   static const std::string trim(const std::string);                   // #TEST#
 
@@ -459,6 +462,9 @@ public:
   static std::string getLogoStr(void);
 
   /// Return a std::string representation of various object types.
+  static const std::string infoStr(const IndivState &);
+  static const std::string infoStr(const StateId &);
+  static const std::string infoStr(const std::set<StateId> &);
   static const std::string infoStr(const std::vector<std::string> &list);
   static const std::string infoStr(const INT &, bool isShort = false);
   static const std::string infoStr(const UINT &, bool isShort = false);

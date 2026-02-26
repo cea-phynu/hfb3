@@ -19,32 +19,10 @@
 #include "global.h"
 #include "general.h"
 #include "datatree.h"
-#include "action.h"
-#include "interaction.h"
-#include "solver.h"
-#include "system.h"
-#include "solver_alternator.h"
-#include "solver_basis.h"
-#include "solver_hfb_broyden.h"
-#include "solver_hfb_gradient.h"
-#include "solver_ws.h"
-#include "io_berger.h"
-#include "state.h"
 
 /** \file
  *  \brief Methods of the General class.
  */
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-std::list<KeyStruct > General::validKeys =
-  {
-    { "general/compatibility", "general.compatibility mode (can be: 'ringAndSchuck', 'berger', 'robledo', 'hfbtho')", "ringAndSchuck", "S" },
-    { "general/version"      , "Version of the HFB3 library"                                                        , ""             , "S" },
-    { "general/skill"        , "SKILL level (related to compilation optimization options) of the HFB3 library"      , ""             , "S" },
-  };
 
 //==============================================================================
 //==============================================================================
@@ -73,27 +51,17 @@ General::General()
 
 General::General(const DataTree &dataTree)
 {
-  setGlobalValidKeys();
 
   // Set the general.compatibility mode.
   std::string compatibilityStr;
   dataTree.get(compatibilityStr, "general/compatibility", true);
 
-  if      (compatibilityStr == "robledo")
-  {
-    compatibility = General::COMPAT_ROBLEDO;
-    Tools::warning("Compatibility mode: 'robledo'");
-  }
-  else if (compatibilityStr == "berger" )
-  {
-    compatibility = General::COMPAT_BERGER;
-    Tools::warning("Compatibility mode: 'berger'");
-  }
-  else if (compatibilityStr == "hfbtho" )
-  {
-    compatibility = General::COMPAT_HFBTHO;
-    Tools::warning("Compatibility mode: 'hfbtho'");
-  }
+  int _compatibility = General::COMPAT_NONE;
+  if      (compatibilityStr == "robledo") _compatibility = General::COMPAT_ROBLEDO;
+  else if (compatibilityStr == "berger" ) _compatibility = General::COMPAT_BERGER;
+  else if (compatibilityStr == "hfbtho" ) _compatibility = General::COMPAT_HFBTHO;
+
+  setCompatibility(_compatibility);
 
   if (dataTree.get(version, "general/version", true)) Tools::warning("Modifying the automatic version value");
   if (dataTree.get(skill,   "general/skill",   true)) Tools::warning("Modifying the automatic skill value");
@@ -103,29 +71,28 @@ General::General(const DataTree &dataTree)
 //==============================================================================
 //==============================================================================
 
-/** Gather the valid keys.
+/** Set the compatibility flag.
  */
 
-void General::setGlobalValidKeys(void)
+void General::setCompatibility(int _compatibility)
 {
-  if (globalValidKeys.size() == 0)
+  compatibility = _compatibility;
+
+  switch(compatibility)
   {
-    ADDLIST(globalValidKeys,            Action::validKeys);
-    ADDLIST(globalValidKeys,             Basis::validKeys);
-    ADDLIST(globalValidKeys,            Solver::validKeys);
-    ADDLIST(globalValidKeys,       SolverBasis::validKeys);
-    ADDLIST(globalValidKeys,  SolverAlternator::validKeys);
-    ADDLIST(globalValidKeys,  SolverHFBBroyden::validKeys);
-    ADDLIST(globalValidKeys, SolverHFBGradient::validKeys);
-    ADDLIST(globalValidKeys,          SolverWS::validKeys);
-    ADDLIST(globalValidKeys,        Constraint::validKeys);
-    ADDLIST(globalValidKeys,       Interaction::validKeys);
-    ADDLIST(globalValidKeys,            Mixing::validKeys);
-    ADDLIST(globalValidKeys,             State::validKeys);
-    ADDLIST(globalValidKeys,            System::validKeys);
-    ADDLIST(globalValidKeys,           General::validKeys);
-    ADDLIST(globalValidKeys,          IOberger::validKeys);
+    case COMPAT_NONE:
+      // Tools::warning("Compatibility mode: 'ringAndSchuck'");
+    break;
+    case COMPAT_ROBLEDO:
+      Tools::warning("Compatibility mode: 'robledo'");
+    break;
+    case COMPAT_BERGER:
+      Tools::warning("Compatibility mode: 'berger'");
+    break;
+    case COMPAT_HFBTHO:
+      Tools::warning("Compatibility mode: 'hfbtho'");
+    break;
+    default:
+      ERROR("Unknown compatibility value.");
   }
 }
-
-

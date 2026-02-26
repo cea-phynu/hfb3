@@ -32,17 +32,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct> SolverAlternator::validKeys =
-  {
-    { "solver/alternator/maxIter", "Maximum number of iterations when alternating solvers",  "200", "I" },
-    { "solver/alternator/scheme" , "Scheme for the alternating solvers"                   , "[GB]", "S" },
-    { "solver/alternator/snapshotInterval" , "Interval between snapshots"                 , "-1"  , "I" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** The constructor from a filename.
  */
 
@@ -82,9 +71,10 @@ SolverAlternator::SolverAlternator(const DataTree &_dataTree, State _state) :
 {
   DBG_ENTER;
 
-  dataTree.get(scheme               , "solver/alternator/scheme"               , true);
-  dataTree.get(maxIter              , "solver/alternator/maxIter"              , true);
-  dataTree.get(snapshotInterval     , "solver/alternator/snapshotInterval"     , true);
+  dataTree.get(scheme                 , "solver/alternator/scheme"                 , true);
+  dataTree.get(maxIter                , "solver/alternator/maxIter"                , true);
+  dataTree.get(snapshotInterval       , "solver/alternator/snapshotInterval"       , true);
+  dataTree.get(gradientOnlyFromScratch, "solver/alternator/gradientOnlyFromScratch", true);
 
   DBG_LEAVE;
 }
@@ -182,6 +172,7 @@ bool SolverAlternator::nextIter()
 
         solverHFBBroyden.state = state;
         solverHFBBroyden.init();
+        solverHFBBroyden.iterShift = nbIter;
 
         solverInit = false;
       }
@@ -208,10 +199,20 @@ bool SolverAlternator::nextIter()
     {
       if (solverInit)
       {
+        if ((gradientOnlyFromScratch)&&(!state.empty()))
+        {
+          Tools::mesg("SolAlt", "skipping the Gradient solver, since an initial state is given");
+          solverInit = true;
+          schemeId++;
+          break;
+        }
+
         Tools::mesg("SolAlt", "Starting the Gradient HFB solver");
 
         solverHFBGradient.state = state;
         solverHFBGradient.init();
+        solverHFBGradient.iterShift = nbIter;
+
         solverInit = false;
       }
       bool gradientIterating = solverHFBGradient.nextIter();
@@ -325,7 +326,6 @@ const std::string SolverAlternator::info(bool isShort) const
       {"basis ", state.basis.info(true)},
       {"inter.", solverHFBBroyden.interaction.info(true)},
       {"maxIt.", Tools::infoStr(maxIter)},
-      {"target", Tools::infoStr(cvgTarget)},
       {"status", Solver::statusStr[status]},
       {"scheme", scheme},
       {"momen.", solverHFBBroyden.multipoleOperators.info(true)},

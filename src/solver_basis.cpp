@@ -37,17 +37,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > SolverBasis::validKeys =
-  {
-    { "solver/basis/sphericalBasis", "Force the use of a spherical basis (b_r = b_z)"       , "false", "B" },
-    { "solver/basis/cvgTarget"     , "Convergence target value"                             , "1e-4" , "D" },
-    { "solver/basis/maxIter"       , "Maximum number of iterations"                         , "40"   , "I" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** The constructor from a filename.
  */
 
@@ -114,17 +103,13 @@ void SolverBasis::init()
   arma::vec previousParams;
 
   if (dim == 1) previousParams = {state.basis.b_r};
-
   if (dim == 2) previousParams = {state.basis.b_r, state.basis.b_z};
-
   if (dim == 3) previousParams = {state.basis.b_r, state.basis.b_z, state.basis.d_0};
 
   // TODO: remove hardcoded values
 
   vmin  = arma::ones(dim) * 1.00;
-
   vmax  = arma::ones(dim) * 3.50;
-
   vstep = arma::ones(dim) * 0.05;
 
   if (dim == 3)
@@ -177,7 +162,7 @@ bool SolverBasis::nextIter()
 
   bool valid;
   valid = calcHFB(next);
-  minimizer.addEval(next, -value, valid);
+  minimizer.addEval(next, -energy, valid);
   Tools::mesg("SolBas", getHistTable());
 
   status = Solver::ITERATING;
@@ -198,7 +183,7 @@ bool SolverBasis::nextIter()
 
   if (convergence < cvgTarget)
   {
-    Tools::mesg("SolBas", PF_GREEN("target value reached %e < %e", convergence, cvgTarget));
+    Tools::mesg("SolBas", PF_GREEN("convergence target value reached %e < %e", convergence, cvgTarget));
 
     status = Solver::CONVERGED;
 
@@ -294,45 +279,45 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
   while (solverAlternator.nextIter());
   state = solverAlternator.state;
 
-  value = state.converged ? state.totalEnergy: 1e99;
+  energy = state.converged ? state.totalEnergy: 1e99;
 
-  histCoords = arma::resize(histCoords, dim, nbIter + 1);
-  histValues = arma::resize(histValues, nbIter + 1,   1);
-  histIters  = arma::resize(histIters, nbIter + 1,   1);
+  previousCoords = arma::resize(previousCoords, dim, nbIter + 1);
+  previousEnergy = arma::resize(previousEnergy, nbIter + 1,   1);
+  previousIter   = arma::resize(previousIter , nbIter + 1,   1);
 
-  histCoords.col(nbIter) = basisParams;
-  histValues(nbIter) = value;
-  histIters(nbIter) = solverAlternator.nbIter;
+  previousCoords.col(nbIter) = basisParams;
+  previousEnergy(nbIter) = energy;
+  previousIter(nbIter) = solverAlternator.nbIter;
 
   newBest = false;
 
 
-  if ((value < bestValue) && state.converged)
+  if ((energy < bestEnergy) && state.converged)
   {
-    bestValue = value;
+    bestEnergy = energy;
     newBest = true;
     bestState = state;
   }
 
-  // Tools::mesg("SolBas", PF_MAGENTA("end of HFB: (basis: " + Tools::vecToStr(basisParams) + PF(", Ehfb: %.3e)", value)));
+  // Tools::mesg("SolBas", PF_MAGENTA("end of HFB: (basis: " + Tools::vecToStr(basisParams) + PF(", Ehfb: %.3e)", energy)));
 
   if (useBokeh)
   {
     // Plot::save(PF("plot%04d.html", iter));
 
-    Plot::clear("Ene HFB [MeV]");
-    Plot::clear("Convergence");
+    // Plot::clear("Ene HFB [MeV]");
+    // Plot::clear("Convergence");
 
     Plot::slot(4);
-    Plot::curve("#iter basis", "Best Ene HFB [MeV]", nbIter, value);
+    Plot::curve("#iter basis", "HFB Energy [MeV]", nbIter, energy);
   }
 
   if (solverAlternator.status == Solver::CONVERGED)
   {
     Tools::mesg("SolBas",
-                PF("#it: %03d ", nbIter) +
+                getIterMesg() +
                 Tools::vecToStr(basisParams) + " " +
-                PF("ene: ") + PF_GREEN("%9.3f", value) + " " +
+                PF("ene: ") + PF_GREEN("%9.3f", energy) + " " +
                 label + (newBest ? PF_GREEN(" *") : ""));
   }
   else
@@ -347,7 +332,7 @@ bool SolverBasis::calcHFB(const arma::vec &basisParams, const std::string &label
   bestState.calculationLength = Tools::clock() - startTime;
 
 #ifdef DEBUG_META
-  DBG_RETURN(!std::isnan(value));
+  DBG_RETURN(!std::isnan(energy));
 #else
   DBG_RETURN(state.converged);
 #endif
@@ -369,26 +354,26 @@ const std::string SolverBasis::getHistTable(void) const
             + "#iter"            + TABLE_TD
             + TABLE_TR;
 
-  UINT idMin = histValues.index_min();
+  UINT idMin = previousEnergy.index_min();
 
-  for (UINT i = 0; i < histValues.n_rows; i++)
+  for (UINT i = 0; i < previousEnergy.n_rows; i++)
   {
-    std::string eneStr = PF("%.3f", histValues(i));
-    std::string iterStr = PF("%d", histIters(i));
+    std::string eneStr = PF("%.3f", previousEnergy(i));
+    std::string iterStr = PF("%d", previousIter(i));
 
-    if (histValues(i) > 1e98) eneStr = TABLE_RED + "none";
+    if (previousEnergy(i) > 1e98) eneStr = TABLE_RED + "none";
 
     if (i == idMin)
-      result += TABLE_BLUE + TABLE_RIGHT + PF("* %d", i) + TABLE_TD;
+      result += TABLE_GREEN + TABLE_RIGHT + PF("* %d", i) + TABLE_TD;
     else
-      result += TABLE_GREEN + TABLE_RIGHT + PF("%d", i) + TABLE_TD;
+      result += TABLE_GREEN + TABLE_RIGHT + PF("%d", i) + TABLE_NORM + TABLE_TD;
 
-    result += Tools::vecToStr(histCoords.col(i)) + TABLE_TD;
+    result += Tools::vecToStr(previousCoords.col(i)) + TABLE_TD;
     result += TABLE_RIGHT + eneStr + TABLE_TD;
     result += TABLE_RIGHT + iterStr + TABLE_TR;
   }
 
-  result += TABLE_TD + TABLE_TD + TABLE_TD + TABLE_RED + PF("tot: %d", arma::accu(histIters)) + TABLE_TR;
+  result += TABLE_TD + TABLE_TD + TABLE_TD + TABLE_RED + PF("tot: %d", arma::accu(previousIter)) + TABLE_TR;
 
   DBG_RETURN(Tools::printTable(result));
 }

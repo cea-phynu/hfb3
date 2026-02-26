@@ -28,6 +28,10 @@
 #include "multi.h"
 #include "state.h"
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief This class analytically calculates the multipole moment mean values.
  */
 
@@ -37,20 +41,23 @@ public :
 
   // Constructors
   MultipoleOperators();                                                // #TEST#
-  MultipoleOperators(State);                                 // #TEST#
+  MultipoleOperators(State);                                           // #TEST#
 
   //============================================================================
 
-  void calcQl0Matrices(void);                                          // #TEST#
+  void calcQlmHO(void);                                                // #TEST#
   const std::string info(bool isShort = USE_SHORT_INFO) const;         // #TEST#
 
   const std::string getNiceInfo(void);                                 // #TEST#
 
-  void calcQlm(const Multi<arma::mat> &rho);                           // #TEST#
+  void calcQlmObs(const Multi<arma::mat> &rho);                        // #TEST#
   void calcBeta(void);                                                 // #TEST#
   void calcNPart(const Multi<arma::mat> &rho);                         // #TEST#
   static double getBetaFromQ20(double parts, double A, double vq20);   // #TEST#
   static double getQ20FromBeta(double parts, double A, double vBeta);  // #TEST#
+  void calcRk(void);                                                   // #TEST#
+  void calcRkn(void);                                                  // #TEST#
+  void calcZk(void);                                                   // #TEST#
 
   //============================================================================
   //============================================================================
@@ -60,7 +67,7 @@ public :
   State state;
 
   /// The \f$\langle m,n,n_z,d,s|\hat{Q}_{l,0}|m',n',n_z',d',s'\rangle\f$ matrices.
-  Multi<arma::mat> ql0;
+  Multi<arma::mat> qlmHO;
 
   /// The integrated number of particles.
   arma::vec nPart = {0.0, 0.0, 0.0};
@@ -72,7 +79,7 @@ public :
   Multi<arma::mat> matZ;
 
   /// The \f$\psi|\hat{Q}_{\lambda,0}|\psi\rangle\f$ values.
-  arma::mat qlm;
+  Multi<double> qlmObs;
 
   /// The \f$\beta\f$ deformation parameter values.
   arma::vec beta;
@@ -86,14 +93,9 @@ public :
   /// The \f$\langle s|s'\rangle\f$ arma::mat.
   arma::mat matS0;
 
-  //============================================================================
-  //============================================================================
-  //============================================================================
+  /// TODO
+  Multi<MAT> matRkn;
 
-private:
-
-  void calcR2l(void);
-  void calcZk(void);
 };
 
 #endif // MULTIPOLE_OPERATORS_H

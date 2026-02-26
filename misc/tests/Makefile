@@ -31,7 +31,6 @@ TEST_MAIN_OBJECT=$(OBJ_DIR)/tests.o
 TEST_OBJECTS=$(OBJ_DIR)/test_action.o                      \
              $(OBJ_DIR)/test_axis.o                        \
              $(OBJ_DIR)/test_base64.o                      \
-             $(OBJ_DIR)/test_basis.o                       \
              $(OBJ_DIR)/test_state.o                       \
              $(OBJ_DIR)/test_cliparser.o                   \
              $(OBJ_DIR)/test_constraint.o                  \

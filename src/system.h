@@ -25,6 +25,19 @@
 
 #include "datatree.h"
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define SYSTEM_VALID_KEYS \
+{ "system/nNeut", "Neutron number", "146", "I"  }, \
+{ "system/nProt", "Proton number" , "94" , "I"  }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief A nuclear system identifier.
  *
  *  This class represents a nuclear system.
@@ -40,13 +53,9 @@ public:
   const std::string info(bool isShort = false) const;
   static const std::string getElementSymbol(INT Z);
 
-
   //============================================================================
   //============================================================================
   //============================================================================
-
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
 
   int nProt =  94;
   int nNeut = 146;

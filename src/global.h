@@ -25,6 +25,8 @@
 #include <zlib.h>
 #include <armadillo>
 #include <cstdarg>
+#include "logger.h"
+#include "general.h"
 
 /** \file
  *  \brief Global definitions.
@@ -96,15 +98,6 @@ typedef arma::Cube<INT> ICUBE;
  */
 #define HBARC 1.9732698045930246e+02
 
-/// Default version string (should be set at compile time).
-#ifndef CFG_VERSION
-#define CFG_VERSION "undefined"
-#endif
-
-/// Default Git version string (should be set at compile time).
-#ifndef CFG_GIT_VERSION
-#define CFG_GIT_VERSION ""
-#endif
 
 /// \f$\alpha\f$ numerical constant (fine-structure constant).
 #define ALPHA 7.2973525664e-03
@@ -245,44 +238,6 @@ typedef arma::Cube<INT> ICUBE;
 #define TABLE_NORM        std::string("##NO")
 ///@}
 
-#ifdef SKILL0
-/// SKILL level 0 (cf. Makefile for meaning)
-#define SKILL "SKILL0 (I'm too young to die)"
-#endif
-
-#ifdef SKILL1
-/// SKILL level 1 (cf. Makefile for meaning)
-#define SKILL "SKILL1 (Hey, not too rough)"
-#endif
-
-#ifdef SKILL2
-/// SKILL level 2 (cf. Makefile for meaning)
-#define SKILL "SKILL2 (Hurt me plenty)"
-#endif
-
-#ifdef SKILL3
-/// SKILL level 3 (cf. Makefile for meaning)
-#define SKILL "SKILL3 (Ultra-Violence)"
-#endif
-
-#ifdef SKILL4
-/// SKILL level 4 (cf. Makefile for meaning)
-#define SKILL "SKILL4 (Nightmare!)"
-#endif
-
-// Default SKILL string value (should be set above).
-#ifndef SKILL
-/// No SKILL defined !?
-#define SKILL "NO SKILL DEFINED !?"
-#endif
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-#include "logger.h"
-#include "general.h"
-
 //==============================================================================
 //==============================================================================
 //==============================================================================
@@ -304,8 +259,8 @@ enum
   MSG_TIME
 };
 
-/// Force the loading of an invalid DataTree object.
-extern bool forceInvalidDataTree;
+/// Allow invalid DataTree loading.
+extern bool forceValidDataTree;
 
 /// Save the DataTree to a file.
 extern bool saveToFile;

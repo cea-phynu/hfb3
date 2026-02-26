@@ -58,7 +58,6 @@ DataTree IOmsgp::fromContent(const std::string &content)
   DBG_ENTER;
 
   DataTree result;
-  result.strict_mode = false;
 
   msgpack::object_handle oh = msgpack::unpack(content.data(), content.size());
   msgpack::object obj = oh.get();

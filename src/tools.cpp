@@ -485,7 +485,7 @@ void Tools::progress(const std::string &mesg, INT p, INT total)
 
     if (p > total - 2)
     {
-      // if no colors are used, only prINT the completed progress bar
+      // if no colors are used, only print the completed progress bar
       if (!useColors) std::cout << mesgTemp << " [" << std::string(nb1, '=') << std::string(barLength - nb1, ' ') << "] " << std::fixed << std::setprecision(2) << std::setw(5) << length << "s" << "\n";
       else std::cout << "\n";
 
@@ -1066,7 +1066,7 @@ std::string Tools::armaMD5(const arma::mat &mat)
   DBG_ENTER;
 
   MD5 md5;
-  md5.update((unsigned char *)(mat.memptr()), (unsigned int)(mat.n_elem * sizeof(double)));
+  md5.update((unsigned char *)(mat.memptr()), (unsigned long int)(mat.n_elem * sizeof(double)));
   md5.finalize();
 
   DBG_RETURN(md5.hexdigest());
@@ -1105,9 +1105,37 @@ void Tools::end(INT code)
 UINT Tools::stringLen(const std::string &s)
 {
   INT len = 0;
-  auto ptr = s.begin();
 
-  while (*ptr) len += (*ptr++ & 0xC0) != 0x80;
+  // auto ptr = s.begin();
+  // while (*ptr) len += (*ptr++ & 0xC0) != 0x80;
+
+  bool ignoreANSIColors = false;
+
+  for (auto &c: s)
+  {
+    // skip ANSI color codes
+    if (c == '\033')
+    {
+      ignoreANSIColors = true;
+      continue;
+    }
+
+    if (ignoreANSIColors && (c == 'm'))
+    {
+      ignoreANSIColors = false;
+      continue;
+    }
+
+
+    if (!ignoreANSIColors)
+    {
+      if (c == '\xE2') // UTF-8 character incoming
+      {
+        len -= 2;
+      }
+      len++;
+    }
+  }
 
   return len;
 }
@@ -1364,9 +1392,9 @@ std::string Tools::printTable(std::string input, INT style)
   Multi<std::string> finalTable;
 
 
-  for (INT i = 0; i < table.size(); i++) 
+  for (INT i = 0; i < table.size(); i++)
   {
-    for (INT j = 0; j < maxcols; j++) 
+    for (INT j = 0; j < maxcols; j++)
     {
       if (table[i][j] != "")
       {
@@ -1383,9 +1411,9 @@ std::string Tools::printTable(std::string input, INT style)
 
   if (lines)
   {
-    for (INT i = 0; i < table.size(); i++) 
+    for (INT i = 0; i < table.size(); i++)
     {
-      for (INT j = 0; j < maxcols; j++) 
+      for (INT j = 0; j < maxcols; j++)
       {
         if (fill(i + 1, j + 1) == 1)
         {
@@ -1408,9 +1436,9 @@ std::string Tools::printTable(std::string input, INT style)
 
   if (border)
   {
-    for (INT i = 0; i < table.size(); i++) 
+    for (INT i = 0; i < table.size(); i++)
     {
-      for (INT j = 0; j < maxcols; j++) 
+      for (INT j = 0; j < maxcols; j++)
       {
         if (fill(i + 1, j + 1) == 1)
         {
@@ -1431,9 +1459,9 @@ std::string Tools::printTable(std::string input, INT style)
     }
   }
 
-  for (INT i = 0; i < table.size(); i++) 
+  for (INT i = 0; i < table.size(); i++)
   {
-    for (INT j = 0; j < maxcols; j++) 
+    for (INT j = 0; j < maxcols; j++)
     {
       if (finalTable(i * 2 + 0, j * 2 + 0) != "x") continue;
 
@@ -1529,27 +1557,28 @@ std::string Tools::printTable(std::string input, INT style)
     finalWidth(j * 2 + 1) = width(j);
   }
 
-  for (INT j = 0; j < maxcols * 2 + 1; j += 2) 
+  for (INT j = 0; j < maxcols * 2 + 1; j += 2)
   {
     finalWidth(j) = 0;
 
-    for (INT i = 0; i < table.size() * 2 + 1; i++) 
+    for (INT i = 0; i < table.size() * 2 + 1; i++)
     {
       finalWidth(j) = MAX(finalWidth(j), stringLen(finalTable(i, j)));
     }
+
   }
 
   // Fill with spaces if needed.
-  for (INT i = 0; i < table.size() * 2 + 1; i++) 
+  for (INT i = 0; i < table.size() * 2 + 1; i++)
   {
-    for (INT j = 0; j < maxcols * 2 + 1; j++) 
+    for (INT j = 0; j < maxcols * 2 + 1; j++)
     {
       while (stringLen(finalTable(i, j)) < finalWidth(j))
         finalTable(i, j) += " ";
     }
   }
 
-  for (INT i = 0; i < table.size() * 2 - 1; i++) 
+  for (INT i = 0; i < table.size() * 2 - 1; i++)
   {
     std::string toto = "";
 
@@ -2073,6 +2102,60 @@ const std::string Tools::treeStr(const std::vector<std::pair<std::string, std::s
 //==============================================================================
 //==============================================================================
 
+const std::string Tools::infoStr(const IndivState &indivState)
+{
+  DBG_ENTER;
+
+  std::string result = Tools::treeStr(
+      {
+      {"#", PF("%d", indivState.index)},
+      {"ene", PF("%.3f", indivState.energy)},
+      {"occ", PF("%.3f", indivState.occupation)},
+      {"id", Tools::infoStr(indivState.stateId)}
+      }, true);
+
+  DBG_RETURN(result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+const std::string Tools::infoStr(const StateId &stateId)
+{
+  DBG_ENTER;
+
+  std::string result = Tools::treeStr(
+      {
+      {"id", PF("%d", stateId.index)},
+      {"ome", PF("%d/2", stateId.omega * 2 + 1)},
+      {"iso", strIsospin(stateId.isospin)}
+      }, true);
+
+  DBG_RETURN(result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+const std::string Tools::infoStr(const std::set<StateId> &states)
+{
+  DBG_ENTER;
+
+  std::string result = "";
+  for (auto &s: states)
+  {
+    result += infoStr(s);
+  }
+
+  DBG_RETURN(result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 const std::string Tools::infoStr(const States &, bool)
 {
   DBG_ENTER;
@@ -2587,6 +2670,28 @@ const std::string Tools::getChar(INT id)
   {
     return asciiChars[id];
   }
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+const std::string Tools::wrap(const std::string str, int length)
+{
+  std::string strRemaining = str;
+  std::string result;
+
+  while (strRemaining.length() > length)
+  {
+    int lastSpace = strRemaining.rfind(' ', length);
+    if (lastSpace > length) lastSpace = length;
+
+    result += strRemaining.substr(0, lastSpace) + "\n";
+    strRemaining = Tools::trim_b(strRemaining.substr(lastSpace, strRemaining.length() - lastSpace));
+  }
+  result += strRemaining;
+
+  return result;
 }
 
 //==============================================================================

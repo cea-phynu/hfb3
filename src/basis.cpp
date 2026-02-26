@@ -17,32 +17,13 @@
 //==============================================================================
 
 #include "basis.h"
+#include "datatree.h"
 #include "quadratures.h"
 #include "tools.h"
 
 /** \file
  *  \brief Methods of the Basis class.
  */
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-std::list<KeyStruct > Basis::validKeys =
-  {
-    { "basis/d_0"         , "d_0 basis deformation parameter"                , "10.0", "D" },
-    { "basis/b_r"         , "b_r basis deformation parameter"                , "1.9" , "D" },
-    { "basis/b_z"         , "b_z basis deformation parameter"                , "1.9" , "D" },
-    { "basis/nOscil"      , "Number of major HO shells in the basis"         , "11"  , "I" },
-    { "basis/n_zMax"      , "Maximum value of n_z in the basis"              , "24"  , "I" },
-    { "basis/g_q"         , "g_q basis truncation parameter"                 , "1.0" , "D" },
-    { "state/basis/d_0"   , "Previous d_0 basis deformation parameter"       , ""    , "D" },
-    { "state/basis/b_r"   , "Previous b_r basis deformation parameter"       , ""    , "D" },
-    { "state/basis/b_z"   , "Previous b_z basis deformation parameter"       , ""    , "D" },
-    { "state/basis/nOscil", "Previous Number of major HO shells in the basis", ""    , "I" },
-    { "state/basis/n_zMax", "Previous Maximum value of n_z in the basis"     , ""    , "I" },
-    { "state/basis/g_q"   , "Previous g_q basis truncation parameter"        , ""    , "D" },
-  };
 
 //==============================================================================
 //==============================================================================
@@ -90,12 +71,12 @@ Basis::Basis(const DataTree &dataTree, const std::string &prefix)
 
   ASSERT((prefix == "")||(prefix == "state/"), PF("Wrong prefix '%s'", prefix.c_str()));
 
-  dataTree.get(d_0,           prefix + "basis/d_0",    true);
-  dataTree.get(b_r,           prefix + "basis/b_r",    true);
-  dataTree.get(b_z,           prefix + "basis/b_z",    true);
-  dataTree.get(nOscil,        prefix + "basis/nOscil", true);
-  dataTree.get(n_zMaxImposed, prefix + "basis/n_zMax", true);
-  dataTree.get(g_q,           prefix + "basis/g_q",    true);
+  dataTree.get(d_0,           prefix + "basis/d_0",    false);
+  dataTree.get(b_r,           prefix + "basis/b_r",    false);
+  dataTree.get(b_z,           prefix + "basis/b_z",    false);
+  dataTree.get(nOscil,        prefix + "basis/nOscil", false);
+  dataTree.get(n_zMaxImposed, prefix + "basis/n_zMax", false);
+  dataTree.get(g_q,           prefix + "basis/g_q",    false);
 
   alfBerger = 1 / pow(b_z, 2);
   betBerger = 1 / pow(b_r, 2);
@@ -356,27 +337,31 @@ void Basis::cylTruncate(void)
 
   // Calculate the omega block indexes (same order as in BERGER2CT)
   for (INT omega = 0; omega < mMax; omega++) omegaIndexHO(omega) = UVEC();
+  blockIdHO = arma::zeros<IVEC>(HOqn.nb);
 
   for (INT m = 0; m < mMax; m++)
   {
     for (INT n = 0; n < nMax(m); n++)
     {
-      for (INT n_z = 0; n_z < n_zMax(m, n); n_z++)//J'ai inversé n_z et d...
+      for (INT n_z = 0; n_z < n_zMax(m, n); n_z++)
       {
         for (INT d = 0; d < dMax; d++)
         {
           for (INT s = 0; s < sMax; s++)
           {
-            if (m - s < 0) continue;
-
-            INT a     = HOqn.find({m, n, n_z, d, s});
             INT omega = m - s;
+
+            // do not include 'omega < 0' states in the basis
+            if (omega < 0) continue;
+
+            INT a = HOqn.find({m, n, n_z, d, s});
 
             if ((omega >= 0) and (omega < mMax))
             {
               auto size = omegaIndexHO(omega).n_rows;
               omegaIndexHO(omega).resize(size + 1);
               omegaIndexHO(omega)(size) = a;
+              blockIdHO(a) = INT(size);
             }
           }
         }
@@ -385,7 +370,6 @@ void Basis::cylTruncate(void)
   }
 
   DBG_LEAVE;
-  return;
 }
 
 //==============================================================================
@@ -464,7 +448,8 @@ const std::string Basis::info(bool isShort) const
       {"b_z", PF("%.3f", b_z)},
       {"d_0", PF("%.3f", d_0)},
       {"g_q", PF("%.1f", g_q)},
-      {"states", PF("%d", HOqn.nb)},
+      {"HO", PF("%d", HOqn.nb)},
+      {"OR", PF("%d", ORqn.nb)},
       {"max_nz", PF("%d", n_zGlobalMax)},
     }, true);
   }
@@ -472,11 +457,12 @@ const std::string Basis::info(bool isShort) const
   {
     result += Tools::treeStr({{"Basis", ""},
       {"nOscil", PF("%9d", nOscil)},
-      {"b_r   ", PF("%9.6f", b_r)},
-      {"b_z   ", PF("%9.6f", b_z)},
-      {"d_0   ", PF("%9.6f", d_0)},
-      {"g_q   ", PF("%9.6f", g_q)},
-      {"States", PF("%9d", HOqn.nb)},
+      {"b_r   ", PF("%19.16f", b_r)},
+      {"b_z   ", PF("%19.16f", b_z)},
+      {"d_0   ", PF("%19.16f", d_0)},
+      {"g_q   ", PF("%19.16f", g_q)},
+      {"HOrep.", PF("%9d", HOqn.nb)},
+      {"ORrep.", PF("%9d", ORqn.nb)},
       {"max_nz", PF("%9d", n_zGlobalMax)},
 
 /* #ifdef PRINT_BERGER_BASIS_PARAMETERS */
@@ -589,14 +575,17 @@ double Basis::zPartScalar(double z, INT n_z, INT d)
   double fac2 = 1.0 / sqrt(pow(2, n_z) * fact[n_z] * sqrt(PI));
   double zeta = 0.0;
 
+
   if (d == -1)
     zeta = z / b_z;
   else
-    zeta = (z - (0.5 - double(d)) * d_0) / b_z;
+    // zeta = (z - (0.5 - double(d)) * d_0) / b_z;
+    zeta = (z - (0.5 - d) * d_0) / b_z;
 
   double herm   = hermite(n_z, zeta);
   double expo   = exp(-zeta * zeta / 2.0);
   double result = fac1 * fac2 * herm * expo;
+
   return result;
 }
 
@@ -1112,6 +1101,7 @@ void Basis::calcWDN(void)
 
   // Calculate the omega block indices
 
+  blockIdOR = arma::zeros<IVEC>(ORqn.nb);
   omegaIndexOR.clear();
 
   for (UINT a = 0; a < ORqn.nb; a++)
@@ -1125,6 +1115,7 @@ void Basis::calcWDN(void)
       auto size = omegaIndexOR(omega).n_rows;
       omegaIndexOR(omega).resize(size + 1);
       omegaIndexOR(omega)(size) = a;
+      blockIdOR(a) = INT(size);
     }
   }
 
@@ -1219,8 +1210,8 @@ void Basis::calcRecouv(void)
   {
     for (INT dp = 0; dp < dMax; dp++)
     {
-      double di     = (0.5 - double(d)) * d_0;
-      double dj     = (0.5 - double(dp)) * d_0;
+      double di     = (0.5 - d) * d_0;
+      double dj     = (0.5 - dp) * d_0;
       Recouv(d, dp) = 0.5 * exp(-1.0 * pow((di - dj) / (2.0 * b_z), 2)) *
                       erfc(-1.0 * (di + dj) /
                            (2.0 * b_z));     // Modified !? Eq. (E-18), p. E-3, PhD J.-F. Berger.
@@ -2321,7 +2312,7 @@ double Basis::getOverlapHO(Basis &otherBasis, UINT iB, UINT iK, const arma::mat 
 //==============================================================================
 //==============================================================================
 
-/** PrINT a matrix using Berger's order.
+/** Print a matrix using Berger's order.
  */
 
 void Basis::debugMat(const arma::mat &mat) const
@@ -2536,7 +2527,9 @@ double Basis::hermite(INT n_z, double zeta)
   if (it != hermiteBuffer2.end()) return it->second;     // yes !
 
 #endif
-  double val = 2 * zeta * hermite(n_z - 1, zeta) - 2 * double(n_z - 1) * hermite(n_z - 2, zeta);
+  double herm1 = 2 * zeta * hermite(n_z - 1, zeta);
+  double herm2 = 2 * double(n_z - 1) * hermite(n_z - 2, zeta);
+  double val = herm1 - herm2;
 #ifdef USE_POLY_CACHING
   const std::pair<std::pair<int, double>, double> tempPairPair(tempPair, val);
   hermiteBuffer2.insert(tempPairPair);     // store it

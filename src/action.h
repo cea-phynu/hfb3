@@ -19,14 +19,26 @@
 #ifndef ACTION_H
 #define ACTION_H
 
+/** \file
+ *  \brief Headers for the Action class.
+ */
+
 #include "global.h"
 #include "generic.h"
 #include "datatree.h"
 #include "state.h"
 
-/** \file
- *  \brief Headers for the Action class.
- */
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define ACTION_VALID_KEYS \
+{ "action"                  , "Action to be performed (can be: 'hfb', 'ener', 'obs', 'ws', 'test')", "hfb"    , "S" }, \
+{ "action/jobName"          , "Name of the job"                                                    , "unnamed", "S" }, \
+{ "action/saveResultFiles"  , "Save result files"                                                  , "True"   , "B" }, \
+{ "action/nbBlockingTries"  , "Number of blocking tries by isospin value"                          , "4"      , "I" }, \
+{ "action/basisOptimization", "Optimize the basis deformation parameters"                          , "True"   , "B" }
 
 //==============================================================================
 //==============================================================================
@@ -49,13 +61,13 @@ class Action : public Generic
   /// A structure to store a blocking try.
   struct BlockingTry
   {
-    INT id;           ///< Id of the try.
-    std::string name; ///< Name of the try.
-    std::string neut; ///< Blocked neutron state.
-    std::string prot; ///< Blocked proton state.
-    double ene;       ///< Energy obtained.
-    INT nbIter;       ///< Number of iterations performed.
-    bool converged;   ///< Did the solver converge ?
+    INT id;             ///< Id of the try.
+    std::string name;   ///< Name of the try.
+    std::string blockn; ///< Blocked neutron QP state.
+    std::string blockp; ///< Blocked proton QP state.
+    double ene;         ///< Energy obtained.
+    INT nbIter;         ///< Number of iterations performed.
+    bool converged;     ///< Did the solver converge ?
   };
 
   //============================================================================
@@ -86,9 +98,6 @@ class Action : public Generic
   //============================================================================
   //============================================================================
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// The main DataTree instance.
   DataTree dataTree;
 
@@ -96,7 +105,7 @@ class Action : public Generic
   State state;
 
   /// The blocking tries.
-  std::list<BlockingTry> blockingTrials;
+  std::list<BlockingTry> blockingTries;
 
   /// Optimize the basis parameters ?
   bool basisOptimization = false;
@@ -111,7 +120,7 @@ class Action : public Generic
   std::string action = "ws_hfb";
 
   /// Number of blocking tries for each isospin value.
-  int nbBlockingTrials = 3;
+  int nbBlockingTries = 3;
 };
 
 #endif // ACTION_H

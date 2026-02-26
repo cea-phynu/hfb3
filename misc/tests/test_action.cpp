@@ -28,6 +28,9 @@
 TEST(Action, Action)
 {
   DataTree dataTree("misc/data/test_2ct_256Fm.hfb3");
+
+  dataTree = DataTree::getDefault() + dataTree;
+
   Action action(dataTree);
   ASSERT_TRUE(dataTree == action.dataTree);
 }
@@ -37,7 +40,11 @@ TEST(Action, Action)
 TEST(Action, Action_)
 {
   std::string filename = "misc/data/test_2ct_256Fm.hfb3";
+
   Action action(filename);
+
   DataTree dataTree(filename);
+  dataTree = DataTree::getDefault() + dataTree;
+
   ASSERT_TRUE(dataTree == action.dataTree);
 }

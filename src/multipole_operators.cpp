@@ -61,8 +61,8 @@ MultipoleOperators::MultipoleOperators(State _state) : state(_state)
   // dependencies
   basis.calcWDN();
   calcZk();
-  calcR2l();
-  calcQlm(state.rho);
+  calcRk();
+  calcQlmObs(state.rho);
 
   DBG_LEAVE;
 }
@@ -77,13 +77,15 @@ MultipoleOperators::MultipoleOperators(State _state) : state(_state)
  * multipol_cyl.
  */
 
-void MultipoleOperators::calcQl0Matrices(void)
+void MultipoleOperators::calcQlmHO(void)
 {
   DBG_ENTER;
 
+  calcRkn();
+
   Basis &basis = state.basis;
 
-  if (!ql0.empty())
+  if (!qlmHO.empty())
   {
     DBG_LEAVE;
   }
@@ -99,6 +101,9 @@ void MultipoleOperators::calcQl0Matrices(void)
   }
 
   matS0 = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
+  arma::mat matDeltaOmega0 = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
+  arma::mat matDeltaOmega1 = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
+  arma::mat matDeltaOmega2 = arma::zeros(basis.HOqn.nb, basis.HOqn.nb);
 
   for (UINT ia = 0; ia < basis.HOqn.nb; ia++)
   {
@@ -116,7 +121,9 @@ void MultipoleOperators::calcQl0Matrices(void)
       INT db   = basis.HOqn(3, ib);
       INT sb   = basis.HOqn(4, ib);
 
-      if (ma != mb) continue;
+      if (ma == mb    ) matDeltaOmega0(ia, ib) = 1.0;
+      if (ma == mb + 1) matDeltaOmega1(ia, ib) = 1.0;
+      if (ma == mb + 2) matDeltaOmega2(ia, ib) = 1.0;
 
       if (sa == sb) matS0(ia, ib) = 1.0;
 
@@ -126,10 +133,12 @@ void MultipoleOperators::calcQl0Matrices(void)
         matZk(k)(ia, ib) = matZ(k, n_za, da)(n_zb, db);
       }
 
-      for (INT k = 0; k < 4; k++)
+      if (ma == mb)
       {
-        // TODO: optimize me
-        matR2k(k)(ia, ib) = matR(k, ma, na)(nb);
+        for (INT k = 0; k < 4; k++)
+        {
+          matR2k(k)(ia, ib) = matR(k, ma, na)(nb);
+        }
       }
     }     // ib
   }       // ia
@@ -137,37 +146,39 @@ void MultipoleOperators::calcQl0Matrices(void)
   switch(general.compatibility)
   {
     case General::COMPAT_NONE:
+      // see https://en.wikipedia.org/wiki/Table_of_spherical_harmonics for a list of some YLM functions
+      // see https://en.wikipedia.org/wiki/List_of_common_coordinate_transformations for the common coordinate transformations
+
       // QLM = rho * r^l * YLM (see Ring, Schuck)
-      ql0(0) = 1. / 2.  * sqrt( 1. / PI) * matS0 % ( 1 * matZk(0) % matR2k(0));
-      ql0(1) = 1. / 2.  * sqrt( 3. / PI) * matS0 % ( 1 * matZk(1) % matR2k(0));
-      ql0(2) = 1. / 4.  * sqrt( 5. / PI) * matS0 % ( 2 * matZk(2) % matR2k(0) -   1 * matR2k(1) % matZk(0));
-      ql0(3) = 1. / 4.  * sqrt( 7. / PI) * matS0 % ( 2 * matZk(3) % matR2k(0) -   3 * matR2k(1) % matZk(1));
-      ql0(4) = 1. / 16. * sqrt( 9. / PI) * matS0 % ( 8 * matZk(4) % matR2k(0) -  24 * matR2k(1) % matZk(2) +  3 * matR2k(2) % matZk(0));
-      ql0(5) = 1. / 16. * sqrt(11. / PI) * matS0 % ( 8 * matZk(5) % matR2k(0) -  40 * matR2k(1) % matZk(3) + 15 * matR2k(2) % matZk(1));
-      ql0(6) = 1. / 32. * sqrt(13. / PI) * matS0 % (16 * matZk(6) % matR2k(0) - 120 * matR2k(1) % matZk(4) + 90 * matR2k(2) % matZk(2) - 5 * matR2k(3) % matZk(0));
+      qlmHO(0,  0) = 1. / 2.  * sqrt( 1. / PI) * matS0 % matDeltaOmega0 % ( 1 * matZk(0) % matR2k(0));
+      qlmHO(1,  0) = 1. / 2.  * sqrt( 3. / PI) * matS0 % matDeltaOmega0 % ( 1 * matZk(1) % matR2k(0));
+      qlmHO(2,  0) = 1. / 4.  * sqrt( 5. / PI) * matS0 % matDeltaOmega0 % ( 2 * matZk(2) % matR2k(0) -   1 * matR2k(1) % matZk(0));
+      qlmHO(3,  0) = 1. / 4.  * sqrt( 7. / PI) * matS0 % matDeltaOmega0 % ( 2 * matZk(3) % matR2k(0) -   3 * matR2k(1) % matZk(1));
+      qlmHO(4,  0) = 1. / 16. * sqrt( 9. / PI) * matS0 % matDeltaOmega0 % ( 8 * matZk(4) % matR2k(0) -  24 * matR2k(1) % matZk(2) +  3 * matR2k(2) % matZk(0));
+      qlmHO(5,  0) = 1. / 16. * sqrt(11. / PI) * matS0 % matDeltaOmega0 % ( 8 * matZk(5) % matR2k(0) -  40 * matR2k(1) % matZk(3) + 15 * matR2k(2) % matZk(1));
+      qlmHO(6,  0) = 1. / 32. * sqrt(13. / PI) * matS0 % matDeltaOmega0 % (16 * matZk(6) % matR2k(0) - 120 * matR2k(1) % matZk(4) + 90 * matR2k(2) % matZk(2) - 5 * matR2k(3) % matZk(0));
+
       break;
     case General::COMPAT_BERGER:
-      /*
-      *    QLM = sqrt( (4 * PI) / (2 * L + 1) ) * rho * r^l * YLM (see, e.g., Messiah, Albert (1999) "Quantum mechanics : two volumes bound as one")
-      *    !!! Berger added a factor 2 in the Q20 definition !!!
-      */
-      ql0(0) = matS0 % (1.0 * matZk(0) % matR2k(0));
-      ql0(1) = matS0 % (1.0 * matZk(1) % matR2k(0));
-      ql0(2) = matS0 % (2.0 * matZk(2) % matR2k(0) - 1.0          * matR2k(1) % matZk(0));
-      ql0(3) = matS0 % (1.0 * matZk(3) % matR2k(0) - 3.0   / 2.0  * matR2k(1) % matZk(1));
-      ql0(4) = matS0 % (1.0 * matZk(4) % matR2k(0) - 24.0  / 8.0  * matR2k(1) % matZk(2) + 3.0  / 8.0  * matR2k(2) % matZk(0));
-      ql0(5) = matS0 % (1.0 * matZk(5) % matR2k(0) - 40.0  / 8.0  * matR2k(1) % matZk(3) + 15.0 / 8.0  * matR2k(2) % matZk(1));
-      ql0(6) = matS0 % (1.0 * matZk(6) % matR2k(0) - 120.0 / 16.0 * matR2k(1) % matZk(4) + 90.0 / 16.0 * matR2k(2) % matZk(2) - 5.0 / 16.0 * matR2k(3) % matZk(0));
+      // QLM = sqrt( (4 * PI) / (2 * L + 1) ) * rho * r^l * YLM (see, e.g., Messiah, Albert (1999) "Quantum mechanics : two volumes bound as one")
+      // Berger added a factor 2 in the Q20 definition !!!
+      qlmHO(0, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(0) % matR2k(0));
+      qlmHO(1, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(1) % matR2k(0));
+      qlmHO(2, 0) = matS0 % matDeltaOmega0 % (2.0 * matZk(2) % matR2k(0) - 1.0          * matR2k(1) % matZk(0));
+      qlmHO(3, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(3) % matR2k(0) - 3.0   / 2.0  * matR2k(1) % matZk(1));
+      qlmHO(4, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(4) % matR2k(0) - 24.0  / 8.0  * matR2k(1) % matZk(2) + 3.0  / 8.0  * matR2k(2) % matZk(0));
+      qlmHO(5, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(5) % matR2k(0) - 40.0  / 8.0  * matR2k(1) % matZk(3) + 15.0 / 8.0  * matR2k(2) % matZk(1));
+      qlmHO(6, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(6) % matR2k(0) - 120.0 / 16.0 * matR2k(1) % matZk(4) + 90.0 / 16.0 * matR2k(2) % matZk(2) - 5.0 / 16.0 * matR2k(3) % matZk(0));
       break;
     case General::COMPAT_ROBLEDO:
       // QLM = sqrt( (4 * PI) / (2 * L + 1) ) * rho * r^l * YLM (see, e.g., Messiah, Albert (1999) "Quantum mechanics : two volumes bound as one" or wikipedia)
-      ql0(0) = matS0 % (1.0 * matZk(0) % matR2k(0));
-      ql0(1) = matS0 % (1.0 * matZk(1) % matR2k(0));
-      ql0(2) = matS0 % (1.0 * matZk(2) % matR2k(0) - 0.5          * matR2k(1) % matZk(0));
-      ql0(3) = matS0 % (1.0 * matZk(3) % matR2k(0) - 3.0   / 2.0  * matR2k(1) % matZk(1));
-      ql0(4) = matS0 % (1.0 * matZk(4) % matR2k(0) - 24.0  / 8.0  * matR2k(1) % matZk(2) + 3.0  / 8.0  * matR2k(2) % matZk(0));
-      ql0(5) = matS0 % (1.0 * matZk(5) % matR2k(0) - 40.0  / 8.0  * matR2k(1) % matZk(3) + 15.0 / 8.0  * matR2k(2) % matZk(1));
-      ql0(6) = matS0 % (1.0 * matZk(6) % matR2k(0) - 120.0 / 16.0 * matR2k(1) % matZk(4) + 90.0 / 16.0 * matR2k(2) % matZk(2) - 5.0 / 16.0 * matR2k(3) % matZk(0));
+      qlmHO(0, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(0) % matR2k(0));
+      qlmHO(1, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(1) % matR2k(0));
+      qlmHO(2, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(2) % matR2k(0) - 0.5          * matR2k(1) % matZk(0));
+      qlmHO(3, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(3) % matR2k(0) - 3.0   / 2.0  * matR2k(1) % matZk(1));
+      qlmHO(4, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(4) % matR2k(0) - 24.0  / 8.0  * matR2k(1) % matZk(2) + 3.0  / 8.0  * matR2k(2) % matZk(0));
+      qlmHO(5, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(5) % matR2k(0) - 40.0  / 8.0  * matR2k(1) % matZk(3) + 15.0 / 8.0  * matR2k(2) % matZk(1));
+      qlmHO(6, 0) = matS0 % matDeltaOmega0 % (1.0 * matZk(6) % matR2k(0) - 120.0 / 16.0 * matR2k(1) % matZk(4) + 90.0 / 16.0 * matR2k(2) % matZk(2) - 5.0 / 16.0 * matR2k(3) % matZk(0));
       break;
     case General::COMPAT_HFBTHO:
       /* HFBTHO uses the definitions of General::COMPAT_ROBLEDO for Q00,Q10,
@@ -175,19 +186,84 @@ void MultipoleOperators::calcQl0Matrices(void)
       *  and the definitions General::COMPAT_NONE for Q30 and higher.
       *  No, it doesn't make any sense.
       */
-      ql0(0) =                             matS0 % ( 1 * matZk(0) % matR2k(0));
-      ql0(1) =                             matS0 % ( 1 * matZk(1) % matR2k(0));
-      ql0(2) =                             matS0 % ( 2 * matZk(2) % matR2k(0) -   1 * matR2k(1) % matZk(0));
-      ql0(3) = 1. / 4.  * sqrt( 7. / PI) * matS0 % ( 2 * matZk(3) % matR2k(0) -   3 * matR2k(1) % matZk(1));
-      ql0(4) = 1. / 16. * sqrt( 9. / PI) * matS0 % ( 8 * matZk(4) % matR2k(0) -  24 * matR2k(1) % matZk(2) +  3 * matR2k(2) % matZk(0));
-      ql0(5) = 1. / 16. * sqrt(11. / PI) * matS0 % ( 8 * matZk(5) % matR2k(0) -  40 * matR2k(1) % matZk(3) + 15 * matR2k(2) % matZk(1));
-      ql0(6) = 1. / 32. * sqrt(13. / PI) * matS0 % (16 * matZk(6) % matR2k(0) - 120 * matR2k(1) % matZk(4) + 90 * matR2k(2) % matZk(2) - 5 * matR2k(3) % matZk(0));
+      qlmHO(0, 0) =                             matS0 % matDeltaOmega0 % ( 1 * matZk(0) % matR2k(0));
+      qlmHO(1, 0) =                             matS0 % matDeltaOmega0 % ( 1 * matZk(1) % matR2k(0));
+      qlmHO(2, 0) =                             matS0 % matDeltaOmega0 % ( 2 * matZk(2) % matR2k(0) -   1 * matR2k(1) % matZk(0));
+      qlmHO(3, 0) = 1. / 4.  * sqrt( 7. / PI) * matS0 % matDeltaOmega0 % ( 2 * matZk(3) % matR2k(0) -   3 * matR2k(1) % matZk(1));
+      qlmHO(4, 0) = 1. / 16. * sqrt( 9. / PI) * matS0 % matDeltaOmega0 % ( 8 * matZk(4) % matR2k(0) -  24 * matR2k(1) % matZk(2) +  3 * matR2k(2) % matZk(0));
+      qlmHO(5, 0) = 1. / 16. * sqrt(11. / PI) * matS0 % matDeltaOmega0 % ( 8 * matZk(5) % matR2k(0) -  40 * matR2k(1) % matZk(3) + 15 * matR2k(2) % matZk(1));
+      qlmHO(6, 0) = 1. / 32. * sqrt(13. / PI) * matS0 % matDeltaOmega0 % (16 * matZk(6) % matR2k(0) - 120 * matR2k(1) % matZk(4) + 90 * matR2k(2) % matZk(2) - 5 * matR2k(3) % matZk(0));
       break;
     default:
       ERROR("Unknown general.compatibility value.");
   }
 
+  // TODO: check that this is still true for non-default compatibility values
+  qlmHO(2, -2) =  1. / 4. * sqrt(15. / (2.0 * PI)) * (2.0 * PI) * matS0 % matDeltaOmega2.t() % matZk(0) % matRkn(3);
+  qlmHO(2, -1) =  1. / 2. * sqrt(15. / (2.0 * PI)) * (2.0 * PI) * matS0 % matDeltaOmega1.t() % matZk(1) % matRkn(2);
+  qlmHO(2,  1) = -1. / 2. * sqrt(15. / (2.0 * PI)) * (2.0 * PI) * matS0 % matDeltaOmega1     % matZk(1) % matRkn(2);
+  qlmHO(2,  2) =  1. / 4. * sqrt(15. / (2.0 * PI)) * (2.0 * PI) * matS0 % matDeltaOmega2     % matZk(0) % matRkn(3);
+
+
   DBG_LEAVE;
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Calculate the \f$\langle m,n_a|\hat{r}^{k}|m,n_b\rangle\f$ values.
+ */
+
+void MultipoleOperators::calcRkn(void)
+{
+  Multi<MAT> rkn;
+
+  Axis axis(Axis::GAUSS_LAGUERRE, 60);
+
+  for (INT k = 2; k < 4; k++)
+  {
+    VEC crkw = pow(state.basis.b_r, k - 1) / (2.0 * PI) * arma::pow(arma::sqrt(axis.p), k - 1) % axis.w;
+
+    for (INT ma = 0; ma < state.basis.mMax; ma++)
+    {
+      for (INT mb = ma; mb < state.basis.mMax; mb++)
+      {
+        rkn(k, ma, mb) = arma::zeros(state.basis.nMax(ma), state.basis.nMax(mb));
+
+        for (INT na = 0; na < state.basis.nMax(ma); na++)
+        {
+          VEC Ra = state.basis.rPartNormReduced(axis.p, ma, na);
+
+          for (INT nb = 0; nb < state.basis.nMax(mb); nb++)
+          {
+            VEC Rb = state.basis.rPartNormReduced(axis.p, mb, nb);
+
+            VEC func = Ra % Rb % crkw;
+            rkn(k, ma, mb)(na, nb) = arma::accu(func);
+          }
+        }
+        rkn(k, mb, ma) = rkn(k, ma, mb).t();
+      }
+    }
+
+    matRkn(k) = arma::zeros(state.basis.HOqn.nb, state.basis.HOqn.nb);
+
+    for (UINT ia = 0; ia < state.basis.HOqn.nb; ia++)
+    {
+      INT ma   = state.basis.HOqn(0, ia);
+      INT na   = state.basis.HOqn(1, ia);
+
+      for (UINT ib = ia; ib < state.basis.HOqn.nb; ib++)
+      {
+        INT mb   = state.basis.HOqn(0, ib);
+        INT nb   = state.basis.HOqn(1, ib);
+
+        matRkn(k)(ia, ib) = rkn(k, ma, mb)(na, nb);
+        matRkn(k)(ib, ia) = matRkn(k)(ia, ib);
+      }     // ib
+    }       // ia
+  }         // k
 }
 
 //==============================================================================
@@ -273,9 +349,9 @@ void MultipoleOperators::calcBeta(void)
   double N = state.sys.nNeut;
   double A = Z + N;
 
-  beta(NEUTRON) = getBetaFromQ20(N, A, qlm(2, NEUTRON));
-  beta(PROTON ) = getBetaFromQ20(Z, A, qlm(2, PROTON ));
-  beta(TOTAL  ) = getBetaFromQ20(A, A, qlm(2, TOTAL  ));
+  beta(NEUTRON) = getBetaFromQ20(N, A, qlmObs(2, 0, NEUTRON));
+  beta(PROTON ) = getBetaFromQ20(Z, A, qlmObs(2, 0, PROTON ));
+  beta(TOTAL  ) = getBetaFromQ20(A, A, qlmObs(2, 0, TOTAL  ));
 
   DBG_LEAVE;
 }
@@ -288,7 +364,7 @@ void MultipoleOperators::calcBeta(void)
  * TODO: use A-28 in Berger's PhD + Talmanr transformation ?
  */
 
-void MultipoleOperators::calcR2l(void)
+void MultipoleOperators::calcRk(void)
 {
   DBG_ENTER;
 
@@ -355,7 +431,7 @@ void MultipoleOperators::calcZk(void)
     DBG_LEAVE;
   }
 
-  INT    kmax = 7;
+  INT    kmax = 7; // <- WARNING hard-coded value
   double sum0, sum1, factor, dab;
   INT    n_zcMin;
   double tempv;
@@ -418,7 +494,7 @@ void MultipoleOperators::calcZk(void)
  * multipole moments, cf. \ref multipol_cyl.
  */
 
-void MultipoleOperators::calcQlm(const Multi<arma::mat> &rho)
+void MultipoleOperators::calcQlmObs(const Multi<arma::mat> &rho)
 {
   DBG_ENTER;
 
@@ -430,35 +506,43 @@ void MultipoleOperators::calcQlm(const Multi<arma::mat> &rho)
   }
 
   // dependencies
-  calcQl0Matrices();
+  calcQlmHO();
   basis.calcWDN();
-  qlm             = arma::zeros(7, 3);
+
+  qlmObs.clear();
+
   arma::mat rn    = 2 * rho(NEUTRON);     // coeff 2 to take into account time reversal negative states
   arma::mat rp    = 2 * rho(PROTON );     // same
-  arma::mat ra    = rn + rp;
+  arma::mat rt    = rn + rp;
   // arma::mat s     = basis.ORtoHO * basis.ORtoHO.t();
 
-  qlm(0, NEUTRON) = arma::accu(ql0(0) % rn);     // tr( M * r * M.t() ) ?
-  qlm(0, PROTON)  = arma::accu(ql0(0) % rp);
-  qlm(0, TOTAL)   = arma::accu(ql0(0) % ra);
-  qlm(1, NEUTRON) = arma::accu(ql0(1) % rn);     // tr( Mt M A Mt M r  ) ?
-  qlm(1, PROTON)  = arma::accu(ql0(1) % rp);
-  qlm(1, TOTAL)   = arma::accu(ql0(1) % ra);
-  qlm(2, NEUTRON) = arma::accu(ql0(2) % rn);
-  qlm(2, PROTON)  = arma::accu(ql0(2) % rp);
-  qlm(2, TOTAL)   = arma::accu(ql0(2) % ra);
-  qlm(3, NEUTRON) = arma::accu(ql0(3) % rn);
-  qlm(3, PROTON)  = arma::accu(ql0(3) % rp);
-  qlm(3, TOTAL)   = arma::accu(ql0(3) % ra);
-  qlm(4, NEUTRON) = arma::accu(ql0(4) % rn);
-  qlm(4, PROTON)  = arma::accu(ql0(4) % rp);
-  qlm(4, TOTAL)   = arma::accu(ql0(4) % ra);
-  qlm(5, NEUTRON) = arma::accu(ql0(5) % rn);
-  qlm(5, PROTON)  = arma::accu(ql0(5) % rp);
-  qlm(5, TOTAL)   = arma::accu(ql0(5) % ra);
-  qlm(6, NEUTRON) = arma::accu(ql0(6) % rn);
-  qlm(6, PROTON)  = arma::accu(ql0(6) % rp);
-  qlm(6, TOTAL)   = arma::accu(ql0(6) % ra);
+  qlmObs(0, 0, NEUTRON) = arma::accu(qlmHO(0, 0) % rn);
+  qlmObs(0, 0, PROTON ) = arma::accu(qlmHO(0, 0) % rp);
+  qlmObs(0, 0, TOTAL  ) = arma::accu(qlmHO(0, 0) % rt);
+  qlmObs(1, 0, NEUTRON) = arma::accu(qlmHO(1, 0) % rn);
+  qlmObs(1, 0, PROTON ) = arma::accu(qlmHO(1, 0) % rp);
+  qlmObs(1, 0, TOTAL  ) = arma::accu(qlmHO(1, 0) % rt);
+  qlmObs(2, 0, NEUTRON) = arma::accu(qlmHO(2, 0) % rn);
+  qlmObs(2, 0, PROTON ) = arma::accu(qlmHO(2, 0) % rp);
+  qlmObs(2, 0, TOTAL  ) = arma::accu(qlmHO(2, 0) % rt);
+  qlmObs(2, 1, NEUTRON) = arma::accu(qlmHO(2, 1) % rn);
+  qlmObs(2, 1, PROTON ) = arma::accu(qlmHO(2, 1) % rp);
+  qlmObs(2, 1, TOTAL  ) = arma::accu(qlmHO(2, 1) % rt);
+  qlmObs(2, 2, NEUTRON) = arma::accu(qlmHO(2, 2) % rn);
+  qlmObs(2, 2, PROTON ) = arma::accu(qlmHO(2, 2) % rp);
+  qlmObs(2, 2, TOTAL  ) = arma::accu(qlmHO(2, 2) % rt);
+  qlmObs(3, 0, NEUTRON) = arma::accu(qlmHO(3, 0) % rn);
+  qlmObs(3, 0, PROTON ) = arma::accu(qlmHO(3, 0) % rp);
+  qlmObs(3, 0, TOTAL  ) = arma::accu(qlmHO(3, 0) % rt);
+  qlmObs(4, 0, NEUTRON) = arma::accu(qlmHO(4, 0) % rn);
+  qlmObs(4, 0, PROTON ) = arma::accu(qlmHO(4, 0) % rp);
+  qlmObs(4, 0, TOTAL  ) = arma::accu(qlmHO(4, 0) % rt);
+  qlmObs(5, 0, NEUTRON) = arma::accu(qlmHO(5, 0) % rn);
+  qlmObs(5, 0, PROTON ) = arma::accu(qlmHO(5, 0) % rp);
+  qlmObs(5, 0, TOTAL  ) = arma::accu(qlmHO(5, 0) % rt);
+  qlmObs(6, 0, NEUTRON) = arma::accu(qlmHO(6, 0) % rn);
+  qlmObs(6, 0, PROTON ) = arma::accu(qlmHO(6, 0) % rp);
+  qlmObs(6, 0, TOTAL  ) = arma::accu(qlmHO(6, 0) % rt);
 
   calcBeta();
   calcNPart(rho);
@@ -491,7 +575,7 @@ void MultipoleOperators::calcNPart(const Multi<arma::mat> &rho)
 
   for (INT iso = 0; iso < 3; iso++)
   {
-    nPart(iso) = qlm(0, iso) / correctionFactor;
+    nPart(iso) = qlmObs(0, 0, iso) / correctionFactor;
   }
 
   DBG_LEAVE;
@@ -513,7 +597,7 @@ const std::string MultipoleOperators::getNiceInfo(void)
   // color constrained values
   Multi<std::string> colorStr;
 
-  for (auto &c : state.constraints) colorStr(c.second.lm, c.second.iso) = TABLE_BLUE;
+  for (auto &c : state.constraints) colorStr(c.second.lambda, c.second.mu, c.second.iso) = TABLE_BLUE;
 
   std::list<std::list<std::string> > tempList;
 
@@ -525,19 +609,20 @@ const std::string MultipoleOperators::getNiceInfo(void)
     PF("%.6f", nPart(TOTAL  ))
   });
 
+  std::map< std::string, std::vector<double> > tempMap;
+
   for (INT lambda = 0; lambda < 7; lambda++)
   {
+    INT mu = 0;
+
     tempList.push_back(
     {
-      PF("<Q%1d0> [fm%1d]", lambda, lambda),
-      colorStr(lambda, NEUTRON) + PF("%.6f", qlm(lambda, NEUTRON)) + TABLE_NORM,
-      colorStr(lambda, PROTON ) + PF("%.6f", qlm(lambda, PROTON )) + TABLE_NORM,
-      colorStr(lambda, TOTAL  ) + PF("%.6f", qlm(lambda, TOTAL  )) + TABLE_NORM
+      PF("<Q%1d%d> [fm%1d]", lambda, mu, lambda),
+      PF("%s%.6f", colorStr(lambda, mu, NEUTRON).c_str(), qlmObs(lambda, mu, NEUTRON)),
+      PF("%s%.6f", colorStr(lambda, mu, PROTON ).c_str(), qlmObs(lambda, mu, PROTON )),
+      PF("%s%.6f", colorStr(lambda, mu, TOTAL  ).c_str(), qlmObs(lambda, mu, TOTAL  ))
     });
   }
-
-  tempList.push_back({"beta2    []", PF("%.6f", beta(NEUTRON)), PF("%.6f", beta(PROTON)),
-                      PF("%.6f", beta(TOTAL))});
 
   std::string result =
     Tools::valueTable("Deformations", {"Neutron", "Proton", "Neut+Prot"}, {"", "", ""}, tempList);
@@ -562,14 +647,19 @@ const std::string MultipoleOperators::info(bool isShort) const
 
   if (isShort)
   {
-    if (qlm.empty())
+    if (qlmObs.empty())
     {
       DBG_RETURN(PF_RED("empty"));
     }
 
-    for (UINT l = 0; l < 4; l++)
+    auto keys = qlmObs.getKeys();
+
+    for (auto key: keys)
     {
-      list.push_back({PF("Q%1d0", l), PF("%.6e", qlm(l, TOTAL))});
+      int lambda = key[0];
+      int mu     = key[1];
+      int iso    = key[2];
+      if (iso == TOTAL) list.push_back({PF("Q%01d%01d", lambda, mu), PF("%.6e", qlmObs(lambda, mu, TOTAL))});
     }
 
     list.push_back({"beta", PF("%.6e", beta(TOTAL))});
@@ -578,18 +668,18 @@ const std::string MultipoleOperators::info(bool isShort) const
   {
     list.push_back({"MultipoleOperators", ""});
 
-    if (qlm.empty())
+    if (qlmObs.empty())
     {
       list.push_back({"qlm", PF_RED("empty")});
     }
     else
     {
-      for (UINT l = 0; l < qlm.n_rows; l++)
+      for (auto key: qlmObs.getKeys())
       {
-        list.push_back({PF("<Q%1d0> ", l),
-                        "(" + PF_YELLOW("neut.") + ":" + PF_BLUE("%13.6e", qlm(l, NEUTRON)) + ", " +
-                              PF_YELLOW("prot.") + ":" + PF_BLUE("%13.6e", qlm(l, PROTON) ) + ", " +
-                              PF_YELLOW("total") + ":" + PF_BLUE("%13.6e", qlm(l, TOTAL)  ) + ")"});
+        int lambda = key[0];
+        int mu     = key[1];
+        int iso    = key[2];
+        list.push_back({PF("<Q%01d%01d> ", lambda, mu), PF_YELLOW(Tools::strIsospin(iso)) + ":" + PF_BLUE("%13.6e", qlmObs(lambda, mu, iso))});
       }
 
       list.push_back({"beta  ", "(" + PF_YELLOW("neut.") + ":" + PF_BLUE("%13.6e", beta(NEUTRON)) +

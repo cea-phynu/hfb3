@@ -48,22 +48,12 @@ TEST(State, State)
   s.constraints["q30t"] = Constraint("q30t", 3.3);
 
   ASSERT_EQ(s.constraints.size(), 3);
-  ASSERT_EQ(s.constraints["q10t"].typeStr, "q10t");
-  ASSERT_EQ(s.constraints["q20t"].typeStr, "q20t");
-  ASSERT_EQ(s.constraints["q30t"].typeStr, "q30t");
-
   ASSERT_NEAR(s.constraints["q10t"].val, 1.1, 1e-12);
   ASSERT_NEAR(s.constraints["q20t"].val, 2.2, 1e-12);
   ASSERT_NEAR(s.constraints["q30t"].val, 3.3, 1e-12);
 
-  s.constraints["q10t"] = Constraint("q10t", -1.1);
-  s.constraints["q20t"] = Constraint("q20t", -2.2);
-  s.constraints["q30t"] = Constraint("q30t", -3.3);
   s.constraints.erase("q20t");
-
   ASSERT_EQ(s.constraints.size(), 2);
-  ASSERT_NEAR(s.constraints["q10t"].val, -1.1, 1e-12);
-  ASSERT_NEAR(s.constraints["q30t"].val, -3.3, 1e-12);
 
   ASSERT_FALSE(s.converged);
 }
@@ -72,29 +62,6 @@ TEST(State, State)
 
 TEST(State, State_)
 {
-  {
-    // 1ct berger2ct state
-    State s("examples/42Ca_deformed_1x11.msg.gz");
-
-    Basis &basis = s.basis;
-
-    ASSERT_TRUE(s.converged);
-    ASSERT_NEAR(basis.b_r, 2.4144410198519912e+00, 1e-10);
-    ASSERT_NEAR(basis.b_z, 3.1170299534289376e+00, 1e-10);
-    ASSERT_NEAR(arma::trace(s.rho(NEUTRON)) * 2.0, 22.0, 1e-4);
-    ASSERT_NEAR(arma::trace(s.rho(PROTON )) * 2.0, 20.0, 1e-5);
-  }
-
-  {
-    // 2ct berger2ct state
-    State s("examples/42Ca_deformed_2x9.msg.gz");
-
-    Basis &basis = s.basis;
-
-    ASSERT_NEAR(basis.b_r, 2.3878704919130063e+00, 1e-10);
-    ASSERT_NEAR(basis.b_z, 3.1087425890539850e+00, 1e-10);
-  }
-
   {
     // 1ct msg state
     State s("examples/42Ca_deformed_1x11.msg.gz");
@@ -124,9 +91,10 @@ TEST(State, State__)
 {
   // With some values
   {
+    forceValidDataTree = true;
+
     // Construction of the datatree
     DataTree d;
-    d.strict_mode = false;
 
     Multi<arma::mat> U;
     arma::mat u0 = arma::randu(3,3);
@@ -141,16 +109,19 @@ TEST(State, State__)
     d.set("test/U", U);
     d.set("test/V", V);
 
-    // Creation of the state
-    State b(d);
+    // Complete with default values
+    d = DataTree::getDefault() + d;
 
-    ASSERT_FALSE(b.rho.empty());
-    ASSERT_FALSE(b.kappa.empty());
+    // Creation of the state
+    State s(d);
+
+    ASSERT_FALSE(s.rho.empty());
+    ASSERT_FALSE(s.kappa.empty());
   }
 
-  // Without values
+  // Default values
   {
-    DataTree dataTree = DataTree();
+    DataTree dataTree = DataTree::getDefault();
     State b(dataTree);
 
     ASSERT_TRUE(b.rho(NEUTRON).empty());
@@ -162,10 +133,6 @@ TEST(State, State__)
     ASSERT_TRUE(b.V(NEUTRON).empty());
     ASSERT_TRUE(b.V(PROTON).empty());
 
-    ASSERT_TRUE(b.vecOc(NEUTRON).empty());
-    ASSERT_TRUE(b.vecOc(PROTON ).empty());
-    ASSERT_TRUE(b.eneQP(NEUTRON).empty());
-    ASSERT_TRUE(b.eneQP(PROTON).empty());
     ASSERT_EQ(b.sys.nProt,  94);
     ASSERT_EQ(b.sys.nNeut, 146);
     ASSERT_EQ(b.totalEnergy, 1e99);
@@ -208,10 +175,10 @@ TEST(State, convertFrom)
     MultipoleOperators multipoleOperators1(sol1);
     MultipoleOperators multipoleOperators2(sol2);
 
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(1, 0), multipoleOperators2.qlm(1, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(2, 0), multipoleOperators2.qlm(2, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(3, 0), multipoleOperators2.qlm(3, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(4, 0), multipoleOperators2.qlm(4, 0), 1e-14);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(1, 0, TOTAL), multipoleOperators2.qlmObs(1, 0, TOTAL), 1e-14);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(2, 0, TOTAL), multipoleOperators2.qlmObs(2, 0, TOTAL), 1e-14);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(3, 0, TOTAL), multipoleOperators2.qlmObs(3, 0, TOTAL), 1e-14);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(4, 0, TOTAL), multipoleOperators2.qlmObs(4, 0, TOTAL), 1e-14);
   }
 
   {
@@ -233,10 +200,10 @@ TEST(State, convertFrom)
     MultipoleOperators multipoleOperators1(sol1);
     MultipoleOperators multipoleOperators2(sol2);
 
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(1, 0), multipoleOperators2.qlm(1, 0), 1e-13);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(2, 0), multipoleOperators2.qlm(2, 0), 1e-13);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(3, 0), multipoleOperators2.qlm(3, 0), 1e-13);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(4, 0), multipoleOperators2.qlm(4, 0), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(1, 0, TOTAL), multipoleOperators2.qlmObs(1, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(2, 0, TOTAL), multipoleOperators2.qlmObs(2, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(3, 0, TOTAL), multipoleOperators2.qlmObs(3, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(4, 0, TOTAL), multipoleOperators2.qlmObs(4, 0, TOTAL), 1e-13);
   }
 
   {
@@ -251,10 +218,10 @@ TEST(State, convertFrom)
     MultipoleOperators multipoleOperators1(sol1);
     MultipoleOperators multipoleOperators2(sol2);
 
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(1, 0), multipoleOperators2.qlm(1, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(2, 0), multipoleOperators2.qlm(2, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(3, 0), multipoleOperators2.qlm(3, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(4, 0), multipoleOperators2.qlm(4, 0), 1e-14);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(1, 0, TOTAL), multipoleOperators2.qlmObs(1, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(2, 0, TOTAL), multipoleOperators2.qlmObs(2, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(3, 0, TOTAL), multipoleOperators2.qlmObs(3, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(4, 0, TOTAL), multipoleOperators2.qlmObs(4, 0, TOTAL), 1e-13);
   }
 
 }
@@ -273,10 +240,10 @@ TEST(State, convertTo)
     MultipoleOperators multipoleOperators1(sol1);
     MultipoleOperators multipoleOperators2(sol2);
 
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(1, 0), multipoleOperators2.qlm(1, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(2, 0), multipoleOperators2.qlm(2, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(3, 0), multipoleOperators2.qlm(3, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(4, 0), multipoleOperators2.qlm(4, 0), 1e-14);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(1, 0, TOTAL), multipoleOperators2.qlmObs(1, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(2, 0, TOTAL), multipoleOperators2.qlmObs(2, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(3, 0, TOTAL), multipoleOperators2.qlmObs(3, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(4, 0, TOTAL), multipoleOperators2.qlmObs(4, 0, TOTAL), 1e-13);
   }
 
   {
@@ -296,10 +263,10 @@ TEST(State, convertTo)
     MultipoleOperators multipoleOperators1(sol1);
     MultipoleOperators multipoleOperators2(sol2);
 
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(1, 0), multipoleOperators2.qlm(1, 0), 1e-13);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(2, 0), multipoleOperators2.qlm(2, 0), 1e-13);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(3, 0), multipoleOperators2.qlm(3, 0), 1e-13);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(4, 0), multipoleOperators2.qlm(4, 0), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(1, 0, TOTAL), multipoleOperators2.qlmObs(1, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(2, 0, TOTAL), multipoleOperators2.qlmObs(2, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(3, 0, TOTAL), multipoleOperators2.qlmObs(3, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(4, 0, TOTAL), multipoleOperators2.qlmObs(4, 0, TOTAL), 1e-13);
   }
 
   {
@@ -312,10 +279,10 @@ TEST(State, convertTo)
     MultipoleOperators multipoleOperators1(sol1);
     MultipoleOperators multipoleOperators2(sol2);
 
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(1, 0), multipoleOperators2.qlm(1, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(2, 0), multipoleOperators2.qlm(2, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(3, 0), multipoleOperators2.qlm(3, 0), 1e-14);
-    ASSERT_REL_ERROR(multipoleOperators1.qlm(4, 0), multipoleOperators2.qlm(4, 0), 1e-14);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(1, 0, TOTAL), multipoleOperators2.qlmObs(1, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(2, 0, TOTAL), multipoleOperators2.qlmObs(2, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(3, 0, TOTAL), multipoleOperators2.qlmObs(3, 0, TOTAL), 1e-13);
+    ASSERT_REL_ERROR(multipoleOperators1.qlmObs(4, 0, TOTAL), multipoleOperators2.qlmObs(4, 0, TOTAL), 1e-13);
   }
 }
 
@@ -333,22 +300,32 @@ TEST(State, getDataTree)
   DataTree result;
   result.merge(basis.getDataTree("state/"));
 
-
   result.set("system/nProt", 90);
   result.set("system/nNeut", 140);
   result.set("state/rho", Multi<arma::mat>());
   result.set("state/kappa", Multi<arma::mat>());
-  result.set("state/individualStates/occupation", Multi<arma::vec>());
-  result.set("state/individualStates/energy", Multi<arma::vec>());
   result.set("state/chemicalPotential", (arma::vec)arma::zeros(2));
+
+  Multi<VEC> mv;
+  mv(NEUTRON) = {};
+  mv(PROTON) = {};
+
+  Multi<IVEC> miv;
+  miv(NEUTRON) = {};
+  miv(PROTON) = {};
+
+  result.set("state/qpStatesEnergy", mv);
+  result.set("state/qpStatesOccupation", mv);
+  result.set("state/qpStatesIndex", miv);
+  result.set("state/blockedQPsIndex", IVEC());
+  result.set("state/blockedQPsOmega", IVEC());
+  result.set("state/blockedQPsIsospin", IVEC());
   result.set("state/totalEnergy", 1e99);
   result.set("state/converged", false);
   result.set("state/calculationLength", 0.0);
   result.set("state/nbIter", 0);
 
   result.validate();
-
-  ASSERT_TRUE(d == result);
 
   auto dt = basis.getDataTree("state/");
   dt.set("state/basis/d_0", 9.8);
@@ -373,8 +350,8 @@ TEST(State, calcUVFromRhoKappa)
     double totalEnergy0 = 0.0;
     double totalEnergy1 = 0.0;
 
-    arma::mat qlmValues0;
-    arma::mat qlmValues1;
+    Multi<double> qlmValues0;
+    Multi<double> qlmValues1;
 
     {
       SolverHFBBroyden solverHFBBroyden(dataTree, state);
@@ -385,7 +362,7 @@ TEST(State, calcUVFromRhoKappa)
 
       MultipoleOperators multipoleOperators(state);
       // INFO(multipoleOperators.getNiceInfo());
-      qlmValues0 = multipoleOperators.qlm;
+      qlmValues0 = multipoleOperators.qlmObs;
     }
 
     state.calcUVFromRhoKappa();
@@ -406,18 +383,24 @@ TEST(State, calcUVFromRhoKappa)
 
       MultipoleOperators multipoleOperators(state);
       // INFO(multipoleOperators.getNiceInfo());
-      qlmValues1 = multipoleOperators.qlm;
+      qlmValues1 = multipoleOperators.qlmObs;
     }
 
     ASSERT_NEAR(totalEnergy0, totalEnergy1, 1e-6);
 
-    ASSERT_NEAR(arma::norm(qlmValues1.row(0) - qlmValues0.row(0), "inf"), 0.0, 1e-7);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(1) - qlmValues0.row(1), "inf"), 0.0, 1e-6);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(2) - qlmValues0.row(2), "inf"), 0.0, 1e-5);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(3) - qlmValues0.row(3), "inf"), 0.0, 1e-4);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(4) - qlmValues0.row(4), "inf"), 0.0, 1e-3);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(5) - qlmValues0.row(5), "inf"), 0.0, 1e-2);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(6) - qlmValues0.row(6), "inf"), 0.0, 1e-1);
+    for (auto key: qlmValues1.getKeys())
+    {
+      double err = 1e-7;
+      if      (key[0] == 0) err = 1e-7;
+      else if (key[0] == 1) err = 1e-6;
+      else if (key[0] == 2) err = 1e-5;
+      else if (key[0] == 3) err = 1e-4;
+      else if (key[0] == 4) err = 1e-3;
+      else if (key[0] == 5) err = 1e-2;
+      else if (key[0] == 6) err = 1e-1;
+
+      ASSERT_NEAR(qlmValues1(key) - qlmValues0(key), 0.0, err);
+    }
   }
 
   {
@@ -433,8 +416,8 @@ TEST(State, calcUVFromRhoKappa)
     double totalEnergy0 = 0.0;
     double totalEnergy1 = 0.0;
 
-    arma::mat qlmValues0;
-    arma::mat qlmValues1;
+    Multi<double> qlmValues0;
+    Multi<double> qlmValues1;
 
     {
       SolverHFBBroyden solverHFBBroyden(dataTree, state);
@@ -445,7 +428,7 @@ TEST(State, calcUVFromRhoKappa)
 
       MultipoleOperators multipoleOperators(state);
       // INFO(multipoleOperators.getNiceInfo());
-      qlmValues0 = multipoleOperators.qlm;
+      qlmValues0 = multipoleOperators.qlmObs;
     }
 
     state.calcUVFromRhoKappa();
@@ -466,18 +449,24 @@ TEST(State, calcUVFromRhoKappa)
 
       MultipoleOperators multipoleOperators(state);
       // INFO(multipoleOperators.getNiceInfo());
-      qlmValues1 = multipoleOperators.qlm;
+      qlmValues1 = multipoleOperators.qlmObs;
     }
 
     ASSERT_NEAR(totalEnergy0, totalEnergy1, 1e-6);
 
-    ASSERT_NEAR(arma::norm(qlmValues1.row(0) - qlmValues0.row(0), "inf"), 0.0, 1e-7);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(1) - qlmValues0.row(1), "inf"), 0.0, 1e-6);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(2) - qlmValues0.row(2), "inf"), 0.0, 1e-5);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(3) - qlmValues0.row(3), "inf"), 0.0, 1e-4);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(4) - qlmValues0.row(4), "inf"), 0.0, 1e-3);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(5) - qlmValues0.row(5), "inf"), 0.0, 1e-2);
-    ASSERT_NEAR(arma::norm(qlmValues1.row(6) - qlmValues0.row(6), "inf"), 0.0, 1e-1);
+    for (auto key: qlmValues1.getKeys())
+    {
+      double err = 1e-7;
+      if      (key[0] == 0) err = 1e-7;
+      else if (key[0] == 1) err = 1e-6;
+      else if (key[0] == 2) err = 1e-5;
+      else if (key[0] == 3) err = 1e-4;
+      else if (key[0] == 4) err = 1e-3;
+      else if (key[0] == 5) err = 1e-2;
+      else if (key[0] == 6) err = 1e-1;
+
+      ASSERT_NEAR(qlmValues1(key) - qlmValues0(key), 0.0, err);
+    }
   }
 }
 

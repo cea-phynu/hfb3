@@ -41,6 +41,16 @@
 //==============================================================================
 //==============================================================================
 
+/// Key, description,  optional default value and type for each input or output.
+#define MIXING_VALID_KEYS \
+{ "solver/broyden/mixing/size"        , "Number of configurations", "8"  , "I" }, \
+{ "solver/broyden/mixing/linearFactor", "Linear mixing factor"    , "0.1", "D" }, \
+{ "solver/broyden/mixing/mixingfactor", "General mixing factor"   , "0.6", "D" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /// Implementation of the Broyden Mixing method.
 class Mixing : public Generic
 {
@@ -71,9 +81,6 @@ public:
   //============================================================================
   //============================================================================
   //============================================================================
-
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
 
 private:
   INT                m = 0;     // m <= M gives back linear mixing

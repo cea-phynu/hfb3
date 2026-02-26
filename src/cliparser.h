@@ -57,6 +57,9 @@ public:
 
   /// Will show the HFB3 logo at the start of the program if true.
   bool showLogo = false;
+
+  /// Will clean the dataTree
+  bool cleanDataTree = false;
 };
 
 #endif // CLIPARSER_H

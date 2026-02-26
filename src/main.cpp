@@ -54,12 +54,14 @@ INT main(INT argc, char **argv)
   CliParser cliParser(argc, argv);
 
   // ===== Welcome message =====
-  if (cliParser.showLogo) Tools::mesg("Logo!!", Tools::getLogoStr());
+  if (cliParser.showLogo)
+    Tools::mesg("Logo!!", Tools::getLogoStr());
   Tools::mesg("Versio", Tools::version());
   Tools::mesg("Compil", std::string(SKILL));
 
 #ifdef NO_DBG_STACK
-  Tools::warning("The debug stack has been disabled.\nRecompile without `-DNO_DBG_STACK` to enable it.");
+  Tools::warning("The debug stack has been disabled.\nRecompile without "
+                 "`-DNO_DBG_STACK` to enable it.");
 #endif
 
   DBG_ENTER;
@@ -87,8 +89,10 @@ INT main(INT argc, char **argv)
       }
       else
       {
-        if (file[0] == '{') content = file;
-        else content = Tools::readFile(file);
+        if (file[0] == '{')
+          content = file;
+        else
+          content = Tools::readFile(file);
       }
 
       DataTree newDataTree = DataTree().fromContent(content);
@@ -97,7 +101,9 @@ INT main(INT argc, char **argv)
       {
         stateOnly = false;
         newDataTree = newDataTree.getFiltered("state/");
-        Tools::mesg("Main  ", "Filtering the given dataTree (keeping only 'state/*' keys)");
+        Tools::mesg(
+            "Main  ",
+            "Filtering the given dataTree (keeping only 'state/*' keys)");
       }
 
       dataTree.merge(newDataTree);
@@ -110,6 +116,9 @@ INT main(INT argc, char **argv)
 
   // ===== Update the general constants/flags =====
   general = General(dataTree);
+
+  // ===== Clean the initial dataTree =====
+  if (cliParser.cleanDataTree) dataTree.clean();
 
   // ===== Validate the initial dataTree =====
   dataTree.validate();
@@ -148,7 +157,24 @@ INT main(INT argc, char **argv)
     // =========================================================================
     // =========================================================================
 
-    // insert some testing code here, get it executed with 'hfb3 "{action:test}"'
+    // insert some testing code here, get it executed with 'hfb3 {action:test}"'
+
+    general.setCompatibility(General::COMPAT_BERGER);
+
+    DataTree dt = DataTree::getDefault() + dataTree;
+    State state(dt);
+    state.calcInertia(Interaction(dt).interactionName);
+
+    INFO(state.getNiceInfo("inertia"));
+
+    double zpeGCMv = state.zpeGCM(0, 0)
+                   + state.zpeGCM(1, 1)
+                   + state.zpeGCM(2, 2);
+    INFO("zpeVibGCM= %.6f", zpeGCMv);
+    double zpeGCMr = state.zpeGCM(3, 3) * 2.0
+                   + state.zpeGCM(4, 4);
+    INFO("zpeRotGCM= %.6f", zpeGCMr);
+    INFO("zpeTotGCM= %.6f", zpeGCMv + zpeGCMr);
 
     // =========================================================================
     // =========================================================================
@@ -157,8 +183,8 @@ INT main(INT argc, char **argv)
   else if (actionStr == "info")
   {
     INFO(dataTree.info());
-    INFO(State(dataTree).info());
     INFO(Basis(dataTree).info());
+    INFO(State(dataTree).info());
     // INFO(State(dataTree).getOmegaContributionsInfo());
   }
   else
@@ -175,4 +201,3 @@ INT main(INT argc, char **argv)
 
   DBG_RETURN(0);
 }
-

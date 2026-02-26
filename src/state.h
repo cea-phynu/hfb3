@@ -32,6 +32,35 @@
 
 class DataTree;
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define STATE_VALID_KEYS \
+{ "state/U"                          , "U matrices"                         , ""     , "MM" }, \
+{ "state/V"                          , "V matrices"                         , ""     , "MM" }, \
+{ "state/rho"                        , "Rho matrices"                       , ""     , "MM" }, \
+{ "state/kappa"                      , "Kappa matrices"                     , ""     , "MM" }, \
+{ "state/chemicalPotential"          , "Chemical potentials"                , ""     , "V"  }, \
+{ "state/totalEnergy"                , "Total energy"                       , ""     , "D"  }, \
+{ "state/converged"                  , "Converged state ?"                  , "False", "B"  }, \
+{ "state/nbIter"                     , "Number of iterations"               , "0"    , "I"  }, \
+{ "state/blockedQPsIndex"            , "Index of the blocked QP states"     , ""     , "IV" }, \
+{ "state/blockedQPsOmega"            , "Omega of the blocked QP states"     , ""     , "IV" }, \
+{ "state/blockedQPsIsospin"          , "Isospin of the blocked QP states"   , ""     , "IV" }, \
+{ "state/qpStatesEnergy"             , "Energy of the quasi-particle states", ""     , "MV" }, \
+{ "state/qpStatesOccupation"         , "Occupation of individual states"    , ""     , "MV" }, \
+{ "state/qpStatesIndex"              , "Index of the quasi-particle states" , ""     , "MIV"}, \
+{ "state/calculationLength"          , "Length of the calculation [s]"      , "0.0"  , "D"  }, \
+{ "basis/useStateBasis"              , "If possible, use the basis of the starting state", "True" , "B"  }
+
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+
 /** \brief Cylindrical one- or two-center state.
  *
  *  This class represents a cylindrical one- or two-center state (Bogoliubov- or EFA-state).
@@ -54,7 +83,7 @@ public :
   const std::string getNiceInfo(const std::string &what = "");         // #TEST#
   bool empty(void) const;                                              // #TEST#
   const arma::vec getOverlap(State &otherState);   // #TEST#
-  void calcInertia(const IVEC &collectiveCoordinates = {});            // #TEST#
+  void calcInertia(const std::string &interactionName, const std::list<std::pair<INT, INT> > &_collectiveCoordinates = {});
   bool checkSolution(void) const;                                      // #TEST#
   void calcCanonical(void);                                            // #TEST#
   const arma::vec getCanonicalV2(const arma::mat &_rho);
@@ -67,9 +96,6 @@ public :
   //============================================================================
   //============================================================================
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// A state is given in a specified Basis
   Basis basis;
 
@@ -79,32 +105,26 @@ public :
   /// A state is computed for a set of contraints
   std::map<std::string, Constraint> constraints;
 
-  /// Blocked quasi-particle states [NEUTRON, PROTON].
-  Multi<INT> blockedQP;
+  /// Blocked quasi-particle states
+  std::set<StateId> blockedQPStates;
 
-  // TODO: store omega-blocks only
-  /// The rho matrices [NEUTRON, PROTON].
+  // TODO: store omega-blocks only ?
+  /// The rho matrices [NEUTRON, PROTON]
   Multi<arma::mat> rho;
 
-  /// The kappa matrices [NEUTRON, PROTON].
+  /// The kappa matrices [NEUTRON, PROTON]
   Multi<arma::mat> kappa;
 
-  /// An arma::mat object representing \f$U\f$ in the HO*OR representation [NEUTRON, PROTON].
+  /// An arma::mat object representing \f$U\f$ in the HO*OR representation [NEUTRON, PROTON]
   Multi<arma::mat> U;
 
-  /// An arma::mat object representing \f$V\f$ in the HO*OR representation [NEUTRON, PROTON].
+  /// An arma::mat object representing \f$V\f$ in the HO*OR representation [NEUTRON, PROTON]
   Multi<arma::mat> V;
 
-  /// Occupation numbers \f$v^2\f$ [NEUTRON, PROTON].
-  Multi<arma::vec> vecOc;
-
-  /// Individual HF energies [NEUTRON, PROTON].
-  Multi<arma::vec> eneQP;
-
-  /// HF state omega and index [NEUTRON, PROTON].
+  /// HF state omega and index [NEUTRON, PROTON]
   Multi<IMAT> oaiHF;
 
-  /// Chemical potentials [NEUTRON, PROTON].
+  /// Chemical potentials [NEUTRON, PROTON]
   arma::vec chemPot = arma::zeros(2);
 
   /// Total binding energy.
@@ -113,16 +133,17 @@ public :
   /// Is this state converged ?
   bool converged = false;
 
-  /// Number of iterations performed.
+  /// Number of iterations performed
   INT nbIter = 0;
 
-  /// Length of the calculation [s].
+  /// Length of the calculation [s]
   double calculationLength = 0.0;
 
   //===== collective quantities =====
 
-  /// collective coordinates
-  IVEC collectiveCoordinates;
+  /// collective coordinates for the inertia calculation
+  // std::list<std::pair<INT, INT> > collectiveCoordinates = {{2, 0}, {3, 0}, {4, 0}};
+  std::list<std::pair<INT, INT> > collectiveCoordinates = {{2, 0}, {3, 0}, {4, 0}, {2, 1}, {2, 2}};
 
   /// metric (GCM and ATDHF)
   arma::mat metric;

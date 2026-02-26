@@ -35,6 +35,21 @@
 
 class DataTree;
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description, optional default value and type for each input or output.
+#define SOLVER_WS_VALID_KEYS \
+{ "solver/ws/beta20tInit", "Temporary constraint on beta20t.", "0.1"   , "D" }, \
+{ "solver/ws/q30tInit"   , "Temporary constraint on q30t."   , "1000.0", "D" }, \
+{ "solver/ws/maxIter"    , "Maximum number of iterations"    , "50"    , "I" }, \
+{ "solver/ws/errorTarget", "Error target value."             , "1e-6"  , "D" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief The solver of the WS equation.
  *
  *  This class represents the core solver of the WS equation.
@@ -69,9 +84,6 @@ public:
   //============================================================================
   //============================================================================
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// The interaction.
   Interaction wsInteraction;
 
@@ -101,6 +113,12 @@ public:
 
   /// Number of parameters to consider.
   UINT dim = 0;
+
+  /// Error value.
+  double errorValue = 1e99;
+
+  /// Error target value.
+  double errorTarget = 1e99;
 
   /// Initial constraint for $\langle \beta_{20}\rangle$.
   double beta20tInit = 0.1;

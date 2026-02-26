@@ -30,6 +30,52 @@
 /// Double nubers are stored in haxadecimal format.
 #define ALWAYS_HEXA
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define IO_BERGER_VALID_KEYS \
+{ "berger/cvg", "convergence reached", "", "D" }, \
+{ "berger/iterx", "number of x-iteractions performed", "", "I" }, \
+{ "berger/itert", "number of t-iteractions performed", "", "I" }, \
+{ "berger/qsciss", "mean-value of Qneck operator", "", "D" }, \
+{ "berger/parent", "parent (starting solution)", "", "S" }, \
+{ "berger/enerNeut_Kinetic"         ,"Energy contribution: Neutron Kinetic"         , "" , "D" }, \
+{ "berger/enerNeut_Coulomb_Direct"  ,"Energy contribution: Neutron Coulomb_Direct"  , "" , "D" }, \
+{ "berger/enerNeut_Central_Direct"  ,"Energy contribution: Neutron Central_Direct"  , "" , "D" }, \
+{ "berger/enerNeut_Central_Exchange","Energy contribution: Neutron Central_Exchange", "" , "D" }, \
+{ "berger/enerNeut_Spin-orbit"      ,"Energy contribution: Neutron Spin-orbit"      , "" , "D" }, \
+{ "berger/enerNeut_Density"         ,"Energy contribution: Neutron Density"         , "" , "D" }, \
+{ "berger/enerNeut_Density_D2"      ,"Energy contribution: Neutron Density D2"      , "" , "D" }, \
+{ "berger/enerNeut_2-Body_COM_Cor." ,"Energy contribution: Neutron 2-Body_COM_Cor." , "" , "D" }, \
+{ "berger/enerNeut_Coulomb_Exchange","Energy contribution: Neutron Coulomb_Exchange", "" , "D" }, \
+{ "berger/enerNeut_Pairing_Central" ,"Energy contribution: Neutron Pairing_Central" , "" , "D" }, \
+{ "berger/enerNeut_Rearrangement"   ,"Energy contribution: Neutron Rearrangement"   , "" , "D" }, \
+{ "berger/enerNeut_Rearrangement_D2","Energy contribution: Neutron Rearrangement D2", "" , "D" }, \
+{ "berger/enerProt_Kinetic"         ,"Energy contribution: Proton Kinetic"         , "" , "D" }, \
+{ "berger/enerProt_Coulomb_Direct"  ,"Energy contribution: Proton Coulomb_Direct"  , "" , "D" }, \
+{ "berger/enerProt_Central_Direct"  ,"Energy contribution: Proton Central_Direct"  , "" , "D" }, \
+{ "berger/enerProt_Central_Exchange","Energy contribution: Proton Central_Exchange", "" , "D" }, \
+{ "berger/enerProt_Spin-orbit"      ,"Energy contribution: Proton Spin-orbit"      , "" , "D" }, \
+{ "berger/enerProt_Density"         ,"Energy contribution: Proton Density"         , "" , "D" }, \
+{ "berger/enerProt_Density_D2"      ,"Energy contribution: Proton Density D2"      , "" , "D" }, \
+{ "berger/enerProt_2-Body_COM_Cor." ,"Energy contribution: Proton 2-Body_COM_Cor." , "" , "D" }, \
+{ "berger/enerProt_Coulomb_Exchange","Energy contribution: Proton Coulomb_Exchange", "" , "D" }, \
+{ "berger/enerProt_Pairing_Central" ,"Energy contribution: Proton Pairing_Central" , "" , "D" }, \
+{ "berger/enerProt_Rearrangement"   ,"Energy contribution: Proton Rearrangement"   , "" , "D" }, \
+{ "berger/enerProt_Rearrangement_D2","Energy contribution: Proton Rearrangement D2", "" , "D" }, \
+{ "berger/enerCorrections", "Energy corrections", "", "V" }, \
+{ "berger/inertia0"  , "inertia tensor 0", "", "V" }, \
+{ "berger/inertia23" , "inertia tensor 2*3", "", "V" }, \
+{ "berger/inertia24" , "inertia tensor 2*4", "", "V" }, \
+{ "berger/inertia34" , "inertia tensor 3*4", "", "V" }, \
+{ "berger/inertia234", "inertia tensor 2*3*4", "", "V" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief Interface to berger2ct result files.
  *
  * This class provides methods to open rhl.dat files (results from the berger2ct code).
@@ -52,9 +98,6 @@ public:
   //============================================================================
   //============================================================================
   //============================================================================
-
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
 
 private:
 
@@ -133,9 +176,15 @@ private:
   arma::mat matDp;
 
   /// The HF energies for neutrons.
-  arma::vec eneQPn;
+  arma::vec energyn;
 
   /// The HF energies for protons.
+  arma::vec energyp;
+
+  /// The QP energies for neutrons.
+  arma::vec eneQPn;
+
+  /// The QP energies for protons.
   arma::vec eneQPp;
 
   /// The \f$V_n\f$ vector.

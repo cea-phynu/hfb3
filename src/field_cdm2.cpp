@@ -42,7 +42,7 @@ FieldCDM2::FieldCDM2(Field::Parameters _parameters, State *_state) : Field(_para
 
   if (general.compatibility == General::COMPAT_BERGER)
   {
-    Tools::warning("Removing CDM2 pairing contribution ! (general.compatibility with BERGER2CT solver)");
+    Tools::warning("Removing CDM2 pairing contribution ! (compatibility with BERGER2CT solver)");
   }
 
   DBG_LEAVE;

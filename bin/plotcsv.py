@@ -15,38 +15,44 @@ import sys
 # ==============================================================================
 
 
-def create_plot(dataFrames, titles):
+def create_plot(data, titles, idx, idy):
 
-    sources = [ColumnDataSource(df) for df in dataFrames]
+    sources = [ColumnDataSource(df) for df in data]
 
-    render_sources = [ColumnDataSource({"x": df[df.columns[0]],
-                                        "y": df[df.columns[1]],
+    render_sources = [ColumnDataSource({"x": df[df.columns[idx]],
+                                        "y": df[df.columns[idy]],
                                         "f": [titles[i]] * len(df),
-                                        }) for i, df in enumerate(dataFrames)]
+                                        }) for i, df in enumerate(data)]
 
     tools = "crosshair,pan,wheel_zoom,box_zoom,reset,hover"
 
-    colors = Category10[len(dataFrames)]
+    print(f"found {len(data)} curves")
+    # colors = Category10[len(data)]
 
     f = figure(tools=tools,
                title='',
-               x_axis_label=dataFrames[0].columns[0],
-               y_axis_label=dataFrames[0].columns[1],
+               x_axis_label=data[0].columns[idx],
+               y_axis_label=data[0].columns[idy],
                sizing_mode="stretch_both",
                )
 
     f.select_one(HoverTool).tooltips = [('f', '@f'), ('x', '$x'), ('y', '$y')]
 
     for i, rs in enumerate(render_sources):
-        f.scatter(source=rs, x="x", y="y", color=colors[i], line_width=1, legend_label=titles[i])
+        f.scatter(source=rs,
+                  x="x",
+                  y="y",
+                  # color=colors[i],
+                  line_width=1,
+                  legend_label=titles[i])
 
     f.legend.location = "top_right"
-    f.legend.click_policy="hide"
+    f.legend.click_policy = "hide"
 
-    columnNames = list(dataFrames[0].columns)
+    columnNames = list(data[0].columns)
 
-    select0 = Select(title="X axis:", options=columnNames, value=columnNames[0])
-    select1 = Select(title="Y axis:", options=columnNames, value=columnNames[1])
+    select0 = Select(title="X axis:", options=columnNames, value=columnNames[idx])
+    select1 = Select(title="Y axis:", options=columnNames, value=columnNames[idy])
 
     jsArgs = dict(
         render_sources=render_sources,
@@ -103,6 +109,6 @@ def create_plot(dataFrames, titles):
 
 
 if __name__ == "__main__":
-    fileNames = sys.argv[1:]
-    datas = [pd.read_csv(f) for f in fileNames]
-    create_plot(datas, fileNames)
+    fileNames = sys.argv[3:]
+    data = [pd.read_csv(f) for f in fileNames]
+    create_plot(data, fileNames, int(sys.argv[1]), int(sys.argv[2]))

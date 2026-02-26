@@ -30,15 +30,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > FieldKinetic::validKeys =
-  {
-  };
-
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** The constructor.
  */
 
@@ -104,7 +95,7 @@ void FieldKinetic::calcField(void)
               double Sabp2 = basis.tabzd(n_z, n_zp + 2, d, dp);
               double Sabm2 = basis.tabzd(n_z, n_zp - 2, d, dp);
               tab(a, b) = (double(2 * n + m + 1) / b_r2 + (double(n_zp) + 0.5) / b_z2) * Sab;
-              tab(a, b) -= 1.0 / (2.0 * b_z2) * (sqrt(n_zp * (n_zp - 1)) * Sabm2 + sqrt((n_zp + 1) * (n_zp + 2)) * Sabp2);
+              tab(a, b) -= 1.0 / (2.0 * b_z2) * (sqrt(n_zp * (n_zp - 1.0)) * Sabm2 + sqrt((n_zp + 1.0) * (n_zp + 2.0)) * Sabp2);
 
               if (m != 0)
               {
@@ -162,7 +153,7 @@ void FieldKinetic::calcField(void)
               {
                 INT b = basis.HOqn.find({m, np, n_zp, dp, 0}); // spin 0
                 double Sab = basis.tabzd(n_z, n_zp, d, dp);
-                tab(a, b) = 1.0 / b_r2 * (sqrt((n + 1) * (n + m + 1)) * Sab);
+                tab(a, b) = 1.0 / b_r2 * (sqrt((n + 1.0) * (n + m + 1.0)) * Sab);
 
                 if (m != 0)
                 {

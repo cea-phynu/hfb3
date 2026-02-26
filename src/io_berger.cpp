@@ -76,51 +76,6 @@
 //==============================================================================
 //==============================================================================
 
-std::list<KeyStruct > IOberger::validKeys =
-  {
-    { "berger/cvg", "convergence reached", "", "D" },
-    { "berger/iterx", "number of x-iteractions performed", "", "I" },
-    { "berger/itert", "number of t-iteractions performed", "", "I" },
-    { "berger/qsciss", "mean-value of Qneck operator", "", "D" },
-    { "berger/parent", "parent (starting solution)", "", "S" },
-    { "berger/enerNeut_Kinetic"         ,"Energy contribution: Neutron Kinetic"         , "" , "D" },
-    { "berger/enerNeut_Coulomb_Direct"  ,"Energy contribution: Neutron Coulomb_Direct"  , "" , "D" },
-    { "berger/enerNeut_Central_Direct"  ,"Energy contribution: Neutron Central_Direct"  , "" , "D" },
-    { "berger/enerNeut_Central_Exchange","Energy contribution: Neutron Central_Exchange", "" , "D" },
-    { "berger/enerNeut_Spin-orbit"      ,"Energy contribution: Neutron Spin-orbit"      , "" , "D" },
-    { "berger/enerNeut_Density"         ,"Energy contribution: Neutron Density"         , "" , "D" },
-    { "berger/enerNeut_Density_D2"      ,"Energy contribution: Neutron Density D2"      , "" , "D" },
-    { "berger/enerNeut_2-Body_COM_Cor." ,"Energy contribution: Neutron 2-Body_COM_Cor." , "" , "D" },
-    { "berger/enerNeut_Coulomb_Exchange","Energy contribution: Neutron Coulomb_Exchange", "" , "D" },
-    { "berger/enerNeut_Pairing_Central" ,"Energy contribution: Neutron Pairing_Central" , "" , "D" },
-    { "berger/enerNeut_Rearrangement"   ,"Energy contribution: Neutron Rearrangement"   , "" , "D" },
-    { "berger/enerNeut_Rearrangement_D2","Energy contribution: Neutron Rearrangement D2", "" , "D" },
-
-    { "berger/enerProt_Kinetic"         ,"Energy contribution: Proton Kinetic"         , "" , "D" },
-    { "berger/enerProt_Coulomb_Direct"  ,"Energy contribution: Proton Coulomb_Direct"  , "" , "D" },
-    { "berger/enerProt_Central_Direct"  ,"Energy contribution: Proton Central_Direct"  , "" , "D" },
-    { "berger/enerProt_Central_Exchange","Energy contribution: Proton Central_Exchange", "" , "D" },
-    { "berger/enerProt_Spin-orbit"      ,"Energy contribution: Proton Spin-orbit"      , "" , "D" },
-    { "berger/enerProt_Density"         ,"Energy contribution: Proton Density"         , "" , "D" },
-    { "berger/enerProt_Density_D2"      ,"Energy contribution: Proton Density D2"      , "" , "D" },
-    { "berger/enerProt_2-Body_COM_Cor." ,"Energy contribution: Proton 2-Body_COM_Cor." , "" , "D" },
-    { "berger/enerProt_Coulomb_Exchange","Energy contribution: Proton Coulomb_Exchange", "" , "D" },
-    { "berger/enerProt_Pairing_Central" ,"Energy contribution: Proton Pairing_Central" , "" , "D" },
-    { "berger/enerProt_Rearrangement"   ,"Energy contribution: Proton Rearrangement"   , "" , "D" },
-    { "berger/enerProt_Rearrangement_D2","Energy contribution: Proton Rearrangement D2", "" , "D" },
-
-    { "berger/enerCorrections", "Energy corrections", "", "V" },
-    { "berger/inertia0"  , "inertia tensor 0", "", "V" },
-    { "berger/inertia23" , "inertia tensor 2*3", "", "V" },
-    { "berger/inertia24" , "inertia tensor 2*4", "", "V" },
-    { "berger/inertia34" , "inertia tensor 3*4", "", "V" },
-    { "berger/inertia234", "inertia tensor 2*3*4", "", "V" },
-  };
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
 /** The constructor.
  *
  *  Open a rhl.dat file, build the corresponding DataTree.
@@ -252,6 +207,7 @@ void IOberger::readMisc(void)
     noeRead("xbz", "D", 1, &zNumber);
     noeRead("xbn", "D", 1, &nNumber);
     noeRead("wtab(iwtab,09)", "D", 1, &convergence);
+    // INFO("read Z=%lf N=%lf system", zNumber, nNumber);
   }
   catch (...)
   {
@@ -374,17 +330,17 @@ void IOberger::readMisc(void)
   //  energiesNeut["Pairing_D2"   ] = energiesNeut["Pairing_Central"];
   //  energiesProt["Pairing_D2"   ] = energiesProt["Pairing_Central"];
   corrections = arma::zeros(6);
-  noeRead("ztroa", "D", 1, &v1);
+  noeRead("ztroa", "D", 1, &v1); // zpevibATD(q2+q3+q4)
   corrections(0) = v1;
-  noeRead("ztrog", "D", 1, &v1);
+  noeRead("ztrog", "D", 1, &v1); // zpevibGCM(q2+q3+q4)
   corrections(1) = v1;
-  noeRead("ztroqa", "D", 1, &v1);
+  noeRead("ztroqa", "D", 1, &v1); // zpevibATD(q2+q3+q4) + zperot(3D)ATD
   corrections(2) = v1;
-  noeRead("ztroqg", "D", 1, &v1);
+  noeRead("ztroqg", "D", 1, &v1); // zpevibGCM(q2+q3+q4) + zperot(3D)GCM
   corrections(3) = v1;
-  noeRead("ztroja", "D", 1, &v1);
+  noeRead("ztroja", "D", 1, &v1); // zpevibATD(q2+q3+q4) + zperot(J2)
   corrections(4) = v1;
-  noeRead("ztrojg", "D", 1, &v1);
+  noeRead("ztrojg", "D", 1, &v1); // zpevibGCM(q2+q3+q4) + zperot(J2)
   corrections(5) = v1;
   noeRead("masses0", "D", 15, toto);
   inertia0 = arma::zeros(15);
@@ -440,6 +396,8 @@ void IOberger::readMisc(void)
     double xocw[ke];
     double xenr[ke];
     double xenrw[ke];
+    double xqp[ke];
+    double xqpw[ke];
     INT kenr[basis.mMax + 1];
     noeRead("nord", "I", ke, nord);
     noeRead("nordw", "I", ke, nordw);
@@ -447,11 +405,15 @@ void IOberger::readMisc(void)
     noeRead("xocw", "D", ke, xocw);
     noeRead("xenr", "D", ke, xenr);
     noeRead("xenrw", "D", ke, xenrw);
+    noeRead("xqp", "D", ke, xqp);
+    noeRead("xqpw", "D", ke, xqpw);
     noeRead("kenr", "I", basis.mMax + 1, kenr);
     vecVn = arma::zeros(ke);
     vecVp = arma::zeros(ke);
     eneQPn = arma::zeros(ke);
     eneQPp = arma::zeros(ke);
+    energyn = arma::zeros(ke);
+    energyp = arma::zeros(ke);
     vecOmegan = IVEC(ke, arma::fill::zeros);
     vecOmegap = IVEC(ke, arma::fill::zeros);
     double toto2[jdx * jdx];
@@ -524,11 +486,14 @@ void IOberger::readMisc(void)
 
         if ((rankn != -1) && (rankp != -1))
         {
-          vecVn(rankn) = xoc[istate];
           vecOmegan(rankn) = mo;
-          eneQPn(istate) = xenr[istate];
+          vecVn(rankn) = xoc[istate];
           vecVp(rankp) = xocw[istate];
-          eneQPp(istate) = xenrw[istate];
+          eneQPn(istate) = xqp[istate];
+          eneQPp(istate) = xqpw[istate];
+          energyn(istate) = xenr[istate];
+          energyp(istate) = xenrw[istate];
+
           vecOmegap(rankp) = mo;
 
           for (INT mb = mo; mb < mbstop; mb++)
@@ -1330,17 +1295,40 @@ DataTree IOberger::fromContent(const std::string &_content)
   result.merge(basis.getDataTree(""));
   result.set("state/rho", rho);
   result.set("state/kappa", kappa);
-  // result.set("state/N", (INT)(nNumber));
-  // result.set("state/Z", (INT)(zNumber));
+  result.set("system/nNeut", (INT)(nNumber));
+  result.set("system/nProt", (INT)(zNumber));
   // result.set("state/HOtoHFNeut", matDn);
   // result.set("state/HOtoHFProt", matDp);
-  // result.set("state/indivOccupNeut", vecVn);
-  // result.set("state/indivOccupProt", vecVp);
-  // result.set("state/indivEnerNeut", eneQPn);
-  // result.set("state/indivEnerProt", eneQPp);
+
+  // TODO : debug this
+// #define LOAD_QP_STATES
+#ifdef LOAD_QP_STATES
+  Multi<VEC> occupation;
+  occupation(NEUTRON) = vecVn;
+  occupation(PROTON ) = vecVp;
+  result.set("state/qpStatesOccupation", occupation);
+
+  Multi<IVEC> indexm;
+  indexm(NEUTRON) = arma::zeros<IVEC>(vecVn.n_elem);
+  indexm(PROTON ) = arma::zeros<IVEC>(vecVn.n_elem);
+  for (int i = 0; i < indexm(NEUTRON).n_elem; i++) indexm(NEUTRON)(i) = i;
+  for (int i = 0; i < indexm(PROTON ).n_elem; i++) indexm(PROTON )(i) = i;
+  result.set("state/qpStatesIndex", indexm);
+
+  Multi<VEC> eneQP;
+  eneQP(NEUTRON) = eneQPn;
+  eneQP(PROTON ) = eneQPp;
+  result.set("state/qpStatesEnergy", eneQP);
+#endif
+
+
+
+
   result.set("state/chemicalPotential", chemPot);
 
   result.set("state/totalEnergy", eneTot);
+
+  INFO("Total energy: %.6f", eneTot);
 
   IMAT oaiHFn = arma::zeros<IMAT >(vecOmegan.n_rows, 2);
   IMAT oaiHFp = arma::zeros<IMAT >(vecOmegap.n_rows, 2);
@@ -1427,7 +1415,7 @@ bool IOberger::checkFileType(const std::string &_content)
 //==============================================================================
 //==============================================================================
 
-/** Save a DataTree to a .rhl file.
+/** Save a State instance to an .rhl file.
  */
 
 void IOberger::saveState(const State &state, const std::string &filename)
@@ -1773,7 +1761,7 @@ void IOberger::saveState(const State &state, const std::string &filename)
 
   for (auto &c : state.constraints)
   {
-    bufferAppend(c.second.lambda); // xlamci
+    bufferAppend(c.second.lagrangeMultiplier); // xlamci
   }
 
   for (UINT i = state.constraints.size(); i < 9; i++)

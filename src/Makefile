@@ -82,7 +82,7 @@ LIB_OBJECTS=$(OBJ_DIR)/action.o                       \
             $(OBJ_DIR)/system.o                       \
             $(OBJ_DIR)/states.o                       \
             $(OBJ_DIR)/wspot.o                        \
-            $(OBJ_DIR)/tools.o                        \
+            $(OBJ_DIR)/tools.o
 
 DEP = $(LIB_OBJECTS:%.o=%.d) $(MAIN_OBJECT:%.o=%.d)
 

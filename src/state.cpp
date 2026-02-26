@@ -23,28 +23,11 @@
 #include "multipole_operators.h"
 #include "interaction.h"
 #include "solver_hfb_broyden.h"
+#include "states.h"
 
 /** \file
  *  \brief Methods of the State class.
  */
-
-//==============================================================================
-//==============================================================================
-//==============================================================================
-
-std::list<KeyStruct > State::validKeys =
-  {
-    { "state/rho"                        , "Rho matrices"                   , ""     , "MM" },
-    { "state/kappa"                      , "Kappa matrices"                 , ""     , "MM" },
-    { "state/individualStates/energy"    , "Energy of individual states"    , ""     , "MV" },
-    { "state/individualStates/occupation", "Occupation of individual states", ""     , "MV" },
-    { "state/chemicalPotential"          , "Chemical potentials"            , ""     , "V"  },
-    { "state/totalEnergy"                , "Total energy"                   , ""     , "D"  },
-    { "state/converged"                  , "Converged state ?"              , "False", "B"  },
-    { "state/nbIter"                     , "Number of iterations"           , "0"    , "I"  },
-    { "state/calculationLength"          , "Length of the calculation [s]"  , "0.0"  , "D"  },
-    { "basis/useStateBasis"              , "If possible, use the basis of the starting state", "True" , "B"  },
-  };
 
 //==============================================================================
 //==============================================================================
@@ -91,16 +74,19 @@ State::State(const DataTree &dataTree) :
 {
   DBG_ENTER;
 
-  rho(NEUTRON) = arma::mat();
-  rho(PROTON ) = arma::mat();
-  kappa(NEUTRON) = arma::mat();
-  kappa(PROTON ) = arma::mat();
-  U(NEUTRON) = arma::mat();
-  U(PROTON ) = arma::mat();
-  V(NEUTRON) = arma::mat();
-  V(PROTON ) = arma::mat();
-  blockedQP(NEUTRON) = -1;
-  blockedQP(PROTON ) = -1;
+  rho(NEUTRON)       = arma::mat();
+  rho(PROTON )       = arma::mat();
+  kappa(NEUTRON)     = arma::mat();
+  kappa(PROTON )     = arma::mat();
+  U(NEUTRON)         = arma::mat();
+  U(PROTON )         = arma::mat();
+  V(NEUTRON)         = arma::mat();
+  V(PROTON )         = arma::mat();
+
+  // // Construct U and V from the dataTree instance
+  // dataTree.get(U, "state/U", true);
+  // dataTree.get(V, "state/V", true);
+  // calcRhoKappaFromUV();
 
   // Try to construct rho and kappa from the dataTree instance
   Multi<arma::mat> multiRho;
@@ -135,19 +121,34 @@ State::State(const DataTree &dataTree) :
     dataTree.get(kappa,           "state/kappa", true);
   }
 
-  dataTree.get(eneQP,             "state/individualStates/energy", true);
-  dataTree.get(chemPot,           "state/chemicalPotential", true);
-
   dataTree.get(totalEnergy,       "state/totalEnergy", true);
   dataTree.get(converged,         "state/converged", true);
-
   dataTree.get(nbIter,            "state/nbIter", true);
   dataTree.get(calculationLength, "state/calculationLength", true);
 
-  // Construct constraints
-  constraints = Constraint::fromDataTree(dataTree);
+  //============================================================================
 
-  basis.calcWDN();
+  // read blocked QP states
+  IVEC blockedQPsOmega;
+  dataTree.get(blockedQPsOmega,   "state/blockedQPsOmega", true);
+  IVEC blockedQPsIndex;
+  dataTree.get(blockedQPsIndex,   "state/blockedQPsIndex", true);
+  IVEC blockedQPsIsospin;
+  dataTree.get(blockedQPsIsospin, "state/blockedQPsIsospin", true);
+
+  ASSERT((blockedQPsOmega.n_elem == blockedQPsIndex.n_elem) && (blockedQPsOmega.n_elem == blockedQPsIsospin.n_elem), "Sizes mismatch for blocked QP states.");
+  blockedQPStates.clear();
+
+  for (INT i = 0; i < blockedQPsOmega.n_elem; i++)
+  {
+    StateId is = {blockedQPsIndex(i), blockedQPsOmega(i), blockedQPsIsospin(i)};
+    blockedQPStates.insert(is);
+  }
+
+  //============================================================================
+
+  // read chemical potentials
+  dataTree.get(chemPot, "state/chemicalPotential", true);
 
   // If a basis is provided, use it (unless specified otherwise)
   if (dataTree.contains("state/basis/b_r"))
@@ -163,20 +164,88 @@ State::State(const DataTree &dataTree) :
       if (useStateBasis)
       {
         basis = stateBasis;
-        basis.calcWDN();
+        // basis.calcWDN();
 
-        Tools::mesg("State ", "The basis specified in 'state/basis/' will be used.");
-        Tools::mesg("State", "To use the basis specified in 'basis/', set `basis/useStateBasis` to False.");
+        Tools::debug("The basis specified in 'state/basis/' will be used.");
+        Tools::debug("To use the basis specified in 'basis/', set `basis/useStateBasis` to False.");
       }
       else
       {
-        Tools::mesg("State", "Converting the state from the basis in `state/basis/` to the basis in `basis/`.");
+        Tools::debug("Converting the state from the basis in `state/basis/` to the basis in `basis/`.");
 
         // Convert the state FROM the stateBasis to the current basis
         convertFrom(stateBasis);
       }
     }
   }
+
+  //============================================================================
+
+  basis.calcWDN();
+
+  //============================================================================
+
+  // read QP states
+  Multi<VEC> qpStatesEnergy;
+  Multi<IVEC> qpStatesIndex;
+  Multi<VEC> qpStatesOccupation;
+  dataTree.get(qpStatesEnergy,     "state/qpStatesEnergy", true);
+  dataTree.get(qpStatesIndex,      "state/qpStatesIndex", true);
+  dataTree.get(qpStatesOccupation, "state/qpStatesOccupation", true);
+
+  for (auto iso: {NEUTRON, PROTON})
+  {
+    qpStates(iso) = States(PF("QP. %s", iso == NEUTRON ? "n" : "p"));
+  }
+
+  bool qpOK = true;
+  INT nbQP = 0;
+
+  if (qpStatesEnergy.size() > 0)
+  {
+    nbQP = basis.ORqn.nb;
+
+    if (qpStatesEnergy(    NEUTRON).n_elem != nbQP) { Tools::warning("wrong size of qpStatesEnergy(n)"    ); qpOK = false;}
+    if (qpStatesEnergy(    PROTON ).n_elem != nbQP) { Tools::warning("wrong size of qpStatesEnergy(p)"    ); qpOK = false;}
+    if (qpStatesIndex(     NEUTRON).n_elem != nbQP) { Tools::warning("wrong size of qpStatesIndex(n)"     ); qpOK = false;}
+    if (qpStatesIndex(     PROTON ).n_elem != nbQP) { Tools::warning("wrong size of qpStatesIndex(p)"     ); qpOK = false;}
+    if (qpStatesOccupation(NEUTRON).n_elem != nbQP) { Tools::warning("wrong size of qpStatesOccupation(n)"); qpOK = false;}
+    if (qpStatesOccupation(PROTON ).n_elem != nbQP) { Tools::warning("wrong size of qpStatesOccupation(p)"); qpOK = false;}
+  }
+  else
+  {
+    qpOK = false;
+  }
+
+  if (qpOK)
+  {
+    for (INT i = 0; i < nbQP; i++)
+    {
+      UINT index = qpStatesIndex(NEUTRON)(i);
+
+      INT m = basis.ORqn(0, index);
+      INT s = basis.ORqn(4, index);
+
+      qpStates(NEUTRON).add(qpStatesIndex(NEUTRON)(i),
+                            qpStatesEnergy(NEUTRON)(i),
+                            qpStatesOccupation(NEUTRON)(i),
+                            {basis.blockIdOR(index), m - s, NEUTRON});
+      qpStates(PROTON ).add(qpStatesIndex(PROTON)(i),
+                            qpStatesEnergy(PROTON)(i),
+                            qpStatesOccupation(PROTON)(i),
+                            {basis.blockIdOR(index), m - s, PROTON});
+    }
+    Tools::mesg("State ", PF("%d QP states loaded", nbQP));
+  }
+  else
+  {
+    Tools::warning("QP states not loaded");
+  }
+
+  //============================================================================
+
+  // Construct constraints
+  constraints = Constraint::fromDataTree(dataTree);
 
   // If missing rho and kappa and U and V present, reconstruct from U and V
   if (rho(NEUTRON).empty() || rho(PROTON).empty() ||
@@ -194,11 +263,6 @@ State::State(const DataTree &dataTree) :
 
   // Tools::mesg("BogCnv", getOmegaContributionsInfo());
 
-  // Set collectiveCoordinates (used for inertia calculation)
-  for (auto &c : constraints)
-    if (c.second.useForInertias)
-      Tools::growIVec(collectiveCoordinates, c.second.lm);
-
   DBG_LEAVE;
 }
 
@@ -213,13 +277,13 @@ DataTree State::getDataTree(void)
 {
   DBG_ENTER;
 
-  DataTree state;
+  DataTree dt;
 
   // State datatree must contain the associated basis
-  state.merge(basis.getDataTree("state/"));
+  dt.merge(basis.getDataTree("state/"));
 
   // State datatree must contain the associated system
-  state.merge(sys.getDataTree());
+  dt.merge(sys.getDataTree());
 
   // Save rho and kappa matrices
   Multi<arma::mat> multiRho;
@@ -243,24 +307,57 @@ DataTree State::getDataTree(void)
     }
   }
 
-  state.set("state/rho",                         multiRho);
-  state.set("state/kappa",                       multiKappa);
+  dt.set("state/rho",                         multiRho);
+  dt.set("state/kappa",                       multiKappa);
+  // dt.set("state/U",                           U);
+  // dt.set("state/V",                           V);
 
-  state.set("state/individualStates/energy",     eneQP);
-  state.set("state/individualStates/occupation", vecOc);
-  state.set("state/chemicalPotential",           chemPot);
-  state.set("state/totalEnergy",                 totalEnergy);
-  state.set("state/converged",                   converged);
-  state.set("state/nbIter",                      nbIter);
-  state.set("state/calculationLength",           calculationLength);
+  // TODO: save individual states
+
+  IVEC blockedQPsOmega   = arma::zeros<IVEC>(blockedQPStates.size());
+  IVEC blockedQPsIndex   = arma::zeros<IVEC>(blockedQPStates.size());
+  IVEC blockedQPsIsospin = arma::zeros<IVEC>(blockedQPStates.size());
+
+  INT i = 0;
+  for (auto &bsid: blockedQPStates)
+  {
+    blockedQPsOmega(i) = bsid.omega;
+    blockedQPsIndex(i) = bsid.index;
+    blockedQPsIsospin(i) = bsid.isospin;
+    i++;
+  }
+  dt.set("state/blockedQPsOmega", blockedQPsOmega);
+  dt.set("state/blockedQPsIndex", blockedQPsIndex);
+  dt.set("state/blockedQPsIsospin", blockedQPsIsospin);
+
+  Multi<VEC> qpStatesEnergy;
+  qpStatesEnergy(NEUTRON) = qpStates(NEUTRON).getEnergy();
+  qpStatesEnergy(PROTON ) = qpStates(PROTON ).getEnergy();
+
+  Multi<IVEC> qpStatesIndex;
+  qpStatesIndex(NEUTRON) = qpStates(NEUTRON).getIndex();
+  qpStatesIndex(PROTON ) = qpStates(PROTON ).getIndex();
+
+  Multi<VEC> qpStatesOccupation;
+  qpStatesOccupation(NEUTRON) = qpStates(NEUTRON).getOccupation();
+  qpStatesOccupation(PROTON ) = qpStates(PROTON ).getOccupation();
+
+  dt.set("state/qpStatesEnergy",     qpStatesEnergy);
+  dt.set("state/qpStatesIndex",      qpStatesIndex);
+  dt.set("state/qpStatesOccupation", qpStatesOccupation);
+  dt.set("state/chemicalPotential",  chemPot);
+  dt.set("state/totalEnergy",        totalEnergy);
+  dt.set("state/converged",          converged);
+  dt.set("state/nbIter",             nbIter);
+  dt.set("state/calculationLength",  calculationLength);
 
   // set the energy constraints
   for (auto &c : constraints)
   {
-    state.merge(c.second.getDataTree());
+    dt.merge(c.second.getDataTree());
   }
 
-  DBG_RETURN(state);
+  DBG_RETURN(dt);
 }
 
 //==============================================================================
@@ -298,14 +395,14 @@ void State::convertFrom(Basis &initialBasis)
 
   if (basis == initialBasis)
   {
-    // Tools::mesg("State.", PF_YELLOW("Identical bases => no conversion"));
+    // Tools::mesg("State ", PF_YELLOW("Identical bases => no conversion"));
 
     DBG_LEAVE;
   }
 
   if (empty())
   {
-    // Tools::mesg("State.", PF_YELLOW("empty state => no conversion"));
+    // Tools::mesg("State ", PF_YELLOW("empty state => no conversion"));
 
     DBG_LEAVE;
   }
@@ -327,9 +424,9 @@ void State::convertFrom(Basis &initialBasis)
   kappa(PROTON ) = transMat * kappa(PROTON ) * transMat.t();
 
   // basis conversion
-  Tools::mesg("State.", "State basis conversion:");
-  Tools::mesg("State.", "from: " + initialBasis.info(true));
-  Tools::mesg("State.", "to:   " + basis.info(true));
+  Tools::mesg("State ", "State basis conversion:");
+  Tools::mesg("State ", "from: " + initialBasis.info(true));
+  Tools::mesg("State ", "to:   " + basis.info(true));
 
   DBG_LEAVE;
 }
@@ -452,8 +549,8 @@ void State::calcUVFromRhoKappa(void)
   if (kappa(NEUTRON).empty()) { DBG_LEAVE; };
   if (kappa(PROTON ).empty()) { DBG_LEAVE; };
 
-  Tools::mesg("State.", "Updating U and V matrices from rho and kappa matrices");
-  // Tools::mesg("State.", info());
+  Tools::debug("Updating U and V matrices from rho and kappa matrices");
+  // Tools::mesg("State ", info());
 
   //============================================================================
   //============================================================================
@@ -515,8 +612,8 @@ void State::calcUVFromRhoKappa(void)
     }
   }
 
-  // Tools::mesg("State.", "Updating U and V matrices from rho and kappa matrices - after:");
-  // Tools::mesg("State.", info());
+  // Tools::mesg("State ", "Updating U and V matrices from rho and kappa matrices - after:");
+  // Tools::mesg("State ", info());
 
   //============================================================================
   //============================================================================
@@ -541,8 +638,8 @@ void State::calcRhoKappaFromUV(void)
   if (V(NEUTRON).empty()) DBG_LEAVE;
   if (V(PROTON ).empty()) DBG_LEAVE;
 
-  Tools::mesg("State.", "Updating rho and kappa matrices from U and V matrices");
-  // Tools::mesg("State.", info());
+  Tools::mesg("State ", "Updating rho and kappa matrices from U and V matrices");
+  // Tools::mesg("State ", info());
 
   rho(NEUTRON)   = V(NEUTRON) * V(NEUTRON).t();
   rho(PROTON )   = V(PROTON ) * V(PROTON ).t();
@@ -554,8 +651,8 @@ void State::calcRhoKappaFromUV(void)
   // kappa(NEUTRON) = arma::symmatu(kappa(NEUTRON));
   // kappa(PROTON ) = arma::symmatu(kappa(PROTON ));
 
-  // Tools::mesg("State.", "Updating rho and kappa matrices from U and V matrices - after:");
-  // Tools::mesg("State.", info());
+  // Tools::mesg("State ", "Updating rho and kappa matrices from U and V matrices - after:");
+  // Tools::mesg("State ", info());
 
   DBG_LEAVE;
 }
@@ -627,6 +724,18 @@ const std::string State::info(bool isShort) const
   }
   else
   {
+    ASSERT(qpStates.contains(NEUTRON), "no NEUTRON key in state.qpStates");
+    ASSERT(qpStates.contains(PROTON ), "no PROTON  key in state.qpStates");
+    ASSERT(rho.contains(NEUTRON), "no NEUTRON key in state.rho");
+    ASSERT(rho.contains(PROTON ), "no PROTON  key in state.rho");
+    ASSERT(chemPot.n_elem == 2, "wrong dimension for state.chemPot");
+    ASSERT(U.contains(NEUTRON), "no NEUTRON key in state.U");
+    ASSERT(U.contains(PROTON ), "no PROTON  key in state.U");
+    ASSERT(V.contains(NEUTRON), "no NEUTRON key in state.V");
+    ASSERT(V.contains(PROTON ), "no PROTON  key in state.V");
+    ASSERT(kappa.contains(NEUTRON), "no NEUTRON key in state.kappa");
+    ASSERT(kappa.contains(PROTON ), "no PROTON  key in state.kappa");
+
     state += Tools::treeStr(
     {
       {"State", ""},
@@ -642,13 +751,14 @@ const std::string State::info(bool isShort) const
       {"U(p)  ", Tools::infoStr(U(PROTON ))},
       {"V(n)  ", Tools::infoStr(V(NEUTRON))},
       {"V(p)  ", Tools::infoStr(V(PROTON ))},
-      {"bloc.n", Tools::infoStr(blockedQP(NEUTRON))},
-      {"bloc.p", Tools::infoStr(blockedQP(PROTON ))},
+      {"block.", Tools::infoStr(blockedQPStates)},
       {"eneTot", Tools::infoStr(totalEnergy)},
       {"chemPn", Tools::infoStr(chemPot(NEUTRON))},
       {"chemPp", Tools::infoStr(chemPot(PROTON ))},
-      {"ZpeGcm", Tools::infoStr(arma::trace(zpeGCM))},
-      {"ZpeAtd", Tools::infoStr(arma::trace(zpeATDHF))},
+      {"QPs n.", PF("%d states", qpStates(NEUTRON).n_elem)},
+      {"QPs p.", PF("%d states", qpStates(PROTON ).n_elem)},
+      // {"ZpeGcm", Tools::infoStr(arma::trace(zpeGCM))},
+      // {"ZpeAtd", Tools::infoStr(arma::trace(zpeATDHF))},
     }, false);
   }
 
@@ -681,33 +791,36 @@ const std::string State::getNiceInfo(const std::string &what)
     if (!metric.empty())
     {
       INT ic = 0;
-      for (auto &c : collectiveCoordinates)
+      for (auto &p : collectiveCoordinates)
       {
-        names.push_back(PF("q%01d0", c));
-        units.push_back(PF("[fm%01d]", c));
+        INT lambda = p.first;
+        INT mu = p.second;
+
+        names.push_back(PF("q%01d%01d", lambda, mu));
+        units.push_back(PF("[fm%01d]", lambda));
 
         std::list<std::string> val;
-        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        val.push_back(PF("q%01d%01d [fm%01d]", lambda, mu, lambda));
         for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", metric(ic, ic2)));
         valuesMetric.push_back(val);
 
         val.clear();
-        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        val.push_back(PF("q%01d%01d [fm%01d]", lambda, mu, lambda));
         for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", massGCM(ic, ic2)));
         valuesMassGCM.push_back(val);
 
         val.clear();
-        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        val.push_back(PF("q%01d%01d [fm%01d]", lambda, mu, lambda));
         for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", zpeGCM(ic, ic2)));
         valuesZpeGCM.push_back(val);
 
         val.clear();
-        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        val.push_back(PF("q%01d%01d [fm%01d]", lambda, mu, lambda));
         for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", massATDHF(ic, ic2)));
         valuesMassATDHF.push_back(val);
 
         val.clear();
-        val.push_back(PF("q%01d0 [fm%01d]", c, c));
+        val.push_back(PF("q%01d%01d [fm%01d]", lambda, mu, lambda));
         for (INT ic2 = 0; ic2 < collectiveCoordinates.size(); ic2++) val.push_back(PF("%13.6e", zpeATDHF(ic, ic2)));
         valuesZpeATDHF.push_back(val);
 
@@ -722,7 +835,7 @@ const std::string State::getNiceInfo(const std::string &what)
     }
     else
     {
-      result += PF_YELLOW("No inertia (no valid constraints).");
+      result += PF_YELLOW("Inertia have not been calculated.");
     }
   }
   else
@@ -740,81 +853,170 @@ const std::string State::getNiceInfo(const std::string &what)
 /** Calculate the inertia tensor, the metric and the ZPE energy (ATDHF and GCM prescriptions).
  */
 
-void State::calcInertia(const IVEC &_collectiveCoordinates)
+void State::calcInertia(const std::string &interactionName, const std::list<std::pair<INT, INT> > &_collectiveCoordinates)
 {
   DBG_ENTER;
+
+  Tools::mesg("State ", "(Re)calculating the QP states and U/V matrices => performing iterations of the Broyden solver");
+  DataTree dt = DataTree::getDefault() + getDataTree();
+  dt.set("interaction/name", interactionName);
+
+  SolverHFBBroyden solver(dt, *this);
+  solver.init();
+
+  while(solver.nextIter());
+  *this = solver.state;
+
+  qpStates(NEUTRON).sort("energy");
+  qpStates(PROTON ).sort("energy");
+
+  // INFO("before calculating inertia...");
+  // INFO(qpStates(NEUTRON).info(-1, true));
+  // INFO(qpStates(PROTON ).info(-1, true));
 
   ASSERT(!U(NEUTRON).empty(), "Empty U(NEUTRON)");
   ASSERT(!U(PROTON ).empty(), "Empty U(PROTON )");
   ASSERT(!V(NEUTRON).empty(), "Empty V(NEUTRON)");
   ASSERT(!V(PROTON ).empty(), "Empty V(PROTON )");
+  ASSERT(!qpStates.empty()  , "No QP states");
 
   if (!_collectiveCoordinates.empty()) collectiveCoordinates = _collectiveCoordinates;
 
+  // ===========================================================================
+  // ===========================================================================
+  // ===========================================================================
+
+  // Construct and print the list of collective coordinates
+  std::string listStr;
+  INT i = 0;
+  for (auto p: collectiveCoordinates)
+  {
+    INT lambda = p.first;
+    INT mu = p.second;
+
+    listStr += PF_YELLOW("Q(%01d,%01d)", lambda, mu);
+    i++;
+    if (i != collectiveCoordinates.size()) listStr += ", ";
+  }
+  Tools::mesg("State ", "Collective coordinates for the inertia calculation: (" + listStr + ")");
+
+  // ===========================================================================
+  // ===========================================================================
+  // ===========================================================================
+
+  // Initialize Qtot matrices
   Multi<arma::mat> Qtot;
 
-  for (auto &lambda : collectiveCoordinates)
+  for (auto iso: {NEUTRON, PROTON})
   {
-    Qtot(NEUTRON, lambda) = arma::zeros(basis.ORqn.nb, basis.ORqn.nb);
-    Qtot(PROTON , lambda) = arma::zeros(basis.ORqn.nb, basis.ORqn.nb);
+    for (auto &p: collectiveCoordinates)
+    {
+      INT lambda = p.first;
+      INT mu = p.second;
+
+      Qtot(iso, lambda, mu) = arma::zeros(basis.ORqn.nb, basis.ORqn.nb);
+    }
   }
 
+  // ===========================================================================
+
+  // Fill Qtot matrices
   MultipoleOperators multipoleOperators(*this);
-  multipoleOperators.calcQl0Matrices();
-
-  Multi<arma::mat> Utot, Vtot;
-
-  // go to OR*OR representation
-  Utot(NEUTRON) = basis.ORtoHO.t() * U(NEUTRON);
-  Utot(PROTON ) = basis.ORtoHO.t() * U(PROTON );
-  Vtot(NEUTRON) = basis.ORtoHO.t() * V(NEUTRON);
-  Vtot(PROTON ) = basis.ORtoHO.t() * V(PROTON );
+  multipoleOperators.calcQlmHO();
 
   for (INT iso: {NEUTRON, PROTON})
   {
-    INT ic = 0;
-
-    for (auto &lambda : collectiveCoordinates)
+    for (auto &p: collectiveCoordinates)
     {
-      Qtot(iso, ic) = Utot(iso).t() * basis.HOtoOR * multipoleOperators.ql0(lambda) * basis.HOtoOR.t() * Vtot(iso)
-                    + Vtot(iso).t() * basis.HOtoOR * multipoleOperators.ql0(lambda) * basis.HOtoOR.t() * Utot(iso);
-      ic++;
+      INT lambda = p.first;
+      INT mu = p.second;
+
+      ASSERT(multipoleOperators.qlmHO.contains(lambda, mu),
+             PF("HO representation of multipole operator missing for lambda=%d and mu=%d.", lambda, mu));
+
+      arma::mat qlmHO = multipoleOperators.qlmHO(lambda, mu);
+
+      if (mu != 0)
+      {
+        // TODO: understand why this factor is needed to reproduce Berger2ct values
+        qlmHO = sqrt(sqrt(2.0 * PI)) * ( multipoleOperators.qlmHO(lambda,  mu)
+                                       + multipoleOperators.qlmHO(lambda, -mu));
+      }
+
+      Qtot(iso, lambda, mu) = U(iso).t() * qlmHO * V(iso)
+                            + V(iso).t() * qlmHO * U(iso);
     }
   }
+
+  // ===========================================================================
+
+  // INFO(info());
+  // Tools::info("U(NEUTRON)", U(NEUTRON), true);
+  // Tools::info("Qtot(NEUTRON, 2, 0)", Qtot(NEUTRON, 2, 0));
+  // Tools::end();
+
+  // ===========================================================================
+
+  INT nbDirections = collectiveCoordinates.size();
 
   Multi<arma::mat> M;
 
+  Multi<VEC> eneQP;
+  eneQP(NEUTRON) = qpStates(NEUTRON).getEnergy();
+  eneQP(PROTON ) = qpStates(PROTON ).getEnergy();
+
   for (INT iso: {NEUTRON, PROTON})
   {
-    arma::mat eitot = iso == NEUTRON ? Tools::matFromCol(eneQP(NEUTRON), eneQP(NEUTRON).n_elem) : Tools::matFromCol(eneQP(PROTON), eneQP(PROTON).n_elem);
+    arma::mat eitot = Tools::matFromCol(eneQP(iso), eneQP(iso).n_elem);
     arma::mat tempMat = 1.0 / (eitot + eitot.t());
 
-    for (INT k = 0; k < 4; k++)
+    for (INT order = 0; order < 4; order++)
     {
-      M(iso, k) = arma::zeros(collectiveCoordinates.n_elem, collectiveCoordinates.n_elem);
+      M(iso, order) = arma::zeros(nbDirections, nbDirections);
 
-      for (INT i = 0; i < collectiveCoordinates.n_elem; i++)
+      INT i = 0;
+      for (auto pi: collectiveCoordinates)
       {
-        for (INT j = 0; j < collectiveCoordinates.n_elem; j++)
+        INT lambdai = pi.first;
+        INT mui = pi.second;
+
+        INT j = 0;
+        for (auto pj: collectiveCoordinates)
         {
-          M(iso, k)(i, j) = 2.0 * arma::accu(Qtot(iso, i) % Qtot(iso, j) % arma::pow(tempMat, double(k)));
+          INT lambdaj = pj.first;
+          INT muj = pj.second;
+
+          M(iso, order)(i, j) = 2.0 * arma::accu(Qtot(iso, lambdai, mui) % Qtot(iso, lambdaj, muj) % arma::pow(tempMat, double(order)));
+          j++;
         }
+        i++;
       }
-      // Tools::info(PF("M(%s, %d)", Tools::strIsospin(iso).c_str(), k), M(iso, k), true);
     }
   }
 
-  // for (INT k = 0; k < 4; k++)
+  // DEBUG
+  // for (INT order = 0; order < 4; order++)
   // {
-  //   arma::mat toto = M(NEUTRON, k) + M(PROTON, k);
-  //   Tools::info(PF("k=%d", k), toto, true);
+  //   arma::mat toto = M(NEUTRON, order) + M(PROTON, order);
+  //   Tools::info(PF("order=%d", order), toto, true);
   // }
+  // DEBUG
 
   arma::mat M1 = M(NEUTRON, 1) + M(PROTON, 1);
   arma::mat M2 = M(NEUTRON, 2) + M(PROTON, 2);
   arma::mat M3 = M(NEUTRON, 3) + M(PROTON, 3);
 
-  arma::mat M1i = M1.i();
+  arma::mat M1i;
+  try
+  {
+    M1i = M1.i();
+  }
+  catch (...)
+  {
+    Tools::info("M1", M1, true);
+    Tools::warning("M1 is a singular matrix");
+    DBG_LEAVE;
+  }
 
   // metric calculation
   metric = 0.5 * M1i * M2 * M1i;
@@ -825,14 +1027,32 @@ void State::calcInertia(const IVEC &_collectiveCoordinates)
   massGCM = 4.0 * metric * M1 * metric;
   //    Eq. (82) and Eq. (96) in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
   // != Eq. (41) and Eq. (46) in R. Navarro Perez et al, Comp. Phys. Comm. 220, (2017) 263
-  zpeGCM = 0.5 * massGCM.i() * metric;
+
+  try
+  {
+    zpeGCM = 0.5 * massGCM.i() * metric;
+  }
+  catch (...)
+  {
+    Tools::warning("massGCM is a singular matrix");
+    DBG_LEAVE;
+  }
 
   //===== ATDHF prescription =====
   // != Eq. (110) in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
   // != Eq. (48)  in R. Navarro Perez et al, Comp. Phys. Comm. 220, (2017) 263
   massATDHF = M1i * M3 * M1i;
-  // May or may not be used. See discussion p. 28-29 in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
-  zpeATDHF = 0.5 * massATDHF.i() * metric;
+
+  try
+  {
+    // May or may not be used. See discussion p. 28-29 in N. Schunck and L. Robledo, Rep. Prog. Phys. 79 (2016) 116301
+    zpeATDHF = 0.5 * massATDHF.i() * metric;
+  }
+  catch (...)
+  {
+    Tools::warning("massATDHF is a singular matrix");
+    DBG_LEAVE;
+  }
 
   // Tools::info("M1", M1, true);
   // Tools::info("M1.i", M1i, true);

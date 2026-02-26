@@ -36,6 +36,20 @@
 
 class DataTree;
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description, optional default value and type for each input or output.
+#define SOLVER_BASIS_VALID_KEYS \
+{ "solver/basis/sphericalBasis", "Force the use of a spherical basis (b_r = b_z)"       , "false", "B" }, \
+{ "solver/basis/cvgTarget"     , "Convergence target value"                             , "1e-4" , "D" }, \
+{ "solver/basis/maxIter"       , "Maximum number of iterations"                         , "40"   , "I" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief The basis parameters optimizer.
  *
  *  This class represents the optimizer of the basis parameters.
@@ -62,9 +76,6 @@ public:
   //============================================================================
   //============================================================================
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// Number of parameters to consider.
   INT dim = 0;
 
@@ -80,6 +91,18 @@ public:
   /// Use a spherical basis (b_r = b_z) ?
   bool sphericalBasis = false;
 
+  /// Total binding energy.
+  double energy = 1e99;
+
+  /// Best total binding energy.
+  double bestEnergy = 1e99;
+
+  /// Convergence value.
+  double convergence = 1e99;
+
+  /// Convergence target value.
+  double cvgTarget = 1e99;
+
   //============================================================================
   //============================================================================
   //============================================================================
@@ -93,13 +116,13 @@ private:
   bool newBest = false;
 
   /// History of the coordinates tried.
-  arma::mat histCoords;
+  arma::mat previousCoords;
 
   /// History of the values obtained.
-  arma::vec histValues;
+  arma::vec previousEnergy;
 
   /// History of the values obtained.
-  IVEC histIters;
+  IVEC previousIter;
 
   /// Minimal values of the basis parameters.
   arma::vec vmin;

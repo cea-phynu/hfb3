@@ -34,6 +34,22 @@
 
 class DataTree;
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description, optional default value and type for each input or output.
+#define SOLVER_HFB_GRADIENT_VALID_KEYS \
+{ "solver/gradient/cvgTarget"      , "Convergence target value"                                       , "1e-1", "D" }, \
+{ "solver/gradient/maxIter"        , "Maximum number of iterations"                                   , "50"  , "I" }, \
+{ "solver/gradient/cvgTargetLambda", "Convergence target value for lambda-iterations"                 , "1e-5", "D" }, \
+{ "solver/gradient/maxIterLambda"  , "Maximum number of iterations for lambda-iterations"             , "10"  , "I" }, \
+{ "solver/gradient/randomSeed"     , "Seed used for the generation of initial random U and V matrices", "1337", "I" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief A Gradient solver for the HFB equations.
  *
  *  This class implements a solver for the HFB equations using the Gradient method.
@@ -55,9 +71,6 @@ public:
   //============================================================================
   //============================================================================
 
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
   /// A Interaction object.
   Interaction interaction;
 
@@ -76,10 +89,16 @@ public:
   //============================================================================
 
   /// Total binding energy.
-  double ene = 1e99;
+  double energy = 1e99;
 
   /// Best energy found.
-  double bestEne = 1e99;
+  double bestEnergy = 1e99;
+
+  /// Convergence value.
+  double convergence = 1e99;
+
+  /// Convergence target value.
+  double cvgTarget = 1e99;
 
   /// Target value for Lambda variation.
   double cvgTargetLambda = 1e-09;

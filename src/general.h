@@ -47,13 +47,10 @@ class DataTree;
 /** \brief A struct to store a key with its description, default value and type.
  */
 
-struct KeyStruct
-{
-  std::string key;
-  std::string description;
-  std::string defaultValue;
-  std::string type;
-};
+#define GENERAL_VALID_KEYS \
+{ "general/compatibility", "general.compatibility mode (can be: 'ringAndSchuck', 'berger', 'robledo', 'hfbtho')", "ringAndSchuck", "S" }, \
+{ "general/version"      , "Version of the HFB3 library"                                                        , ""             , "S" }, \
+{ "general/skill"        , "SKILL level (related to compilation optimization options) of the HFB3 library"      , ""             , "S" }
 
 //==============================================================================
 //==============================================================================
@@ -68,17 +65,9 @@ class General
 {
 public:
 
-  /// Constructors
-  General(void);                                                       // #TEST#
-  General(const DataTree &dataTree);                                   // #TEST#
-
-  /// Global list of valid keys.
-  std::list<KeyStruct > globalValidKeys;
-
-  /// List of keys used by this class.
-  static std::list<KeyStruct > validKeys;
-
-  void setGlobalValidKeys(void);
+  //============================================================================
+  //============================================================================
+  //============================================================================
 
   /// Possible compatibility values,
   enum
@@ -89,11 +78,65 @@ public:
     COMPAT_HFBTHO
   };
 
+  //============================================================================
+  //============================================================================
+  //============================================================================
+
+  /// Constructors
+  General(void);                                                       // #TEST#
+  General(const DataTree &dataTree);                                   // #TEST#
+
+  void setCompatibility(int);
+
+  //============================================================================
+  //============================================================================
+  //============================================================================
+
   /// Compatibility mode.
   int compatibility = COMPAT_NONE;
 
+  //============================================================================
+  //============================================================================
+  //============================================================================
+
+#ifdef SKILL0
+/// SKILL level 0 (cf. Makefile for meaning)
+#define SKILL "SKILL0 (I'm too young to die)"
+#endif
+
+#ifdef SKILL1
+/// SKILL level 1 (cf. Makefile for meaning)
+#define SKILL "SKILL1 (Hey, not too rough)"
+#endif
+
+#ifdef SKILL2
+/// SKILL level 2 (cf. Makefile for meaning)
+#define SKILL "SKILL2 (Hurt me plenty)"
+#endif
+
+#ifdef SKILL3
+/// SKILL level 3 (cf. Makefile for meaning)
+#define SKILL "SKILL3 (Ultra-Violence)"
+#endif
+
+#ifdef SKILL4
+/// SKILL level 4 (cf. Makefile for meaning)
+#define SKILL "SKILL4 (Nightmare!)"
+#endif
+
+
+/// Default Git version string (should be set at compile time).
+#ifndef CFG_GIT_VERSION
+#define CFG_GIT_VERSION ""
+#endif
+
   /// Version of the HFB3 library.
   std::string version = CFG_GIT_VERSION;
+
+// Default SKILL string value (should be set above).
+#ifndef SKILL
+#define SKILL "NO SKILL DEFINED !?"
+#endif
 
   /// SKILL level (related to compilation optimization options) of the HFB3 library.
   std::string skill = SKILL;
@@ -101,6 +144,7 @@ public:
   /// Flag to display the compatibility warning once.
   bool compatWarningDisplayed = false;
 };
+
 
 #endif // GENERAL_H
 
