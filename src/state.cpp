@@ -857,18 +857,20 @@ void State::calcInertia(const std::string &interactionName, const std::list<std:
 {
   DBG_ENTER;
 
-  Tools::mesg("State ", "(Re)calculating the QP states and U/V matrices => performing iterations of the Broyden solver");
-  DataTree dt = DataTree::getDefault() + getDataTree();
-  dt.set("interaction/name", interactionName);
+  if (qpStates(NEUTRON).n_elem == 0)
+  {
+    Tools::mesg("State ", "(Re)calculating the QP states and U/V matrices => performing iterations of the Broyden solver");
+    DataTree dt = DataTree::getDefault() + getDataTree();
+    dt.set("interaction/name", interactionName);
 
+    SolverHFBBroyden solver(dt, *this);
+    solver.init();
 
-  SolverHFBBroyden solver(dt, *this);
-  solver.init();
+    Tools::mesg("State ", solver.info());
 
-  Tools::mesg("State ", solver.info());
-
-  while(solver.nextIter());
-  *this = solver.state;
+    while(solver.nextIter());
+    *this = solver.state;
+  }
 
   qpStates(NEUTRON).sort("energy");
   qpStates(PROTON ).sort("energy");

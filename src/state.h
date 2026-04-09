@@ -81,7 +81,7 @@ public :
   const std::string getNiceInfo(const std::string &what = "");         // #TEST#
   bool empty(void) const;                                              // #TEST#
   const arma::vec getOverlap(State &otherState);   // #TEST#
-  void calcInertia(const std::string &interactionName, const std::list<std::pair<INT, INT> > &_collectiveCoordinates = {});
+  void calcInertia(const std::string &interactionName = "", const std::list<std::pair<INT, INT> > &_collectiveCoordinates = {});
   bool checkSolution(void) const;                                      // #TEST#
   void calcCanonical(void);                                            // #TEST#
   const arma::vec getCanonicalV2(const arma::mat &_rho);

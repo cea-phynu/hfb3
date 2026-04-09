@@ -496,7 +496,7 @@ void Action::calcHFB(void)
     Tools::mesg("ActEne", solverHFBBroyden.interaction.getNiceInfo());
 
     // calculate and print some observables
-    // calcObservables();
+    calcObservables();
 
     if (saveResultFiles)
     {
