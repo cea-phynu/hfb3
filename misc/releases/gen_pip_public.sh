@@ -6,7 +6,7 @@ then
   exit 0
 fi
 
-NOCOPY=(misc/amedee_python misc/berger_python misc/docs misc/releases src/drop.cpp src/drop.h src/link.cpp src/link.h src/field_spin_orbit_fr.cpp src/field_spin_orbit_fr.h src/field_tensor_fr.cpp src/field_tensor_fr.h)
+NOCOPY=(misc/studies/benchmark_berger2ct misc/amedee_python misc/berger_python misc/docs misc/releases src/drop.cpp src/drop.h src/link.cpp src/link.h src/field_spin_orbit_fr.cpp src/field_spin_orbit_fr.h src/field_tensor_fr.cpp src/field_tensor_fr.h)
 
 echo "===== Cleaning project ====="
 make clean

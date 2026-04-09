@@ -260,6 +260,18 @@ bool SolverHFBBroyden::nextIter()
   else if (lambdaIter(PROTON) < maxIterLambda) lambdaIterProtStr = PF_YELLOW("#%2d", lambdaIter(PROTON));
   else                                         lambdaIterProtStr = PF_RED(   "#%2d", lambdaIter(PROTON));
 
+  std::string lnStr;
+  if      (state.chemPot(NEUTRON) > 0.0)   lnStr = PF_RED(   "%9.2e", state.chemPot(NEUTRON));
+  else if (state.chemPot(NEUTRON) < -50.0) lnStr = PF_RED(   "%9.2e", state.chemPot(NEUTRON));
+  else if (state.chemPot(NEUTRON) > -30.0) lnStr = PF_GREEN( "%7.3f", state.chemPot(NEUTRON));
+  else                                     lnStr = PF_YELLOW("%7.3f", state.chemPot(NEUTRON));
+
+  std::string lpStr;
+  if      (state.chemPot(PROTON) > 0.0)   lpStr = PF_RED(   "%9.2e", state.chemPot(PROTON));
+  else if (state.chemPot(PROTON) < -50.0) lpStr = PF_RED(   "%9.2e", state.chemPot(PROTON));
+  else if (state.chemPot(PROTON) > -30.0) lpStr = PF_GREEN( "%7.3f", state.chemPot(PROTON));
+  else                                    lpStr = PF_YELLOW("%7.3f", state.chemPot(PROTON));
+
   Tools::mesg("SolBro",
               getIterMesg() +
               PF("cvg: ") + cvgStr + " " +
@@ -267,8 +279,9 @@ bool SolverHFBBroyden::nextIter()
 #ifdef PRINT_ITER_DURATION
               PF("tot: %6.3fs (fld: %6.3fs)", iterLength, interaction.calcLength) + " " +
 #endif
-              PF("ln: %7.3f(", state.chemPot(NEUTRON)) + lambdaIterNeutStr + ")" +
-              PF("lp: %7.3f(", state.chemPot(PROTON )) + lambdaIterProtStr + ")"
+              PF("ln: ") + lnStr + " " +
+              PF("lp: ") + lpStr + " " +
+              PF("(%s, %s)", lambdaIterNeutStr.c_str(), lambdaIterProtStr.c_str())
              );
 
   // Tools::mesg("SolBro", multipoleOperators.getNiceInfo());

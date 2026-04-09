@@ -42,6 +42,11 @@ R"toto(#!HFB3!#
 [action]
 basisOptimization F
 saveResultFiles   True
+
+[values]
+v0    -1.234
+v1    -12.34e-1
+v2    -12.34E-1
 )toto";
 
   DataTree dt = IOhfb3().fromContent(content);
@@ -55,6 +60,21 @@ saveResultFiles   True
   dt.get(value, "action/saveResultFiles", true);
 
   ASSERT_EQ(value, true);
+
+  double v0 = false;
+  dt.get(v0, "values/v0", true);
+
+  ASSERT_NEAR(v0, -1.234, 1e-14);
+
+  double v1 = false;
+  dt.get(v1, "values/v1", true);
+
+  ASSERT_NEAR(v1, -1.234, 1e-14);
+
+  double v2 = false;
+  dt.get(v2, "values/v2", true);
+
+  ASSERT_NEAR(v2, -1.234, 1e-14);
 }
 
 

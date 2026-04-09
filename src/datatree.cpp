@@ -29,10 +29,12 @@
 #include "action.h"
 #include "basis.h"
 #include "constraint.h"
+#include "fragments.h"
 #include "general.h"
 #include "interaction.h"
 #include "io_berger.h"
 #include "mixing.h"
+#include "multipole_operators.h"
 #include "solver_alternator.h"
 #include "solver_basis.h"
 #include "solver.h"
@@ -63,9 +65,11 @@ std::list<DataTree::KeyStruct > DataTree::globalValidKeys =
     ACTION_VALID_KEYS,
     BASIS_VALID_KEYS,
     CONSTRAINT_VALID_KEYS,
+    FRAGMENTS_VALID_KEYS,
     GENERAL_VALID_KEYS,
     INTERACTION_VALID_KEYS,
     IO_BERGER_VALID_KEYS,
+    MULTIPOLE_OPERATORS_VALID_KEYS,
     MIXING_VALID_KEYS,
     SOLVER_ALTERNATOR_VALID_KEYS,
     SOLVER_BASIS_VALID_KEYS,
@@ -126,6 +130,7 @@ UINT DataTree::size(void) const
   size += ivecMap.size();
   size += imatMap.size();
   size += icubeMap.size();
+  size += multiDoubleMap.size();
   size += multiIVecMap.size();
   size += multiIMatMap.size();
   size += multiICubeMap.size();
@@ -207,6 +212,7 @@ void DataTree::clear(void)
   uvecMap.clear();
   umatMap.clear();
   ucubeMap.clear();
+  multiDoubleMap.clear();
   multiIVecMap.clear();
   multiIMatMap.clear();
   multiICubeMap.clear();
@@ -237,40 +243,42 @@ void DataTree::clean(void)
   for (auto it = umatMap.begin()      ;it != umatMap.end()      ;) { if (it->second.empty()) it = umatMap.erase(it)      ;else (it++);}
   for (auto it = ucubeMap.begin()     ;it != ucubeMap.end()     ;) { if (it->second.empty()) it = ucubeMap.erase(it)     ;else (it++);}
 
-  for (auto it = multiVecMap.begin()  ;it != multiVecMap.end()  ;) { if (it->second.empty()) it = multiVecMap.erase(it)  ;else (it++);}
-  for (auto it = multiMatMap.begin()  ;it != multiMatMap.end()  ;) { if (it->second.empty()) it = multiMatMap.erase(it)  ;else (it++);}
-  for (auto it = multiCubeMap.begin() ;it != multiCubeMap.end() ;) { if (it->second.empty()) it = multiCubeMap.erase(it) ;else (it++);}
-  for (auto it = multiUVecMap.begin() ;it != multiUVecMap.end() ;) { if (it->second.empty()) it = multiUVecMap.erase(it) ;else (it++);}
-  for (auto it = multiUMatMap.begin() ;it != multiUMatMap.end() ;) { if (it->second.empty()) it = multiUMatMap.erase(it) ;else (it++);}
-  for (auto it = multiUCubeMap.begin();it != multiUCubeMap.end();) { if (it->second.empty()) it = multiUCubeMap.erase(it);else (it++);}
-  for (auto it = multiIVecMap.begin() ;it != multiIVecMap.end() ;) { if (it->second.empty()) it = multiIVecMap.erase(it) ;else (it++);}
-  for (auto it = multiIMatMap.begin() ;it != multiIMatMap.end() ;) { if (it->second.empty()) it = multiIMatMap.erase(it) ;else (it++);}
-  for (auto it = multiICubeMap.begin();it != multiICubeMap.end();) { if (it->second.empty()) it = multiICubeMap.erase(it);else (it++);}
+  for (auto it = multiDoubleMap.begin();it != multiDoubleMap.end();) { if (it->second.empty()) it = multiDoubleMap.erase(it);else (it++);}
+  for (auto it = multiVecMap.begin()   ;it != multiVecMap.end()   ;) { if (it->second.empty()) it = multiVecMap.erase(it)   ;else (it++);}
+  for (auto it = multiMatMap.begin()   ;it != multiMatMap.end()   ;) { if (it->second.empty()) it = multiMatMap.erase(it)   ;else (it++);}
+  for (auto it = multiCubeMap.begin()  ;it != multiCubeMap.end()  ;) { if (it->second.empty()) it = multiCubeMap.erase(it)  ;else (it++);}
+  for (auto it = multiUVecMap.begin()  ;it != multiUVecMap.end()  ;) { if (it->second.empty()) it = multiUVecMap.erase(it)  ;else (it++);}
+  for (auto it = multiUMatMap.begin()  ;it != multiUMatMap.end()  ;) { if (it->second.empty()) it = multiUMatMap.erase(it)  ;else (it++);}
+  for (auto it = multiUCubeMap.begin() ;it != multiUCubeMap.end() ;) { if (it->second.empty()) it = multiUCubeMap.erase(it) ;else (it++);}
+  for (auto it = multiIVecMap.begin()  ;it != multiIVecMap.end()  ;) { if (it->second.empty()) it = multiIVecMap.erase(it)  ;else (it++);}
+  for (auto it = multiIMatMap.begin()  ;it != multiIMatMap.end()  ;) { if (it->second.empty()) it = multiIMatMap.erase(it)  ;else (it++);}
+  for (auto it = multiICubeMap.begin() ;it != multiICubeMap.end() ;) { if (it->second.empty()) it = multiICubeMap.erase(it) ;else (it++);}
 
   std::list<std::string> toRemove;
   // Ckeck key types
-  for (auto &key : boolMap      ) { if (!checkKeyAndType(key.first, "B"  , true)) toRemove.push_back(key.first);};
-  for (auto &key : intMap       ) { if (!checkKeyAndType(key.first, "I"  , true)) toRemove.push_back(key.first);};
-  for (auto &key : doubleMap    ) { if (!checkKeyAndType(key.first, "D"  , true)) toRemove.push_back(key.first);};
-  for (auto &key : uvecMap      ) { if (!checkKeyAndType(key.first, "UV" , true)) toRemove.push_back(key.first);};
-  for (auto &key : umatMap      ) { if (!checkKeyAndType(key.first, "UM" , true)) toRemove.push_back(key.first);};
-  for (auto &key : ucubeMap     ) { if (!checkKeyAndType(key.first, "UC" , true)) toRemove.push_back(key.first);};
-  for (auto &key : ivecMap      ) { if (!checkKeyAndType(key.first, "IV" , true)) toRemove.push_back(key.first);};
-  for (auto &key : imatMap      ) { if (!checkKeyAndType(key.first, "IM" , true)) toRemove.push_back(key.first);};
-  for (auto &key : icubeMap     ) { if (!checkKeyAndType(key.first, "IC" , true)) toRemove.push_back(key.first);};
-  for (auto &key : vecMap       ) { if (!checkKeyAndType(key.first, "V"  , true)) toRemove.push_back(key.first);};
-  for (auto &key : matMap       ) { if (!checkKeyAndType(key.first, "M"  , true)) toRemove.push_back(key.first);};
-  for (auto &key : cubeMap      ) { if (!checkKeyAndType(key.first, "C"  , true)) toRemove.push_back(key.first);};
-  for (auto &key : multiUVecMap ) { if (!checkKeyAndType(key.first, "MUV", true)) toRemove.push_back(key.first);};
-  for (auto &key : multiUMatMap ) { if (!checkKeyAndType(key.first, "MUM", true)) toRemove.push_back(key.first);};
-  for (auto &key : multiUCubeMap) { if (!checkKeyAndType(key.first, "MUC", true)) toRemove.push_back(key.first);};
-  for (auto &key : multiIVecMap ) { if (!checkKeyAndType(key.first, "MIV", true)) toRemove.push_back(key.first);};
-  for (auto &key : multiIMatMap ) { if (!checkKeyAndType(key.first, "MIM", true)) toRemove.push_back(key.first);};
-  for (auto &key : multiICubeMap) { if (!checkKeyAndType(key.first, "MIC", true)) toRemove.push_back(key.first);};
-  for (auto &key : multiVecMap  ) { if (!checkKeyAndType(key.first, "MV" , true)) toRemove.push_back(key.first);};
-  for (auto &key : multiMatMap  ) { if (!checkKeyAndType(key.first, "MM" , true)) toRemove.push_back(key.first);};
-  for (auto &key : multiCubeMap ) { if (!checkKeyAndType(key.first, "MC" , true)) toRemove.push_back(key.first);};
-  for (auto &key : stringMap    ) { if (!checkKeyAndType(key.first, "S"  , true)) toRemove.push_back(key.first);};
+  for (auto &key : boolMap       ) { if (!checkKeyAndType(key.first, "B"  , true)) toRemove.push_back(key.first);};
+  for (auto &key : intMap        ) { if (!checkKeyAndType(key.first, "I"  , true)) toRemove.push_back(key.first);};
+  for (auto &key : doubleMap     ) { if (!checkKeyAndType(key.first, "D"  , true)) toRemove.push_back(key.first);};
+  for (auto &key : uvecMap       ) { if (!checkKeyAndType(key.first, "UV" , true)) toRemove.push_back(key.first);};
+  for (auto &key : umatMap       ) { if (!checkKeyAndType(key.first, "UM" , true)) toRemove.push_back(key.first);};
+  for (auto &key : ucubeMap      ) { if (!checkKeyAndType(key.first, "UC" , true)) toRemove.push_back(key.first);};
+  for (auto &key : ivecMap       ) { if (!checkKeyAndType(key.first, "IV" , true)) toRemove.push_back(key.first);};
+  for (auto &key : imatMap       ) { if (!checkKeyAndType(key.first, "IM" , true)) toRemove.push_back(key.first);};
+  for (auto &key : icubeMap      ) { if (!checkKeyAndType(key.first, "IC" , true)) toRemove.push_back(key.first);};
+  for (auto &key : vecMap        ) { if (!checkKeyAndType(key.first, "V"  , true)) toRemove.push_back(key.first);};
+  for (auto &key : matMap        ) { if (!checkKeyAndType(key.first, "M"  , true)) toRemove.push_back(key.first);};
+  for (auto &key : cubeMap       ) { if (!checkKeyAndType(key.first, "C"  , true)) toRemove.push_back(key.first);};
+  for (auto &key : multiDoubleMap) { if (!checkKeyAndType(key.first, "MD" , true)) toRemove.push_back(key.first);};
+  for (auto &key : multiUVecMap  ) { if (!checkKeyAndType(key.first, "MUV", true)) toRemove.push_back(key.first);};
+  for (auto &key : multiUMatMap  ) { if (!checkKeyAndType(key.first, "MUM", true)) toRemove.push_back(key.first);};
+  for (auto &key : multiUCubeMap ) { if (!checkKeyAndType(key.first, "MUC", true)) toRemove.push_back(key.first);};
+  for (auto &key : multiIVecMap  ) { if (!checkKeyAndType(key.first, "MIV", true)) toRemove.push_back(key.first);};
+  for (auto &key : multiIMatMap  ) { if (!checkKeyAndType(key.first, "MIM", true)) toRemove.push_back(key.first);};
+  for (auto &key : multiICubeMap ) { if (!checkKeyAndType(key.first, "MIC", true)) toRemove.push_back(key.first);};
+  for (auto &key : multiVecMap   ) { if (!checkKeyAndType(key.first, "MV" , true)) toRemove.push_back(key.first);};
+  for (auto &key : multiMatMap   ) { if (!checkKeyAndType(key.first, "MM" , true)) toRemove.push_back(key.first);};
+  for (auto &key : multiCubeMap  ) { if (!checkKeyAndType(key.first, "MC" , true)) toRemove.push_back(key.first);};
+  for (auto &key : stringMap     ) { if (!checkKeyAndType(key.first, "S"  , true)) toRemove.push_back(key.first);};
 
   for (auto &k: toRemove)
   {
@@ -466,6 +474,15 @@ INT DataTree::del(const std::string &key)
       }
     }
 
+    for (auto &i : multiDoubleMap)
+    {
+      if (i.first.compare(0, key.size(), key) == 0)
+      {
+        nbDeleted++;
+        multiDoubleMap.erase(i.first);
+      }
+    }
+
     for (auto &i : multiVecMap)
     {
       if (i.first.compare(0, key.size(), key) == 0)
@@ -589,6 +606,12 @@ INT DataTree::del(const std::string &key)
     {
       nbDeleted++;
       icubeMap.erase(key);
+    }
+
+    if (multiDoubleMap.count(key) == 1)
+    {
+      nbDeleted++;
+      multiDoubleMap.erase(key);
     }
 
     if (multiIVecMap.count(key) == 1)
@@ -819,6 +842,22 @@ void DataTree::set(const std::string &key, const ICUBE &val)
 {
   checkKeyAndType(key, "IC");
   icubeMap[key] = val;
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Create or update a (key, Multi<double >) couple in the data tree.
+ *
+ *  \param key The key.
+ *  \param val The Multi<double > object.
+ */
+
+void DataTree::set(const std::string &key, const Multi<double> &val)
+{
+  checkKeyAndType(key, "MD");
+  multiDoubleMap[key] = val;
 }
 
 //==============================================================================
@@ -1529,6 +1568,38 @@ bool DataTree::get(ICUBE &target, const std::string &key, bool ignore) const
 //==============================================================================
 //==============================================================================
 
+/** Get an Multi<double > from the data tree.
+ *
+ *  \param target The target variable.
+ *  \param key The key.
+ *  \param ignore If true, print a warning if the key does not exist.
+ *  \return Returns true if the target variable has been set to the new value.
+ */
+
+bool DataTree::get(Multi<double > &target, const std::string &key, bool ignore) const
+{
+  DBG_ENTER;
+
+  checkKeyAndType(key, "MD");
+
+  if (multiDoubleMap.count(key) == 0)
+  {
+    if (!ignore)
+    {
+      ERROR("no Multi<double> key '" + key + "'");
+    }
+
+    DBG_RETURN(false);
+  }
+
+  target = multiDoubleMap.find(key)->second;
+  DBG_RETURN(true);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** Get an Multi<IVEC > from the data tree.
  *
  *  \param target The target variable.
@@ -1997,6 +2068,23 @@ ICUBE DataTree::getIC(const std::string &key, bool ignore) const
 //==============================================================================
 //==============================================================================
 
+/** Get an Multi<double > from the data tree.
+ *
+ *  \param key The key.
+ *  \param ignore If true, print a warning if the key does not exist.
+ */
+
+Multi<double > DataTree::getMD(const std::string &key, bool ignore) const
+{
+  Multi<double > result;
+  get(result, key, ignore);
+  return result;
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** Get an Multi<IVEC > from the data tree.
  *
  *  \param key The key.
@@ -2112,28 +2200,29 @@ const std::string DataTree::info(bool isShort) const
   {
     result += Tools::treeStr(
     {
-      {"bool      ", Tools::infoStr((INT)boolMap.size())},
-      {"int       ", Tools::infoStr((INT)intMap.size())},
-      {"double    ", Tools::infoStr((INT)doubleMap.size())},
-      {"string    ", Tools::infoStr((INT)stringMap.size())},
-      {"vec       ", Tools::infoStr((INT)vecMap.size())},
-      {"mat       ", Tools::infoStr((INT)matMap.size())},
-      {"cube      ", Tools::infoStr((INT)cubeMap.size())},
-      {"uvec      ", Tools::infoStr((INT)uvecMap.size())},
-      {"umat      ", Tools::infoStr((INT)umatMap.size())},
-      {"ucube     ", Tools::infoStr((INT)ucubeMap.size())},
-      {"multiUVec ", Tools::infoStr((INT)multiUVecMap.size())},
-      {"multiUMat ", Tools::infoStr((INT)multiUMatMap.size())},
-      {"multiUCube", Tools::infoStr((INT)multiUCubeMap.size())},
-      {"ivec      ", Tools::infoStr((INT)ivecMap.size())},
-      {"imat      ", Tools::infoStr((INT)imatMap.size())},
-      {"icube     ", Tools::infoStr((INT)icubeMap.size())},
-      {"multiIVec ", Tools::infoStr((INT)multiIVecMap.size())},
-      {"multiIMat ", Tools::infoStr((INT)multiIMatMap.size())},
-      {"multiICube", Tools::infoStr((INT)multiICubeMap.size())},
-      {"multiVec  ", Tools::infoStr((INT)multiVecMap.size())},
-      {"multiMat  ", Tools::infoStr((INT)multiMatMap.size())},
-      {"multiCube ", Tools::infoStr((INT)multiCubeMap.size())},
+      {"bool       ", Tools::infoStr((INT)boolMap.size())},
+      {"int        ", Tools::infoStr((INT)intMap.size())},
+      {"double     ", Tools::infoStr((INT)doubleMap.size())},
+      {"string     ", Tools::infoStr((INT)stringMap.size())},
+      {"vec        ", Tools::infoStr((INT)vecMap.size())},
+      {"mat        ", Tools::infoStr((INT)matMap.size())},
+      {"cube       ", Tools::infoStr((INT)cubeMap.size())},
+      {"uvec       ", Tools::infoStr((INT)uvecMap.size())},
+      {"umat       ", Tools::infoStr((INT)umatMap.size())},
+      {"ucube      ", Tools::infoStr((INT)ucubeMap.size())},
+      {"multiUVec  ", Tools::infoStr((INT)multiUVecMap.size())},
+      {"multiUMat  ", Tools::infoStr((INT)multiUMatMap.size())},
+      {"multiUCube ", Tools::infoStr((INT)multiUCubeMap.size())},
+      {"ivec       ", Tools::infoStr((INT)ivecMap.size())},
+      {"imat       ", Tools::infoStr((INT)imatMap.size())},
+      {"icube      ", Tools::infoStr((INT)icubeMap.size())},
+      {"multiDouble", Tools::infoStr((INT)multiDoubleMap.size())},
+      {"multiIVec  ", Tools::infoStr((INT)multiIVecMap.size())},
+      {"multiIMat  ", Tools::infoStr((INT)multiIMatMap.size())},
+      {"multiICube ", Tools::infoStr((INT)multiICubeMap.size())},
+      {"multiVec   ", Tools::infoStr((INT)multiVecMap.size())},
+      {"multiMat   ", Tools::infoStr((INT)multiMatMap.size())},
+      {"multiCube  ", Tools::infoStr((INT)multiCubeMap.size())},
       {"empty ", PF("%d", emptyKeys.size())},
     }, isShort);
   }
@@ -2142,28 +2231,29 @@ const std::string DataTree::info(bool isShort) const
     result += Tools::treeStr(
     {
       {"DataTree", ""},
-      {"bool      ", mapToStr("bool  ", boolMap)},
-      {"int       ", mapToStr("INT   ", intMap)},
-      {"double    ", mapToStr("double", doubleMap)},
-      {"string    ", mapToStr("string", stringMap)},
-      {"vec       ", mapToStr("vec   ", vecMap)},
-      {"mat       ", mapToStr("mat   ", matMap)},
-      {"cube      ", mapToStr("cube  ", cubeMap)},
-      {"uvec      ", mapToStr("uvec  ", uvecMap)},
-      {"umat      ", mapToStr("umat  ", umatMap)},
-      {"ucube     ", mapToStr("ucube ", ucubeMap)},
-      {"multiUVec ", multiMapToStr("multiUVec  ", multiUVecMap)},
-      {"multiUMat ", multiMapToStr("multiUMat  ", multiUMatMap)},
-      {"multiUCube", multiMapToStr("multiUCube ", multiUCubeMap)},
-      {"ivec      ", mapToStr("ivec  ", ivecMap)},
-      {"imat      ", mapToStr("imat  ", imatMap)},
-      {"icube     ", mapToStr("icube ", icubeMap)},
-      {"multiIVec ", multiMapToStr("multiIVec  ", multiIVecMap)},
-      {"multiIMat ", multiMapToStr("multiIMat  ", multiIMatMap)},
-      {"multiICube", multiMapToStr("multiICube ", multiICubeMap)},
-      {"multiVec  ", multiMapToStr("multiVec  ", multiVecMap)},
-      {"multiMat  ", multiMapToStr("multiMat  ", multiMatMap)},
-      {"multiCube ", multiMapToStr("multiCube ", multiCubeMap)},
+      {"bool       ", mapToStr("bool"            , boolMap)},
+      {"int        ", mapToStr("INT"             , intMap)},
+      {"double     ", mapToStr("double"          , doubleMap)},
+      {"string     ", mapToStr("string"          , stringMap)},
+      {"vec        ", mapToStr("vec"             , vecMap)},
+      {"mat        ", mapToStr("mat"             , matMap)},
+      {"cube       ", mapToStr("cube"            , cubeMap)},
+      {"uvec       ", mapToStr("uvec"            , uvecMap)},
+      {"umat       ", mapToStr("umat"            , umatMap)},
+      {"ucube      ", mapToStr("ucube"           , ucubeMap)},
+      {"multiUVec  ", multiMapToStr("multiUVec"  , multiUVecMap)},
+      {"multiUMat  ", multiMapToStr("multiUMat"  , multiUMatMap)},
+      {"multiUCube ", multiMapToStr("multiUCube" , multiUCubeMap)},
+      {"ivec       ", mapToStr("ivec"            , ivecMap)},
+      {"imat       ", mapToStr("imat"            , imatMap)},
+      {"icube      ", mapToStr("icube"           , icubeMap)},
+      {"multiDouble", multiMapToStr("multiDouble", multiDoubleMap)},
+      {"multiIVec  ", multiMapToStr("multiIVec"  , multiIVecMap)},
+      {"multiIMat  ", multiMapToStr("multiIMat"  , multiIMatMap)},
+      {"multiICube ", multiMapToStr("multiICube" , multiICubeMap)},
+      {"multiVec   ", multiMapToStr("multiVec"   , multiVecMap)},
+      {"multiMat   ", multiMapToStr("multiMat"   , multiMatMap)},
+      {"multiCube  ", multiMapToStr("multiCube"  , multiCubeMap)},
       {"empty ", PF("%d", emptyKeys.size())},
     }, isShort);
   }
@@ -2331,9 +2421,24 @@ std::string DataTree::abstract(void) const
       result << Tools::color("blue") << it->first << ": " << Tools::color() << "(" << it->second.n_rows << "x" << it->second.n_cols << "x" << it->second.n_slices << ")" << std::endl;
   }
 
+  if (multiDoubleMap.size() != 0)
+  {
+    result << Tools::color("red") << "=== Multi<double> ===" << Tools::color() << std::endl;
+
+    for (auto it = multiDoubleMap.begin(); it != multiDoubleMap.end(); ++it)
+    {
+      result << Tools::color("blue") << it->first << ": " << Tools::color() << std::endl;
+
+      for (auto &key : it->second.getKeys())
+      {
+        result << it->second.keyToStr(key) << ": " << it->second(key) << std::endl;
+      }
+    }
+  }
+
   if (multiIVecMap.size() != 0)
   {
-    result << Tools::color("red") << "=== Multi<IVEC > ===" << Tools::color() << std::endl;
+    result << Tools::color("red") << "=== Multi<IVEC> ===" << Tools::color() << std::endl;
 
     for (auto it = multiIVecMap.begin(); it != multiIVecMap.end(); ++it)
     {
@@ -2500,6 +2605,7 @@ void DataTree::merge(const DataTree &other)
   for (auto &key : other.vecMap         ) set(key.first, key.second);
   for (auto &key : other.matMap         ) set(key.first, key.second);
   for (auto &key : other.cubeMap        ) set(key.first, key.second);
+  for (auto &key : other.multiDoubleMap ) set(key.first, key.second);
   for (auto &key : other.multiUVecMap   ) set(key.first, key.second);
   for (auto &key : other.multiUMatMap   ) set(key.first, key.second);
   for (auto &key : other.multiUCubeMap  ) set(key.first, key.second);
@@ -2782,24 +2888,33 @@ bool DataTree::operator==(const DataTree &other) const
   if (intMap    != other.intMap) return false;
   if (doubleMap != other.doubleMap) return false;
   if (stringMap != other.stringMap) return false;
-  if (!mapStringArmaEquals(uvecMap, other.uvecMap )) return false;
-  if (!mapStringArmaEquals(umatMap, other.umatMap )) return false;
-  if (!mapStringArmaEquals(ucubeMap, other.ucubeMap)) return false;
-  if (!mapStringArmaEquals(ivecMap, other.ivecMap )) return false;
-  if (!mapStringArmaEquals(imatMap, other.imatMap )) return false;
-  if (!mapStringArmaEquals(icubeMap, other.icubeMap)) return false;
+
   if (!mapStringArmaEquals(vecMap, other.vecMap  )) return false;
+  if (!mapStringArmaEquals(ivecMap, other.ivecMap )) return false;
+  if (!mapStringArmaEquals(uvecMap, other.uvecMap )) return false;
+
   if (!mapStringArmaEquals(matMap, other.matMap  )) return false;
+  if (!mapStringArmaEquals(imatMap, other.imatMap )) return false;
+  if (!mapStringArmaEquals(umatMap, other.umatMap )) return false;
+
   if (!mapStringArmaEquals(cubeMap, other.cubeMap )) return false;
-  if (!mapStringArmaEquals(multiIVecMap, other.multiIVecMap  )) return false;
-  if (!mapStringArmaEquals(multiIMatMap, other.multiIMatMap  )) return false;
-  if (!mapStringArmaEquals(multiICubeMap, other.multiICubeMap )) return false;
-  if (!mapStringArmaEquals(multiUVecMap, other.multiUVecMap  )) return false;
-  if (!mapStringArmaEquals(multiUMatMap, other.multiUMatMap  )) return false;
-  if (!mapStringArmaEquals(multiUCubeMap, other.multiUCubeMap )) return false;
+  if (!mapStringArmaEquals(icubeMap, other.icubeMap)) return false;
+  if (!mapStringArmaEquals(ucubeMap, other.ucubeMap)) return false;
+
   if (!mapStringArmaEquals(multiVecMap, other.multiVecMap  )) return false;
+  if (!mapStringArmaEquals(multiIVecMap, other.multiIVecMap  )) return false;
+  if (!mapStringArmaEquals(multiUVecMap, other.multiUVecMap  )) return false;
+
   if (!mapStringArmaEquals(multiMatMap, other.multiMatMap  )) return false;
+  if (!mapStringArmaEquals(multiIMatMap, other.multiIMatMap  )) return false;
+  if (!mapStringArmaEquals(multiUMatMap, other.multiUMatMap  )) return false;
+
   if (!mapStringArmaEquals(multiCubeMap, other.multiCubeMap )) return false;
+  if (!mapStringArmaEquals(multiICubeMap, other.multiICubeMap )) return false;
+  if (!mapStringArmaEquals(multiUCubeMap, other.multiUCubeMap )) return false;
+
+  if (!mapStringArmaEquals(multiDoubleMap, other.multiDoubleMap )) return false;
+
   if (emptyKeys != other.emptyKeys) return false;
 
   return true;
@@ -2981,6 +3096,21 @@ void DataTree::setIM(const std::string &key, const IMAT &val)
  */
 
 void DataTree::setIC(const std::string &key, const ICUBE &val)
+{
+  set(key, val);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Create or update a (key, Multi<double >) couple in the data tree.
+ *
+ *  \param key The key.
+ *  \param val The Multi<double > object.
+ */
+
+void DataTree::setMD(const std::string &key, const Multi<double> &val)
 {
   set(key, val);
 }
@@ -3276,6 +3406,12 @@ DataTree DataTree::getFiltered(const std::string &sectionName) const
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
   }
 
+  if (multiDoubleMap.size() != 0)
+  {
+    for (auto it = multiDoubleMap.begin(); it != multiDoubleMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first, it->second);
+  }
+
   if (multiIVecMap.size() != 0)
   {
     for (auto it = multiIVecMap.begin(); it != multiIVecMap.end(); ++it)
@@ -3441,6 +3577,12 @@ DataTree DataTree::getSection(const std::string &sectionName) const
   if (multiICubeMap.size() != 0)
   {
     for (auto it = multiICubeMap.begin(); it != multiICubeMap.end(); ++it)
+      if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
+  }
+
+  if (multiDoubleMap.size() != 0)
+  {
+    for (auto it = multiDoubleMap.begin(); it != multiDoubleMap.end(); ++it)
       if (it->first.rfind(sectionName, 0) == 0) result.set(it->first.substr(sectionName.size(), std::string::npos), it->second);
   }
 

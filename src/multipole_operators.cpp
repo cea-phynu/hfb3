@@ -554,7 +554,7 @@ void MultipoleOperators::calcQlmObs(const Multi<arma::mat> &rho)
 //==============================================================================
 //==============================================================================
 
-/** Return a nice table with the multipole moment mean values.
+/** Calculate the number of particles from Q00 moments.
  */
 
 void MultipoleOperators::calcNPart(const Multi<arma::mat> &rho)
@@ -592,7 +592,7 @@ const std::string MultipoleOperators::getNiceInfo(void)
 {
   DBG_ENTER;
 
-  /* ASSERT(state.checkSolution(), "state does not contain a solution."); */
+  // ASSERT(state.checkSolution(), "state does not contain a solution.");
 
   // color constrained values
   Multi<std::string> colorStr;
@@ -692,4 +692,23 @@ const std::string MultipoleOperators::info(bool isShort) const
   result += Tools::treeStr(list, isShort);
 
   DBG_RETURN(result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Save the results in a DataTree instance.
+ */
+
+DataTree MultipoleOperators::getDataTree(void)
+{
+  DBG_ENTER;
+
+  DataTree dt;
+
+  dt.set("multipoleOperators/qlmObs", qlmObs);
+  dt.set("multipoleOperators/beta"  , beta);
+
+  DBG_RETURN(dt);
 }

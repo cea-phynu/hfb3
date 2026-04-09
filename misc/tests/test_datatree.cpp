@@ -72,6 +72,11 @@ TEST(DataTree, DataTree)
   // Example ICUBE>
   ICUBE testICube = arma::randi<ICUBE >(12, 2, 7);
   d.set("testICube", testICube);
+  // Example Multi<double>
+  Multi<double> testIMultiDouble;
+  testIMultiDouble(1) = 3.456;
+  testIMultiDouble(3) = 2.456;
+  d.set("testIMultiDouble", testIMultiDouble);
   // Example Multi<IVEC >
   Multi<IVEC > testIMultiVec;
   testIMultiVec(1) = arma::randi<IVEC >(12);
@@ -158,6 +163,13 @@ TEST(DataTree, DataTree)
   d.get(testICube2, "testICube");
   ASSERT_NEAR(arma::abs(testICube2 - testICube).max(), 0.0, 1e-13);
   ASSERT_NEAR(arma::abs(d.getIC("testICube") - testICube).max(), 0.0, 1e-13);
+
+  Multi<double > testIMultiDouble2;
+  d.get(testIMultiDouble2, "testIMultiDouble");
+  for(auto &key : testIMultiDouble.getKeys())
+  {
+    ASSERT_EQ(testIMultiDouble2(key), testIMultiDouble(key));
+  }
 
   Multi<IVEC > testIMultiVec2;
   d.get(testIMultiVec2, "testIMultiVec");

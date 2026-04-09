@@ -61,17 +61,13 @@ GTEST_LIB = misc/deps/googletest/build/lib/libgtest.a
 GTEST_INCDIR = misc/deps/googletest/googletest/include
 
 # system libraries
-GLOBAL_LDFLAGS = -lz -lpthread
+GLOBAL_LDFLAGS = -lz -lpthread -llapack -lblas
 
 # global C++ compiler options
-REQFLAGS = -std=c++14
+REQFLAGS = -std=c++14 -DARMA_DONT_USE_WRAPPER -DARMA_USE_LAPACK -DARMA_USE_BLAS
 # WARNFLAGS = -Wall -Wextra -Werror -Wno-sign-compare -Wfatal-errors -Wconversion
 WARNFLAGS = -Wall -Wextra -Werror -Wno-sign-compare -Wfatal-errors
 GLOBAL_CXXFLAGS = -fPIC $(REQFLAGS) $(WARNFLAGS)
-
-ifeq ($(ARMADILLO_LDFLAGS),)
-	ARMADILLO_LDFLAGS=-larmadillo
-endif
 
 ifeq ($(CXX),)
 	CXX=g++

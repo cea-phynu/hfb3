@@ -112,14 +112,14 @@ const std::string Fragments::getNiceInfo(const std::string what)
   {
     // NUCELAR RADII
     result += Tools::valueTable( "Radii",
-    {"RMS", "<r>", "ch. RMS"},
-    {"[fm]", "[fm]", "[fm]"},
-    {
-      {"neutron", PF("%.3f", geom[NEUTRON].rms), PF("%.3f", geom[NEUTRON].radius), " "},
-      {"proton",  PF("%.3f", geom[PROTON ].rms), PF("%.3f", geom[PROTON ].radius), PF("%.3f", geom[PROTON].chargeRMS)},
-      {"total",   PF("%.3f", geom[TOTAL  ].rms), PF("%.3f", geom[TOTAL  ].radius), " "},
-    }
-                               );
+        {"RMS", "<r>", "ch. RMS"},
+        {"[fm]", "[fm]", "[fm]"},
+        {
+        {"neutron", PF("%.3f", geom[NEUTRON].rms), PF("%.3f", geom[NEUTRON].radius), " "},
+        {"proton",  PF("%.3f", geom[PROTON ].rms), PF("%.3f", geom[PROTON ].radius), PF("%.3f", geom[PROTON].chargeRMS)},
+        {"total",   PF("%.3f", geom[TOTAL  ].rms), PF("%.3f", geom[TOTAL  ].radius), " "},
+        }
+        );
   }
   else
   {
@@ -179,3 +179,36 @@ const std::string Fragments::getNiceInfo(const std::string what)
   DBG_RETURN(result);
 }
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Save the results in a DataTree instance.
+ */
+
+const DataTree Fragments::getDataTree(void) const
+{
+  DBG_ENTER;
+
+  DataTree dt;
+
+  dt.set("fragments/neckPos"  , geom[TOTAL  ].neckPos);
+  dt.set("fragments/neckDens" , geom[TOTAL  ].neckDens);
+  dt.set("fragments/q_neck"   , geom[TOTAL  ].q_neck);
+  dt.set("fragments/z_left"   , geom[PROTON ].intLeft);
+  dt.set("fragments/n_left"   , geom[NEUTRON].intLeft);
+  dt.set("fragments/a_left"   , geom[TOTAL  ].intLeft);
+  dt.set("fragments/z_right"  , geom[PROTON ].intRight);
+  dt.set("fragments/n_right"  , geom[NEUTRON].intRight);
+  dt.set("fragments/a_right"  , geom[TOTAL  ].intRight);
+
+  dt.set("fragments/z_radius" , geom[PROTON ].radius);
+  dt.set("fragments/z_rms"    , geom[PROTON ].rms);
+  dt.set("fragments/n_radius" , geom[NEUTRON].radius);
+  dt.set("fragments/n_rms"    , geom[NEUTRON].rms);
+  dt.set("fragments/chargeRms", geom[PROTON ].chargeRMS);
+  dt.set("fragments/a_radius" , geom[TOTAL  ].radius);
+  dt.set("fragments/a_rms"    , geom[TOTAL  ].rms);
+
+  DBG_RETURN(dt);
+}

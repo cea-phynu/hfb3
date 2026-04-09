@@ -28,6 +28,10 @@
 #include "state.h"
 #include "mesh.h"
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief Compute some geometrical properties of a density, like multipole moments, fragment properties, etc...
  *
  * This class allows to compute some geometrical properties of a density, like multipole moments, fragment properties,

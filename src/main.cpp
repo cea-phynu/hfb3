@@ -56,6 +56,7 @@ INT main(INT argc, char **argv)
   // ===== Welcome message =====
   if (cliParser.showLogo)
     Tools::mesg("Logo!!", Tools::getLogoStr());
+
   Tools::mesg("Versio", Tools::version());
   Tools::mesg("Compil", std::string(SKILL));
 

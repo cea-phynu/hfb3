@@ -297,13 +297,25 @@ bool SolverHFBGradient::nextIter()
   else if (lambdaIter < maxIterLambda) lambdaIterStr = PF_YELLOW("#%2d", lambdaIter);
   else                                 lambdaIterStr = PF_RED(   "#%2d", lambdaIter);
 
+  std::string lnStr;
+  if      (state.chemPot(NEUTRON) > 0.0)   lnStr = PF_RED(   "%9.2e", state.chemPot(NEUTRON));
+  else if (state.chemPot(NEUTRON) < -50.0) lnStr = PF_RED(   "%9.2e", state.chemPot(NEUTRON));
+  else if (state.chemPot(NEUTRON) > -30.0) lnStr = PF_GREEN( "%7.3f", state.chemPot(NEUTRON));
+  else                                     lnStr = PF_YELLOW("%7.3f", state.chemPot(NEUTRON));
+
+  std::string lpStr;
+  if      (state.chemPot(PROTON) > 0.0)   lpStr = PF_RED(   "%9.2e", state.chemPot(PROTON));
+  else if (state.chemPot(PROTON) < -50.0) lpStr = PF_RED(   "%9.2e", state.chemPot(PROTON));
+  else if (state.chemPot(PROTON) > -30.0) lpStr = PF_GREEN( "%7.3f", state.chemPot(PROTON));
+  else                                    lpStr = PF_YELLOW("%7.3f", state.chemPot(PROTON));
+
   Tools::mesg("SolGra",
               getIterMesg() +
               PF("cvg: ") + cvgStr + " " +
               PF("ene: ") + eneStr + " " +
               // PF("tot: %6.3fs (fld: %6.3fs)", iterLength, interaction.calcLength) + " " +
-              PF("ln: %7.3f ", state.chemPot(NEUTRON)) +
-              PF("lp: %7.3f ", state.chemPot(PROTON )) +
+              PF("ln: ") + lnStr + " " +
+              PF("lp: ") + lpStr + " " +
               PF("(%s)", lambdaIterStr.c_str())
               // PF_YELLOW(" " + interaction.getWarningStr())
              );

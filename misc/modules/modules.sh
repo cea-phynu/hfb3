@@ -2,14 +2,7 @@
 
 module --force purge || true
 
-module load ccc
-module load dfldatadir
-module load mkl
-module load armadillo
-module load python3
-module load swig
-module load gnu
-module load boost
+module load gnu/11 mpi/openmpi/4 armadillo/15.2.3 python3/3.12 lapack/netlib boost
 
 export OMP_NUM_THREADS=1
 export OMP_DYNAMIC=FALSE

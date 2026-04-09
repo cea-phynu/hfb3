@@ -71,6 +71,7 @@ public:
   void set(const std::string &key, const IVEC &val);
   void set(const std::string &key, const IMAT &val);
   void set(const std::string &key, const ICUBE &val);
+  void set(const std::string &key, const Multi<double > &val);
   void set(const std::string &key, const Multi<UVEC > &val);
   void set(const std::string &key, const Multi<UMAT > &val);
   void set(const std::string &key, const Multi<UCUBE > &val);
@@ -109,6 +110,7 @@ public:
   bool get(UVEC &, const std::string &key, bool ignore = false) const;
   bool get(UMAT &, const std::string &key, bool ignore = false) const;
   bool get(UCUBE &, const std::string &key, bool ignore = false) const;
+  bool get(Multi<double > &, const std::string &key, bool ignore = false) const;
   bool get(Multi<IVEC > &, const std::string &key, bool ignore = false) const;
   bool get(Multi<IMAT > &, const std::string &key, bool ignore = false) const;
   bool get(Multi<ICUBE > &, const std::string &key, bool ignore = false) const;
@@ -136,6 +138,7 @@ public:
   UVEC   getUV(const std::string &key, bool ignore = false) const;
   UMAT   getUM(const std::string &key, bool ignore = false) const;
   UCUBE  getUC(const std::string &key, bool ignore = false) const;
+  Multi<double > getMD(const std::string &key, bool ignore = false) const;
   Multi<IVEC >   getMIV(const std::string &key, bool ignore = false) const;
   Multi<IMAT >   getMIM(const std::string &key, bool ignore = false) const;
   Multi<ICUBE >  getMIC(const std::string &key, bool ignore = false) const;
@@ -159,6 +162,7 @@ public:
   void setIV(const std::string &key, const IVEC &val);
   void setIM(const std::string &key, const IMAT &val);
   void setIC(const std::string &key, const ICUBE &val);
+  void setMD(const std::string &key, const Multi<double > &val);
   void setMUV(const std::string &key, const Multi<UVEC > &val);
   void setMUM(const std::string &key, const Multi<UMAT > &val);
   void setMUC(const std::string &key, const Multi<UCUBE > &val);
@@ -268,6 +272,10 @@ public:
     return result;
   }
 
+  //============================================================================
+  //============================================================================
+  //============================================================================
+
   /// Return a std::string representation of an std::map<...>.
   template<typename V> static const std::string multiMapToStr(const std::string &title, const std::map<std::string, V> &map)
   {
@@ -331,6 +339,9 @@ public:
 
   /// std::map for arma::cube.
   std::map<std::string, arma::cube > cubeMap;
+
+  /// std::map for Multi<double >.
+  std::map<std::string, Multi<double > > multiDoubleMap;
 
   /// std::map for Multi<IVEC >.
   std::map<std::string, Multi<IVEC > > multiIVecMap;

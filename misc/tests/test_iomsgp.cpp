@@ -40,33 +40,76 @@ TEST(IOmsgp, saveDataTree)
 
   DataTree d0;
 
-  arma::vec V;
-  V.randu(20);
+  // Creation of the DataTree
 
-  arma::mat M;
-  M.randu(20, 13);
-
-  Multi<IVEC > multiV;
-  multiV(1) = arma::randi<IVEC>(3);
-
-  Multi<IMAT > imultiM;
-  imultiM(2,7,8) = arma::randi<IMAT>(3, 3);
-  imultiM(2,4) = IMAT();
-
-  Multi<arma::mat> multiM;
-  multiM(2) = arma::randu(3, 3);
-  multiM(4,9) = arma::randu(3, 4);
-
-  d0.set("string", "text message");
-  d0.set("string", "text message override");
+  d0.set("bool", false);
   d0.set("int", 4);
   d0.set("double", 5.8);
+  d0.set("string", "text message");
+
+  VEC V;
+  V.randu(20);
   d0.set("vec", V);
-  d0.set("ivec", IVEC());
+  IVEC iv1 = arma::randi<IVEC>(5);
+  d0.set("ivec1", iv1);
+  d0.set("ivec2", IVEC());
+  UVEC uv1 = arma::randi<UVEC>(5);
+  d0.set("uvec1", uv1);
+  d0.set("uvec2", UVEC());
+
+  MAT M;
+  M.randu(20, 13);
   d0.set("mat", M);
+  IMAT im1 = arma::randi<IMAT>(5, 5);
+  d0.set("imat1", iv1);
+  d0.set("imat2", IMAT());
+  UMAT um1 = arma::randi<UMAT>(5, 5);
+  d0.set("umat1", uv1);
+  d0.set("umat2", UMAT());
+
+  CUBE C;
+  C.randu(2, 13, 5);
+  d0.set("cube", C);
+  ICUBE ic1 = arma::randi<ICUBE>(5, 5, 5);
+  d0.set("icube1", ic1);
+  d0.set("icube2", ICUBE());
+  UCUBE uc1 = arma::randi<UCUBE>(5, 5, 5);
+  d0.set("ucube1", uc1);
+  d0.set("ucube2", UCUBE());
+
+  Multi<VEC  > multiV;
+  multiV(1) = VEC();
   d0.set("multiVec", multiV);
-  d0.set("multiIMat", imultiM);
-  d0.set("multiMat", multiM);
+  Multi<IVEC > multiIV;
+  multiIV(1) = IVEC();
+  d0.set("multiIV", multiIV);
+  Multi<UVEC > multiUV;
+  multiUV(1) = UVEC();
+  d0.set("multiUV", multiUV);
+
+  Multi<MAT  > multiM;
+  multiM(1) = MAT();
+  d0.set("multiM", multiM);
+  Multi<IMAT > multiIM;
+  multiIM(1) = IMAT();
+  d0.set("multiIM", multiIM);
+  Multi<UMAT > multiUM;
+  multiUM(1) = UMAT();
+  d0.set("multiUM", multiUM);
+
+  Multi<CUBE  > multiC;
+  multiC(1) = CUBE();
+  d0.set("multiC", multiC);
+  Multi<ICUBE  > multiIC;
+  multiIC(1) = ICUBE();
+  d0.set("multiIC", multiIC);
+  Multi<UCUBE  > multiUC;
+  multiUC(1) = UCUBE();
+  d0.set("multiUC", multiUC);
+
+  Multi<double > multiDouble;
+  multiDouble(1, 4) = 1.5;
+  d0.set("multDouble", multiDouble);
 
   std::string fileName = "/tmp/test_hfb3.msg.gz";
   IOmsgp().saveDataTree(d0, fileName);
@@ -89,33 +132,75 @@ TEST(IOmsgp, fromContent)
   DataTree d0;
 
   // Creation of the DataTree
-  arma::vec V;
-  V.randu(20);
 
-  IVEC iv1 = arma::randi<IVEC>(5);
-
-  arma::mat M;
-  M.randu(20, 13);
-
-  Multi<IVEC > multiIV;
-  multiIV(1) = IVEC();
-
-  Multi<IMAT > multiIM;
-  multiIM(2, 4) = arma::randi<IMAT >(3, 3);
-
-  Multi<arma::mat> multiM;
-  multiM(2, 4, 5) = arma::randu(3, 3);
-
-  d0.set("string", "text message");
+  d0.set("bool", false);
   d0.set("int", 4);
   d0.set("double", 5.8);
+  d0.set("string", "text message");
+
+  VEC V;
+  V.randu(20);
   d0.set("vec", V);
+  IVEC iv1 = arma::randi<IVEC>(5);
   d0.set("ivec1", iv1);
   d0.set("ivec2", IVEC());
+  UVEC uv1 = arma::randi<UVEC>(5);
+  d0.set("uvec1", uv1);
+  d0.set("uvec2", UVEC());
+
+  MAT M;
+  M.randu(20, 13);
   d0.set("mat", M);
-  d0.set("multIVec", multiIV);
-  d0.set("multiIMat", multiIM);
-  d0.set("multiMat", multiM);
+  IMAT im1 = arma::randi<IMAT>(5, 5);
+  d0.set("imat1", iv1);
+  d0.set("imat2", IMAT());
+  UMAT um1 = arma::randi<UMAT>(5, 5);
+  d0.set("umat1", uv1);
+  d0.set("umat2", UMAT());
+
+  CUBE C;
+  C.randu(2, 13, 5);
+  d0.set("cube", C);
+  ICUBE ic1 = arma::randi<ICUBE>(5, 5, 5);
+  d0.set("icube1", ic1);
+  d0.set("icube2", ICUBE());
+  UCUBE uc1 = arma::randi<UCUBE>(5, 5, 5);
+  d0.set("ucube1", uc1);
+  d0.set("ucube2", UCUBE());
+
+  Multi<VEC  > multiV;
+  multiV(1) = VEC();
+  d0.set("multiVec", multiV);
+  Multi<IVEC > multiIV;
+  multiIV(1) = IVEC();
+  d0.set("multiIV", multiIV);
+  Multi<UVEC > multiUV;
+  multiUV(1) = UVEC();
+  d0.set("multiUV", multiUV);
+
+  Multi<MAT  > multiM;
+  multiM(1) = MAT();
+  d0.set("multiM", multiM);
+  Multi<IMAT > multiIM;
+  multiIM(1) = IMAT();
+  d0.set("multiIM", multiIM);
+  Multi<UMAT > multiUM;
+  multiUM(1) = UMAT();
+  d0.set("multiUM", multiUM);
+
+  Multi<CUBE  > multiC;
+  multiC(1) = CUBE();
+  d0.set("multiC", multiC);
+  Multi<ICUBE  > multiIC;
+  multiIC(1) = ICUBE();
+  d0.set("multiIC", multiIC);
+  Multi<UCUBE  > multiUC;
+  multiUC(1) = UCUBE();
+  d0.set("multiUC", multiUC);
+
+  Multi<double > multiDouble;
+  multiDouble(1, 4) = 1.5;
+  d0.set("multDouble", multiDouble);
 
   // Data saving
   std::string content = IOmsgp().serializeDataTree(d0);

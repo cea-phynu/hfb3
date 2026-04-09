@@ -75,21 +75,21 @@ private:
   static std::tuple<std::string, std::string> umat2array( const UMAT  &v);
   static std::tuple<std::string, std::string> ucube2array(const UCUBE &v);
 
-  static Multi<IVEC > array2multiIVec( const std::map<std::vector<INT>, std::string> &v);
-  static Multi<IMAT > array2multiIMat( const std::map<std::vector<INT>, std::string> &v);
-  static Multi<ICUBE> array2multiICube(const std::map<std::vector<INT>, std::string> &v);
+  static Multi<double> array2multiDouble(const std::map<std::vector<INT>, std::string> &v);
+  static Multi<IVEC  > array2multiIVec(  const std::map<std::vector<INT>, std::string> &v);
+  static Multi<IMAT  > array2multiIMat(  const std::map<std::vector<INT>, std::string> &v);
+  static Multi<ICUBE > array2multiICube( const std::map<std::vector<INT>, std::string> &v);
+  static Multi<UVEC  > array2multiUVec(  const std::map<std::vector<INT>, std::string> &v);
+  static Multi<UMAT  > array2multiUMat(  const std::map<std::vector<INT>, std::string> &v);
+  static Multi<UCUBE > array2multiUCube( const std::map<std::vector<INT>, std::string> &v);
 
-  static Multi<UVEC > array2multiUVec( const std::map<std::vector<INT>, std::string> &v);
-  static Multi<UMAT > array2multiUMat( const std::map<std::vector<INT>, std::string> &v);
-  static Multi<UCUBE> array2multiUCube(const std::map<std::vector<INT>, std::string> &v);
-
-  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiIVec2array( const Multi<IVEC > &v);
-  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiIMat2array( const Multi<IMAT > &v);
-  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiICube2array(const Multi<ICUBE> &v);
-
-  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiUVec2array( const Multi<UVEC > &v);
-  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiUMat2array( const Multi<UMAT > &v);
-  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiUCube2array(const Multi<UCUBE> &v);
+  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiDouble2array(const Multi<double> &v);
+  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiIVec2array(  const Multi<IVEC  > &v);
+  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiIMat2array(  const Multi<IMAT  > &v);
+  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiICube2array( const Multi<ICUBE > &v);
+  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiUVec2array(  const Multi<UVEC  > &v);
+  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiUMat2array(  const Multi<UMAT  > &v);
+  static std::tuple<std::string, std::map<std::vector<INT>, std::string> > multiUCube2array( const Multi<UCUBE > &v);
 
   static Multi<arma::vec > array2multiVec( const std::map<std::vector<INT>, std::string> &v);
   static Multi<arma::mat > array2multiMat( const std::map<std::vector<INT>, std::string> &v);

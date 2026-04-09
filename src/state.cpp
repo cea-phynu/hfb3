@@ -235,11 +235,11 @@ State::State(const DataTree &dataTree) :
                             qpStatesOccupation(PROTON)(i),
                             {basis.blockIdOR(index), m - s, PROTON});
     }
-    Tools::mesg("State ", PF("%d QP states loaded", nbQP));
+    Tools::debug(PF("%d QP states loaded", nbQP));
   }
   else
   {
-    Tools::warning("QP states not loaded");
+    Tools::debug("QP states not loaded");
   }
 
   //============================================================================
@@ -861,8 +861,11 @@ void State::calcInertia(const std::string &interactionName, const std::list<std:
   DataTree dt = DataTree::getDefault() + getDataTree();
   dt.set("interaction/name", interactionName);
 
+
   SolverHFBBroyden solver(dt, *this);
   solver.init();
+
+  Tools::mesg("State ", solver.info());
 
   while(solver.nextIter());
   *this = solver.state;

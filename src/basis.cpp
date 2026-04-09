@@ -145,7 +145,7 @@ Basis::Basis(double _d_0, double _b_r, double _b_z, INT _nOscil, INT _n_zMaxImpo
  *  For a definition of the cylindrical basis states, cf. \ref basisStates.
  *  If the basis deformation parameter \f$d_0\f$ is strictly positive, the
  *  generated basis is a 1-center basis, otherwise it is a 2-center basis.
- *  This static method is proposed as a convenient way to instanciate a Basis
+ *  This static method is proposed as a convenient way to instantiate a Basis
  *  object from parameters coming from the `BERGER2CT` solver.
  */
 

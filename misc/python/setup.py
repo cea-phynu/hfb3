@@ -88,19 +88,20 @@ include_dirs = [hfb3_include_dir,
 include_dirs = [d for d in include_dirs if d != ""]
 
 
-libraries = ['m', 'z', 'armadillo' ]
-# libraries = ['m', 'z', 'lapack', 'blas', 'armadillo']
+# libraries = ['m', 'z', 'armadillo' ]
+libraries = ['m', 'z', 'lapack', 'blas']
 
 hfb3 = Extension('_hfb3', ['hfb3.i'],
                  include_dirs = include_dirs,
                  libraries = libraries,
                  library_dirs = [
-                                 get_env('ARMADILLO_LIBDIR'),
+                                 # get_env('ARMADILLO_LIBDIR'),
                                  get_env('BOOST_LIBDIR'),
-                                 # get_env('LAPACK_LIBDIR'),
+                                 get_env('LAPACK_LIBDIR'),
+                                 get_env('BLAS_LIBDIR'),
                                  # get_env('BLIS_AOCL_LIBDIR'),
                                 ],
-                 extra_compile_args = ['-std=c++14'] + get_skill_opts(),
+                 extra_compile_args = ['-std=c++14', '-DARMA_DONT_USE_WRAPPER', '-DARMA_USE_LAPACK', '-DARMA_USE_BLAS'] + get_skill_opts(),
 
                  extra_objects = [hfb3_build_dir + '/libhfb3.a', ],
                  # depends = [hfb3_build_dir + '/libhfb3.a', ],

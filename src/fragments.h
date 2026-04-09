@@ -28,6 +28,33 @@
 #include "state.h"
 #include "geometry.h"
 
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/// Key, description,  optional default value and type for each input or output.
+#define FRAGMENTS_VALID_KEYS \
+{ "fragments/neckPos" , "neck position [fm]"                           , "", "D" }, \
+{ "fragments/neckDens", "neck density [fm-3]"                          , "", "D" }, \
+{ "fragments/q_neck"  , "<Qneck> [fm-3]"                               , "", "D" }, \
+{ "fragments/z_left"  , "protons in the left fragment"                 , "", "D" }, \
+{ "fragments/n_left"  , "neutrons in the left fragment"                , "", "D" }, \
+{ "fragments/a_left"  , "nucleons in the left fragment"                , "", "D" }, \
+{ "fragments/z_right" , "protons in the right fragment"                , "", "D" }, \
+{ "fragments/n_right" , "neutrons in the right fragment"               , "", "D" }, \
+{ "fragments/a_right" , "nucleons in the right fragment"               , "", "D" }, \
+{ "fragments/z_radius" , "mean radius of the proton local density [fm]", "", "D" }, \
+{ "fragments/z_rms"    , "RMS of the proton local density [fm]"        , "", "D" }, \
+{ "fragments/n_radius" , "mean radius of the proton local density [fm]", "", "D" }, \
+{ "fragments/n_rms"    , "RMS of the proton local density [fm]"        , "", "D" }, \
+{ "fragments/chargeRms", "charge RMS of the proton local density [fm]" , "", "D" }, \
+{ "fragments/a_radius" , "mean radius of the proton local density [fm]", "", "D" }, \
+{ "fragments/a_rms"    , "RMS of the proton local density [fm]"        , "", "D" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief Compute some fragment properties.
  *
  * This class allows to identify fragments and calculate some of their properties.
@@ -41,6 +68,7 @@ public :
 
   const std::string info(bool isShort = USE_SHORT_INFO) const;         // #TEST#
   const std::string getNiceInfo(const std::string what = "");          // #TEST#
+  const DataTree getDataTree(void) const;                              // #TEST#
 
   //============================================================================
   //============================================================================

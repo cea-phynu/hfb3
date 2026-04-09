@@ -153,6 +153,10 @@ DataTree IOmsgp::fromContent(const std::string &content)
         auto val = k.second.as<std::tuple<std::string, std::map<std::vector<INT>, std::string> > >();
         std::string dataType = std::get<0>(val);
 
+        if (dataType == "D")
+        {
+          result.set(k.first, array2multiDouble(std::get<1>(val)));
+        }
         if (dataType == "UV")
         {
           result.set(k.first, array2multiUVec(std::get<1>(val)));
@@ -237,137 +241,36 @@ std::string IOmsgp::serializeDataTree(const DataTree &d)
 
   pk.pack_map(size);
 
-  for (auto &it : d.boolMap)
-  {
-    pk.pack(it.first);
-    pk.pack(it.second);
-  }
+  for (auto &it : d.boolMap) { pk.pack(it.first); pk.pack(it.second); }
+  for (auto &it : d.intMap) { pk.pack(it.first); pk.pack(it.second); }
+  for (auto &it : d.doubleMap) { pk.pack(it.first); pk.pack(it.second); }
+  for (auto &it : d.stringMap) { pk.pack(it.first); pk.pack(it.second); }
 
-  for (auto &it : d.intMap)
-  {
-    pk.pack(it.first);
-    pk.pack(it.second);
-  }
+  for (auto &it : d.vecMap) { pk.pack(it.first); pk.pack(vec2array(it.second)); }
+  for (auto &it : d.ivecMap) { pk.pack(it.first); pk.pack(ivec2array(it.second)); }
+  for (auto &it : d.uvecMap) { pk.pack(it.first); pk.pack(uvec2array(it.second)); }
 
-  for (auto &it : d.doubleMap)
-  {
-    pk.pack(it.first);
-    pk.pack(it.second);
-  }
+  for (auto &it : d.matMap) { pk.pack(it.first); pk.pack(mat2array(it.second)); }
+  for (auto &it : d.imatMap) { pk.pack(it.first); pk.pack(imat2array(it.second)); }
+  for (auto &it : d.umatMap) { pk.pack(it.first); pk.pack(umat2array(it.second)); }
 
-  for (auto &it : d.stringMap)
-  {
-    pk.pack(it.first);
-    pk.pack(it.second);
-  }
+  for (auto &it : d.cubeMap) { pk.pack(it.first); pk.pack(cube2array(it.second)); }
+  for (auto &it : d.icubeMap) { pk.pack(it.first); pk.pack(icube2array(it.second)); }
+  for (auto &it : d.ucubeMap) { pk.pack(it.first); pk.pack(ucube2array(it.second)); }
 
-  for (auto &it : d.vecMap)
-  {
-    pk.pack(it.first);
-    pk.pack(vec2array(it.second));
-  }
+  for (auto &it : d.multiVecMap) { pk.pack(it.first); pk.pack(multiVec2array(it.second)); }
+  for (auto &it : d.multiIVecMap) { pk.pack(it.first); pk.pack(multiIVec2array(it.second)); }
+  for (auto &it : d.multiUVecMap) { pk.pack(it.first); pk.pack(multiUVec2array(it.second)); }
 
-  for (auto &it : d.matMap)
-  {
-    pk.pack(it.first);
-    pk.pack(mat2array(it.second));
-  }
+  for (auto &it : d.multiMatMap) { pk.pack(it.first); pk.pack(multiMat2array(it.second)); }
+  for (auto &it : d.multiIMatMap) { pk.pack(it.first); pk.pack(multiIMat2array(it.second)); }
+  for (auto &it : d.multiUMatMap) { pk.pack(it.first); pk.pack(multiUMat2array(it.second)); }
 
-  for (auto &it : d.cubeMap)
-  {
-    pk.pack(it.first);
-    pk.pack(cube2array(it.second));
-  }
+  for (auto &it : d.multiCubeMap) { pk.pack(it.first); pk.pack(multiCube2array(it.second)); }
+  for (auto &it : d.multiICubeMap) { pk.pack(it.first); pk.pack(multiICube2array(it.second)); }
+  for (auto &it : d.multiUCubeMap) { pk.pack(it.first); pk.pack(multiUCube2array(it.second)); }
 
-  for (auto &it : d.uvecMap)
-  {
-    pk.pack(it.first);
-    pk.pack(uvec2array(it.second));
-  }
-
-  for (auto &it : d.umatMap)
-  {
-    pk.pack(it.first);
-    pk.pack(umat2array(it.second));
-  }
-
-  for (auto &it : d.ucubeMap)
-  {
-    pk.pack(it.first);
-    pk.pack(ucube2array(it.second));
-  }
-
-  for (auto &it : d.multiUVecMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiUVec2array(it.second));
-  }
-
-  for (auto &it : d.multiUMatMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiUMat2array(it.second)); 
-  }
-
-  for (auto &it : d.multiUCubeMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiUCube2array(it.second));
-  }
-
-  for (auto &it : d.ivecMap)
-  {
-    pk.pack(it.first);
-    pk.pack(ivec2array(it.second));
-  }
-
-  for (auto &it : d.imatMap)
-  {
-    pk.pack(it.first);
-    pk.pack(imat2array(it.second));
-  }
-
-  for (auto &it : d.icubeMap)
-  {
-    pk.pack(it.first);
-    pk.pack(icube2array(it.second));
-  }
-
-  for (auto &it : d.multiIVecMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiIVec2array(it.second));
-  }
-
-  for (auto &it : d.multiIMatMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiIMat2array(it.second)); 
-  }
-
-  for (auto &it : d.multiICubeMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiICube2array(it.second));
-  }
-
-  for (auto &it : d.multiVecMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiVec2array(it.second));
-  }
-
-  for (auto &it : d.multiMatMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiMat2array(it.second)); 
-  }
-
-  for (auto &it : d.multiCubeMap)
-  {
-    pk.pack(it.first);
-    pk.pack(multiCube2array(it.second));
-  }
+  for (auto &it : d.multiDoubleMap) { pk.pack(it.first); pk.pack(multiDouble2array(it.second)); }
 
   DBG_RETURN(std::string(buffer.data(), buffer.size()));
 }
@@ -893,6 +796,31 @@ std::tuple<std::string, std::map<std::vector<INT>, std::string> > IOmsgp::multiI
 //==============================================================================
 //==============================================================================
 
+/** Convert a Multi<double> to an array.
+ */
+
+std::tuple<std::string, std::map<std::vector<INT>, std::string> > IOmsgp::multiDouble2array(const Multi<double > &v)
+{
+  std::map<std::vector<INT>, std::string> result;
+
+  for (auto &key : v.getKeys())
+  {
+    std::ostringstream oss;
+    arma::vec vec = {v(key)}; // TODO: store a float instead of a single-element vector !
+    vec.save(oss, arma::arma_binary);
+    std::string binary_data = oss.str();
+
+    std::vector<INT> myVector(key.begin(), key.end());
+    result.emplace(myVector, binary_data);
+  }
+
+  return std::make_tuple("D", result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** Convert an Multi<UVEC> to an array.
  */
 
@@ -959,6 +887,32 @@ std::tuple<std::string, std::map<std::vector<INT>, std::string> > IOmsgp::multiU
   }
 
   return std::make_tuple("UC", result);
+}
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
+/** Convert an array to an Multi<double>.
+ */
+
+Multi<double> IOmsgp::array2multiDouble(const std::map<std::vector<INT>, std::string> &v)
+{
+  Multi<double> m;
+
+  for(auto it = v.begin(); it != v.end(); ++it)
+  {
+    // key
+    std::vector<INT> key(it->first.begin(), it->first.end());
+
+    // value
+    std::istringstream iss(it->second);
+    arma::vec vec;
+    vec.load(iss, arma::arma_binary);
+    m(key) = vec[0];
+  }
+
+  return m;
 }
 
 //==============================================================================

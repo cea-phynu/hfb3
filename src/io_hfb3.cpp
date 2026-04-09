@@ -165,7 +165,6 @@ void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std
     }
 
     std::stringstream st(val);
-    st >> std::ws;
     INT ival;
     st >> ival;
     if (!st.fail() && st.eof())
@@ -175,9 +174,8 @@ void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std
     }
 
     std::stringstream st2(val);
-    st2 >> std::ws;
     double dval;
-    st2 >> std::setprecision(16) >> std::scientific >> dval;
+    st2 >> std::scientific >> dval;
 
     if (!st2.fail() && st2.eof())
     {
@@ -207,9 +205,7 @@ void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std
     }
     else
     {
-      std::stringstream ss;
-      ss << "wrong bool value in '" << val << "'";
-      Tools::warning(ss.str());
+      Tools::warning(PF("can not convert value '%s' to type bool", val.c_str()));
     }
   }
   else if (type == "I")
@@ -217,7 +213,6 @@ void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std
     std::stringstream st(val);
     INT ival;
     st >> ival;
-    st >> std::ws;
 
     if (!st.fail() && st.eof())
     {
@@ -225,17 +220,14 @@ void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std
     }
     else
     {
-      std::stringstream ss;
-      ss << "wrong INT value in '" << val << "'";
-      Tools::warning(ss.str());
+      Tools::warning(PF("can not convert value '%s' to type int", val.c_str()));
     }
   }
   else if (type == "D")
   {
     std::stringstream st(val);
     double dval;
-    st >> std::setprecision(16) >> dval;
-    st >> std::ws;
+    st >> dval;
 
     if (!st.fail() && st.eof())
     {
@@ -243,9 +235,7 @@ void IOhfb3::updateDataTree(DataTree &dataTree, const std::string key, const std
     }
     else
     {
-      std::stringstream ss;
-      ss << "wrong double value in '" << val << "'";
-      Tools::warning(ss.str());
+      Tools::warning(PF("can not convert value '%s' to type double", val.c_str()));
     }
   }
   else if (type == "S")

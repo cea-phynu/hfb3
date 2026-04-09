@@ -2481,6 +2481,15 @@ void Tools::timer(const std::string &label, const std::string &location, const s
 {
   // std::cout << "timer    : " << label << std::endl;
 
+  // // detect cyclic dependencies
+  // for (auto &s: stack)
+  // {
+  //   if (s.name == label)
+  //   {
+  //     ERROR("Cyclic dependency: " + label);
+  //   }
+  // }
+
   if (msgToOut.count(MSG_TIMELINE) == 0)
   {
     stack.push_back({label, location, ""});

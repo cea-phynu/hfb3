@@ -29,60 +29,61 @@ OBJ_DIR=.objs
 
 MAIN_OBJECT=$(OBJ_DIR)/main.o
 
-LIB_OBJECTS=$(OBJ_DIR)/action.o                       \
-            $(OBJ_DIR)/solver_alternator.o            \
-            $(OBJ_DIR)/axis.o                         \
-            $(OBJ_DIR)/base64.o                       \
-            $(OBJ_DIR)/basis.o                        \
-            $(OBJ_DIR)/state.o                        \
-            $(OBJ_DIR)/cliparser.o                    \
-            $(OBJ_DIR)/constraint.o                   \
-            $(OBJ_DIR)/datatree.o                     \
-            $(OBJ_DIR)/discrete.o                     \
-            $(OBJ_DIR)/field.o                        \
-            $(OBJ_DIR)/field_kinetic.o                \
-            $(OBJ_DIR)/field_cdm2.o                   \
-            $(OBJ_DIR)/field_central.o                \
-            $(OBJ_DIR)/field_coulomb_slater.o         \
-            $(OBJ_DIR)/field_coulomb_exact.o          \
-            $(OBJ_DIR)/field_density.o                \
-            $(OBJ_DIR)/field_density_fr.o             \
-            $(OBJ_DIR)/field_rearrangement.o          \
-            $(OBJ_DIR)/field_rearrangement_fr.o       \
-            $(OBJ_DIR)/field_spin_orbit.o             \
-            $(OBJ_DIR)/field_ws.o                     \
-            $(OBJ_DIR)/fragments.o                    \
-            $(OBJ_DIR)/general.o                      \
-            $(OBJ_DIR)/generic.o                      \
-            $(OBJ_DIR)/geometrical_operators.o        \
-            $(OBJ_DIR)/geometry.o                     \
-            $(OBJ_DIR)/global.o                       \
-            $(OBJ_DIR)/gradientwalk.o                 \
-            $(OBJ_DIR)/gzstream.o                     \
-            $(OBJ_DIR)/interaction.o                  \
-            $(OBJ_DIR)/io_amedee.o                    \
-            $(OBJ_DIR)/io_berger.o                    \
-            $(OBJ_DIR)/io_hfb3.o                      \
-            $(OBJ_DIR)/io_json.o                      \
-            $(OBJ_DIR)/io_msgp.o                      \
-            $(OBJ_DIR)/logger.o                       \
-            $(OBJ_DIR)/md5.o                          \
-            $(OBJ_DIR)/mesh.o                         \
-            $(OBJ_DIR)/mixing.o                       \
-            $(OBJ_DIR)/multipole_operators.o          \
-            $(OBJ_DIR)/multi.o                        \
-            $(OBJ_DIR)/plot.o                         \
-            $(OBJ_DIR)/qnumbers.o                     \
-            $(OBJ_DIR)/quadratures.o                  \
-            $(OBJ_DIR)/solver.o                       \
-            $(OBJ_DIR)/solver_basis.o                 \
-            $(OBJ_DIR)/solver_hfb_broyden.o           \
-            $(OBJ_DIR)/solver_hfb_gradient.o          \
-            $(OBJ_DIR)/solver_ws.o                    \
-            $(OBJ_DIR)/system.o                       \
-            $(OBJ_DIR)/states.o                       \
-            $(OBJ_DIR)/wspot.o                        \
-            $(OBJ_DIR)/tools.o
+LIB_OBJECTS=
+LIB_OBJECTS+=$(OBJ_DIR)/action.o
+LIB_OBJECTS+=$(OBJ_DIR)/solver_alternator.o
+LIB_OBJECTS+=$(OBJ_DIR)/axis.o
+LIB_OBJECTS+=$(OBJ_DIR)/base64.o
+LIB_OBJECTS+=$(OBJ_DIR)/basis.o
+LIB_OBJECTS+=$(OBJ_DIR)/state.o
+LIB_OBJECTS+=$(OBJ_DIR)/cliparser.o
+LIB_OBJECTS+=$(OBJ_DIR)/constraint.o
+LIB_OBJECTS+=$(OBJ_DIR)/datatree.o
+LIB_OBJECTS+=$(OBJ_DIR)/discrete.o
+LIB_OBJECTS+=$(OBJ_DIR)/field.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_kinetic.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_cdm2.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_central.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_coulomb_slater.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_coulomb_exact.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_density.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_density_fr.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_rearrangement.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_rearrangement_fr.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_spin_orbit.o
+LIB_OBJECTS+=$(OBJ_DIR)/field_ws.o
+LIB_OBJECTS+=$(OBJ_DIR)/fragments.o
+LIB_OBJECTS+=$(OBJ_DIR)/general.o
+LIB_OBJECTS+=$(OBJ_DIR)/generic.o
+LIB_OBJECTS+=$(OBJ_DIR)/geometrical_operators.o
+LIB_OBJECTS+=$(OBJ_DIR)/geometry.o
+LIB_OBJECTS+=$(OBJ_DIR)/global.o
+LIB_OBJECTS+=$(OBJ_DIR)/gradientwalk.o
+LIB_OBJECTS+=$(OBJ_DIR)/gzstream.o
+LIB_OBJECTS+=$(OBJ_DIR)/interaction.o
+LIB_OBJECTS+=$(OBJ_DIR)/io_amedee.o
+LIB_OBJECTS+=$(OBJ_DIR)/io_berger.o
+LIB_OBJECTS+=$(OBJ_DIR)/io_hfb3.o
+LIB_OBJECTS+=$(OBJ_DIR)/io_json.o
+LIB_OBJECTS+=$(OBJ_DIR)/io_msgp.o
+LIB_OBJECTS+=$(OBJ_DIR)/logger.o
+LIB_OBJECTS+=$(OBJ_DIR)/md5.o
+LIB_OBJECTS+=$(OBJ_DIR)/mesh.o
+LIB_OBJECTS+=$(OBJ_DIR)/mixing.o
+LIB_OBJECTS+=$(OBJ_DIR)/multipole_operators.o
+LIB_OBJECTS+=$(OBJ_DIR)/multi.o
+LIB_OBJECTS+=$(OBJ_DIR)/plot.o
+LIB_OBJECTS+=$(OBJ_DIR)/qnumbers.o
+LIB_OBJECTS+=$(OBJ_DIR)/quadratures.o
+LIB_OBJECTS+=$(OBJ_DIR)/solver.o
+LIB_OBJECTS+=$(OBJ_DIR)/solver_basis.o
+LIB_OBJECTS+=$(OBJ_DIR)/solver_hfb_broyden.o
+LIB_OBJECTS+=$(OBJ_DIR)/solver_hfb_gradient.o
+LIB_OBJECTS+=$(OBJ_DIR)/solver_ws.o
+LIB_OBJECTS+=$(OBJ_DIR)/system.o
+LIB_OBJECTS+=$(OBJ_DIR)/states.o
+LIB_OBJECTS+=$(OBJ_DIR)/wspot.o
+LIB_OBJECTS+=$(OBJ_DIR)/tools.o
 
 DEP = $(LIB_OBJECTS:%.o=%.d) $(MAIN_OBJECT:%.o=%.d)
 
@@ -91,7 +92,7 @@ COMMON_OPTS = $(GLOBAL_CXXFLAGS) ${ARMADILLO_CFLAGS} -I$(ROOT)/$(MSGPACK_INCDIR)
 
 COPTS = $(SKILLOPTS) $(COMMON_OPTS) -D$(SKILL) $(GIT_VERSION_FLAG) $(VERSION_FLAG)
 
-LDFLAGS = ${ARMADILLO_LDFLAGS} $(GLOBAL_LDFLAGS) ${BLIS_LDFLAGS}
+LDFLAGS = ${LAPACK_LDFLAGS} $(GLOBAL_LDFLAGS) ${BLIS_LDFLAGS}
 AR=ar
 
 .PHONY: clean

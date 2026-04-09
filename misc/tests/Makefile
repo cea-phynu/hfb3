@@ -28,45 +28,46 @@ OBJ_DIR=.objs
 
 TEST_MAIN_OBJECT=$(OBJ_DIR)/tests.o
 
-TEST_OBJECTS=$(OBJ_DIR)/test_action.o                      \
-             $(OBJ_DIR)/test_axis.o                        \
-             $(OBJ_DIR)/test_base64.o                      \
-             $(OBJ_DIR)/test_state.o                       \
-             $(OBJ_DIR)/test_cliparser.o                   \
-             $(OBJ_DIR)/test_constraint.o                  \
-             $(OBJ_DIR)/test_datatree.o                    \
-             $(OBJ_DIR)/test_discrete.o                    \
-             $(OBJ_DIR)/test_field_ws.o                    \
-             $(OBJ_DIR)/test_field.o                       \
-             $(OBJ_DIR)/test_fieldkinetic.o                \
-             $(OBJ_DIR)/test_fieldspinorbit.o              \
-             $(OBJ_DIR)/test_fragments.o                   \
-             $(OBJ_DIR)/test_gradientwalk.o                \
-             $(OBJ_DIR)/test_geometry.o                    \
-             $(OBJ_DIR)/test_global.o                      \
-             $(OBJ_DIR)/test_ioamedee.o                    \
-             $(OBJ_DIR)/test_ioberger.o                    \
-             $(OBJ_DIR)/test_iohfb3.o                      \
-             $(OBJ_DIR)/test_iojson.o                      \
-             $(OBJ_DIR)/test_iomsgp.o                      \
-             $(OBJ_DIR)/test_mesh.o                        \
-             $(OBJ_DIR)/test_meta.o                        \
-             $(OBJ_DIR)/test_mixing.o                      \
-             $(OBJ_DIR)/test_multipole_operators.o         \
-             $(OBJ_DIR)/test_multi.o                       \
-             $(OBJ_DIR)/test_plot.o                        \
-             $(OBJ_DIR)/test_qnumbers.o                    \
-             $(OBJ_DIR)/test_solver_ws.o                   \
-             $(OBJ_DIR)/test_solverhfb.o                   \
-             $(OBJ_DIR)/test_system.o                      \
-             $(OBJ_DIR)/test_wspot.o                       \
-             $(OBJ_DIR)/test_tools.o
+TEST_OBJECTS=
+TEST_OBJECTS+=$(OBJ_DIR)/test_action.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_axis.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_base64.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_state.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_cliparser.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_constraint.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_datatree.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_discrete.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_field_ws.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_field.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_fieldkinetic.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_fieldspinorbit.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_fragments.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_gradientwalk.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_geometry.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_global.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_ioamedee.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_ioberger.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_iohfb3.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_iojson.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_iomsgp.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_mesh.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_meta.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_mixing.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_multipole_operators.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_multi.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_plot.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_qnumbers.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_solver_ws.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_solverhfb.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_system.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_wspot.o
+TEST_OBJECTS+=$(OBJ_DIR)/test_tools.o
 
 COMMON_OPTS = $(GLOBAL_CXXFLAGS) ${ARMADILLO_CFLAGS} -I$(ROOT)/src -I$(ROOT)/$(GTEST_INCDIR)
 
 COPTS = $(SKILLOPTS) $(COMMON_OPTS) -D$(SKILL)
 
-LDFLAGS = $(LIBHFB3) ${ARMADILLO_LDFLAGS} $(ROOT)/$(GTEST_LIB) $(GLOBAL_LDFLAGS) ${BLIS_LDFLAGS}
+LDFLAGS = $(LIBHFB3) ${LAPACK_LDFLAGS} $(ROOT)/$(GTEST_LIB) $(GLOBAL_LDFLAGS) ${BLIS_LDFLAGS}
 
 .PHONY: clean data target
 PWD="misc/tests/"

@@ -275,7 +275,7 @@ arma::mat Discrete::getLocalXZ(const arma::mat &rho, bool ensurePositive)
 
   if (localRho.has_nan())
   {
-    Tools::warning("local density contains NaN");
+    ERROR("local density contains NaN");
   }
 
   DBG_RETURN(localRho);

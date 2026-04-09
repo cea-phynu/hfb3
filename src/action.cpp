@@ -52,11 +52,13 @@ Action::Action(const std::string &filename) : Action(DataTree(filename))
 /** Constructor from a DataTree.
  */
 
-Action::Action(const DataTree &_dataTree) : dataTree(_dataTree), state(_dataTree)
+Action::Action(const DataTree &_dataTree)
 {
   DBG_ENTER;
 
-  dataTree = DataTree::getDefault() + dataTree;
+  dataTree = DataTree::getDefault() + _dataTree;
+
+  state = State(dataTree);
 
   dataTree.get(action           , "action"                  , true);
   dataTree.get(jobName          , "action/jobName"          , true);
@@ -494,7 +496,7 @@ void Action::calcHFB(void)
     Tools::mesg("ActEne", solverHFBBroyden.interaction.getNiceInfo());
 
     // calculate and print some observables
-    calcObservables();
+    // calcObservables();
 
     if (saveResultFiles)
     {
@@ -614,12 +616,18 @@ void Action::calcObservables(void)
   MultipoleOperators multipoleOperators(state);
   Tools::mesg("ActObs", multipoleOperators.getNiceInfo());
 
+  // Keep multipole moments in the DataTree instance
+  dataTree = dataTree + multipoleOperators.getDataTree();
+
   //=========================
   //== FRAGMENT PROPERTIES ==
   //=========================
 
   Fragments fragments(state);
   Tools::mesg("ActObs", fragments.getNiceInfo());
+
+  // Keep fragment properties and radii in the DataTree instance
+  dataTree = dataTree + fragments.getDataTree();
 
   //===================
   //== NUCLEAR RADII ==
@@ -637,7 +645,6 @@ void Action::calcObservables(void)
   state.calcInertia(interactionName);
 
   Tools::mesg("ActObs", state.getNiceInfo("inertia"));
-
 
   //===================
   //== THE QP STATES ==

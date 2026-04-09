@@ -32,6 +32,15 @@
 //==============================================================================
 //==============================================================================
 
+/// Key, description,  optional default value and type for each input or output.
+#define MULTIPOLE_OPERATORS_VALID_KEYS \
+{ "multipoleOperators/qlmObs", "Qlm mean values"             , "", "MD"}, \
+{ "multipoleOperators/beta"  , "beta deformation mean values", "", "V" }
+
+//==============================================================================
+//==============================================================================
+//==============================================================================
+
 /** \brief This class analytically calculates the multipole moment mean values.
  */
 
@@ -58,6 +67,7 @@ public :
   void calcRk(void);                                                   // #TEST#
   void calcRkn(void);                                                  // #TEST#
   void calcZk(void);                                                   // #TEST#
+  DataTree getDataTree(void);                                          // #TEST#
 
   //============================================================================
   //============================================================================

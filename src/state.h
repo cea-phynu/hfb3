@@ -55,11 +55,9 @@ class DataTree;
 { "state/calculationLength"          , "Length of the calculation [s]"      , "0.0"  , "D"  }, \
 { "basis/useStateBasis"              , "If possible, use the basis of the starting state", "True" , "B"  }
 
-
 //==============================================================================
 //==============================================================================
 //==============================================================================
-
 
 /** \brief Cylindrical one- or two-center state.
  *
